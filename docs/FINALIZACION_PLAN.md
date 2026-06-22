@@ -133,6 +133,15 @@ produciendo las cargas documentadas de ~20s (`/portal/dashboard`,
    store); sus ~5.9s eran sobre todo el fetch sin timeout (mitigado en Fase 2) y la
    contención del pool causada por organizations.
 
+### Resultado medido (entorno del usuario) — ✅ FASE 2 CERRADA
+| Endpoint | Antes | Ahora | Datos |
+|----------|-------|-------|-------|
+| `/api/admin/users/organizations` | ~20.900 ms | **102 ms** | reales (no mock) |
+| `/api/dashboard/admin` | ~21.700 ms | **204 ms** | reales |
+
+Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
+`groupBy` batched + counts en paralelo + índices resolvió el problema de raíz.
+
 ---
 
 ## Fase 3 — Calidad y pruebas  ◑ (CI ampliado)
