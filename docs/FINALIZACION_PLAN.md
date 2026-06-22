@@ -177,6 +177,16 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
    - Recomendación (no bloqueante): los Dockerfiles son single-stage (imágenes
      grandes con devDeps). Multi-stage + salida `standalone` de Next reduciría
      el tamaño. Producción no debe auto-sembrar; el seed de piloto es aparte.
+   - 🔴 **Bugs de build de imágenes encontrados al construir (corregidos):**
+     1. `apps/admin/Dockerfile` y `apps/provider/Dockerfile` hacían `npm ci`
+        con `NODE_ENV=production` → sin devDeps → `tsc: not found`. Cambiado a
+        `npm ci --include=dev`.
+     2. `.gitignore` (`coverage`) y `.dockerignore` (`**/coverage`) excluían el
+        **módulo fuente** `services/api/src/modules/coverage/`, por lo que el
+        build de la API fallaba (`Cannot find module './modules/coverage/coverage.routes'`)
+        en Docker y un clon limpio. Patrones acotados a directorios de reportes.
+        **Acción del usuario:** commitear el módulo fuente `coverage` (estaba
+        solo en local por el ignore). Ver instrucciones del PR.
 - [ ] Ejecutar el runbook de pilot (`docs/pilot/`) en un staging real.
 - [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
 - [ ] Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS en producción.
