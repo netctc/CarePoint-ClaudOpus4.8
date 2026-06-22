@@ -19,6 +19,12 @@ dependencies = [
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
+# Silencia los DeprecationWarning (Pydantic v2 class-based config / parse_obj /
+# Field(env=...), y HTTP_422 de Starlette). Son avisos cosmeticos, ocultos en
+# runtime; se mantienen visibles los demas warnings (UserWarning, etc.).
+filterwarnings = [
+  "ignore::DeprecationWarning",
+]
 
 [tool.ruff]
 line-length = 100
