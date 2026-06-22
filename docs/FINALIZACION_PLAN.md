@@ -188,5 +188,12 @@ gate `check:secrets` impedirá que se versionen por error.
 
 ### Pendiente para cerrar `verify:s1`
 - [ ] Levantar PostgreSQL + Redis y volver a correr `npm run verify:s1` completo
-      (faltó la parte de `prisma:generate` + `build:backend` + `smoke:api:ci`,
-      que no llegó a ejecutarse porque `check:secrets` cortaba antes).
+      (faltó la parte de `prisma:generate` + `build:backend` + `smoke:api:ci`).
+
+### Actualización (2ª corrida)
+- `npm run check:secrets` → ✅ pasa tras el fix.
+- `npm run verify:workspace` fallaba con "services/api/.env must not be committed":
+  el script `scripts/s0/verify-workspace.mjs` usaba `existsSync` (presencia en
+  disco) en vez de comprobar si el `.env` estaba versionado. Corregido para usar
+  `git ls-files`; un `.env` local gitignored ya no rompe el gate, pero uno
+  realmente versionado sigue fallando.
