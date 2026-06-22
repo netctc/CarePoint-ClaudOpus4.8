@@ -242,6 +242,8 @@ model Appointment {
   records           MedicalRecord[]
   payments          Payment[]
   subjectContext    AppointmentSubjectContext?
+
+  @@index([organizationId])
 }
 
 model AppointmentSubjectContext {
@@ -287,6 +289,8 @@ model MessageThread {
   patient        PatientProfile?  @relation(fields: [patientId], references: [id])
   provider       ProviderProfile? @relation(fields: [providerId], references: [id])
   messages       Message[]
+
+  @@index([organizationId])
 }
 
 model Message {
@@ -345,6 +349,8 @@ model AuditLog {
   createdAt      DateTime      @default(now())
   actor          User?         @relation(fields: [actorId], references: [id])
   organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, createdAt])
 }
 
 

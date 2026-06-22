@@ -445,7 +445,8 @@ adminUsersRouter.get('/organizations', requireAuth, allowRoles(organizationReadR
 
   const q = clean(req.query.q).toLowerCase();
   const organizations = await prisma.organization.findMany({ orderBy: { name: 'asc' }, take: 500 });
-  const mapped = await Promise.all(organizations.map(mapOrganization));
+  const summaries = await getOrganizationDependencySummariesBatched(organizations.map((organization) => organization.id));
+  const mapped = organizations.map((organization) => buildOrganizationView(organization, summaries.get(organization.id) ?? {}));
   const items = mapped.filter((organization) => !q || [organization.name, organization.id].join(' ').toLowerCase().includes(q));
   res.json({ items, count: items.length, scoped: false, fallbackOrganizationName: defaultOrganizationName, canManage: organizationWriteRoles.includes(req.user?.role ?? '') });
 });
@@ -2333,6 +2334,13 @@ async function getOrganizationDependencySummary(organizationId: string) {
 
 async function mapOrganization(organization: any) {
   const dependencySummary = await getOrganizationDependencySummary(organization.id);
+  return buildOrganizationView(organization, dependencySummary);
+}
+
+// Presentation shape for an organization row, given an already-computed
+// dependency summary. Kept separate so the list view can reuse a single
+// batched summary computation instead of paying 35 count queries per org.
+function buildOrganizationView(organization: any, dependencySummary: Record<string, number>) {
   const accountCount = (dependencySummary.users ?? 0) + (dependencySummary.patients ?? 0) + (dependencySummary.providers ?? 0);
   return {
     id: organization.id,
@@ -2344,6 +2352,73 @@ async function mapOrganization(organization: any) {
     accountCount,
     isFallback: organization.name?.toLowerCase() === defaultOrganizationName.toLowerCase(),
   };
+}
+
+// Relations counted for the organization dependency summary. Used to build the
+// batched summaries with one groupBy per relation instead of one count per
+// (relation x organization).
+const ORGANIZATION_DEPENDENCY_RELATIONS: Array<[string, any]> = [
+  ['users', prisma.user],
+  ['patients', prisma.patientProfile],
+  ['providers', prisma.providerProfile],
+  ['appointments', prisma.appointment],
+  ['appointmentSubjectContexts', prisma.appointmentSubjectContext],
+  ['messageThreads', prisma.messageThread],
+  ['auditLogs', prisma.auditLog],
+  ['onboardingStates', prisma.providerOnboardingState],
+  ['credentialDocuments', prisma.providerCredentialDocument],
+  ['credentialReviewTasks', prisma.providerCredentialReviewTask],
+  ['credentialNotifications', prisma.providerCredentialNotification],
+  ['serviceCatalogItems', prisma.serviceCatalogItem],
+  ['coverageRules', prisma.coverageRule],
+  ['pricingRules', prisma.pricingRule],
+  ['policyTemplates', prisma.policyTemplate],
+  ['supportWorkItems', prisma.supportWorkItem],
+  ['safetyCases', prisma.safetyCase],
+  ['reportDefinitions', prisma.reportDefinition],
+  ['campaigns', prisma.campaign],
+  ['integrationConnections', prisma.integrationConnection],
+  ['moderationCases', prisma.moderationCase],
+  ['providerScheduleTemplates', prisma.providerScheduleTemplate],
+  ['clinicalOrders', prisma.clinicalOrder],
+  ['prescriptionDrafts', prisma.prescriptionDraft],
+  ['labWorkItems', prisma.labWorkItem],
+  ['rpmEnrollments', prisma.rpmEnrollment],
+  ['providerAlerts', prisma.providerAlert],
+  ['facilitySettings', prisma.facilitySetting],
+  ['patientFamilyProfiles', prisma.patientFamilyProfile],
+  ['patientNotificationItems', prisma.patientNotificationItem],
+  ['patientSupportTickets', prisma.patientSupportTicket],
+  ['patientReminderPlans', prisma.patientReminderPlan],
+  ['patientCarePlanItems', prisma.patientCarePlanItem],
+  ['patientRpmPrograms', prisma.patientRpmProgram],
+  ['patientConsentRecords', prisma.patientConsentRecord],
+];
+
+// Batched equivalent of getOrganizationDependencySummary for many organizations.
+// Runs one groupBy per relation (35 queries total) instead of 35 counts per
+// organization (35 x N). This is the fix for the slow GET /organizations page.
+async function getOrganizationDependencySummariesBatched(organizationIds: string[]) {
+  const result = new Map<string, Record<string, number>>();
+  if (organizationIds.length === 0) return result;
+
+  const perOrg: Record<string, Record<string, number>> = {};
+  for (const id of organizationIds) perOrg[id] = {};
+
+  const where = { organizationId: { in: organizationIds } };
+  await Promise.all(
+    ORGANIZATION_DEPENDENCY_RELATIONS.map(async ([key, delegate]) => {
+      const groups = await delegate.groupBy({ by: ['organizationId'], where, _count: { _all: true } });
+      for (const group of groups as Array<{ organizationId: string | null; _count: { _all: number } }>) {
+        const orgId = group.organizationId;
+        const count = group._count?._all ?? 0;
+        if (orgId && perOrg[orgId] && count > 0) perOrg[orgId][key] = count;
+      }
+    }),
+  );
+
+  for (const id of organizationIds) result.set(id, compactDependencySummary(perOrg[id]));
+  return result;
 }
 
 

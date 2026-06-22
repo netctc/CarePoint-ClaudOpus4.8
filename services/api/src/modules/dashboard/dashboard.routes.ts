@@ -33,14 +33,6 @@ async function getProviderProfileId(userId: string) {
   return profile?.id;
 }
 
-async function runSequential<T>(tasks: Array<() => Promise<T>>) {
-  const results: T[] = [];
-  for (const task of tasks) {
-    results.push(await task());
-  }
-  return results;
-}
-
 
 type MedicalProfilePayload = {
   questionnaire: Record<string, unknown>;
@@ -247,11 +239,11 @@ dashboardRouter.get('/patient', async (req, res) => {
   const patientContext = await getPatientContext(userId, req.user?.organizationId, requestedSubjectProfileId);
   const patientProfileId = patientContext.patientProfileId;
 
-  const [appointments, records, threads, payments] = await runSequential([
-    () => prisma.appointment.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
-    () => prisma.medicalRecord.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
-    () => prisma.messageThread.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
-    () => prisma.payment.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
+  const [appointments, records, threads, payments] = await Promise.all([
+    prisma.appointment.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
+    prisma.medicalRecord.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
+    prisma.messageThread.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
+    prisma.payment.count({ where: patientProfileId ? { patientId: patientProfileId } : { id: '__none__' } }),
   ]);
 
   const [notificationItems, refillItems, appointmentItems, homeSummary] = patientProfileId && organizationId
@@ -407,11 +399,11 @@ dashboardRouter.get('/provider', async (req, res) => {
   const providerProfileId = await getProviderProfileId(req.user!.userId);
   const providerWhere = providerProfileId ? { providerId: providerProfileId } : { id: '__none__' };
 
-  const [appointments, waiting, threads, liveSessions] = await runSequential([
-    () => prisma.appointment.count({ where: providerWhere }),
-    () => prisma.appointment.count({ where: { ...providerWhere, status: 'REQUESTED' } }),
-    () => prisma.messageThread.count({ where: providerProfileId ? { providerId: providerProfileId } : { id: '__none__' } }),
-    () => prisma.telehealthSession.count({ where: { appointment: providerWhere, status: 'LIVE' } }),
+  const [appointments, waiting, threads, liveSessions] = await Promise.all([
+    prisma.appointment.count({ where: providerWhere }),
+    prisma.appointment.count({ where: { ...providerWhere, status: 'REQUESTED' } }),
+    prisma.messageThread.count({ where: providerProfileId ? { providerId: providerProfileId } : { id: '__none__' } }),
+    prisma.telehealthSession.count({ where: { appointment: providerWhere, status: 'LIVE' } }),
   ]);
 
   const queue = providerProfileId
@@ -490,18 +482,17 @@ dashboardRouter.get('/admin', async (req, res) => {
   const organizationId = req.user?.organizationId;
   const orgWhere = organizationId ? { organizationId } : undefined;
 
-  const [users, providers, appointments, payments, liveSessions, audits] = await runSequential([
-    () => prisma.user.count({ where: orgWhere }),
-    () => prisma.providerProfile.count({ where: orgWhere }),
-    () => prisma.appointment.count({ where: orgWhere }),
-    () => prisma.payment.aggregate({ where: {}, _sum: { amountMinor: true } }),
-    () => prisma.telehealthSession.count({ where: organizationId ? { appointment: { organizationId } } : undefined }),
-    () =>
-      prisma.auditLog.findMany({
-        where: organizationId ? { organizationId } : undefined,
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      }),
+  const [users, providers, appointments, payments, liveSessions, audits] = await Promise.all([
+    prisma.user.count({ where: orgWhere }),
+    prisma.providerProfile.count({ where: orgWhere }),
+    prisma.appointment.count({ where: orgWhere }),
+    prisma.payment.aggregate({ where: {}, _sum: { amountMinor: true } }),
+    prisma.telehealthSession.count({ where: organizationId ? { appointment: { organizationId } } : undefined }),
+    prisma.auditLog.findMany({
+      where: organizationId ? { organizationId } : undefined,
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    }),
   ]);
   const [governedPacket, savedScopes, deliveryExecutions, failedDeliveries, appointmentSubjectMeta] = organizationId
     ? await Promise.all([

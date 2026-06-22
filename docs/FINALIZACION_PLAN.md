@@ -104,6 +104,27 @@ produciendo las cargas documentadas de ~20s (`/portal/dashboard`,
 **Pendiente (requiere entorno con DB para medir):**
 - [ ] Revisar/optimizar las queries de los endpoints `dashboard`/organizations/catalog (posibles N+1) y medir el tiempo real con datos del piloto. Meta: < 2s.
 
+**Optimizaciones aplicadas (Opción B — análisis por inspección):**
+1. **`GET /api/admin-users/organizations` (causa de los ~20.9s):** `mapOrganization`
+   llamaba a `getOrganizationDependencySummary`, que ejecuta **35 `count`** por
+   organización, y se invocaba por cada org (hasta 500) con `Promise.all` →
+   **35 × N queries**, saturando el pool contra la BD remota. Se añadió
+   `getOrganizationDependencySummariesBatched`, que usa **un `groupBy` por
+   relación** (35 queries fijas) sin importar el número de orgs. La salida por
+   org es idéntica (mismo `dependencySummary`/`canDelete`/`accountCount`). El
+   `delete` sigue revalidando con el cálculo exacto por org.
+2. **`/api/dashboard/{patient,provider,admin}`:** los counts independientes se
+   ejecutaban en serie (`runSequential`). Se cambiaron a `Promise.all`
+   (paralelos), eliminando N round-trips por carga. Helper `runSequential` retirado.
+3. **Índices Prisma:** `organizationId` solo estaba indexado en 6 de 35 tablas.
+   Se añadieron `@@index` en tablas operacionales de alto volumen usadas por estos
+   endpoints: `AuditLog([organizationId, createdAt])`, `Appointment([organizationId])`,
+   `MessageThread([organizationId])`. (`AppointmentSubjectContext` ya tenía prefijo
+   `organizationId`.) Requiere `npm run prisma:generate` + `db push`/`db:reset:pilot`.
+4. **Catálogo (`/api/catalog/services`):** no tiene N+1 (un solo `findMany` en el
+   store); sus ~5.9s eran sobre todo el fetch sin timeout (mitigado en Fase 2) y la
+   contención del pool causada por organizations.
+
 ---
 
 ## Fase 3 — Calidad y pruebas  ◑ (CI ampliado)
@@ -186,14 +207,40 @@ en `.gitignore` y **no** está en el repositorio, pero si esas credenciales son
 de entornos reales, **rótalas** y guárdalas en un gestor de secretos/vault. El
 gate `check:secrets` impedirá que se versionen por error.
 
-### Pendiente para cerrar `verify:s1`
-- [ ] Levantar PostgreSQL + Redis y volver a correr `npm run verify:s1` completo
-      (faltó la parte de `prisma:generate` + `build:backend` + `smoke:api:ci`).
+### Actualización (3ª corrida) — ✅ `verify:s1` COMPLETO EN VERDE
+Pipeline completo del backend verificado con build real en la máquina del usuario:
 
-### Actualización (2ª corrida)
-- `npm run check:secrets` → ✅ pasa tras el fix.
-- `npm run verify:workspace` fallaba con "services/api/.env must not be committed":
-  el script `scripts/s0/verify-workspace.mjs` usaba `existsSync` (presencia en
-  disco) en vez de comprobar si el `.env` estaba versionado. Corregido para usar
-  `git ls-files`; un `.env` local gitignored ya no rompe el gate, pero uno
-  realmente versionado sigue fallando.
+| Paso | Resultado |
+|------|-----------|
+| `check:secrets` | ✅ |
+| `verify:workspace` | ✅ |
+| `verify:s1:config` | ✅ |
+| `prisma:generate` | ✅ Prisma Client v5.22.0 |
+| `build:contracts` (tsc) | ✅ |
+| `build:api` (tsc) | ✅ el backend TypeScript compila completo |
+| `smoke:api:ci` | ✅ API arranca; 5/5 health endpoints PASS |
+
+**Conclusión:** Fase 0 (verificación) y Fase 1 (estabilizar build) quedan
+CONFIRMADAS para backend, contracts y admin web. El proyecto compila y arranca.
+
+### Pendiente de confirmar (corridas rápidas) — ✅ COMPLETADO
+- [x] `npm run build:provider` → ✅ provider web compila (25 rutas).
+- [x] `npm run verify:python-worker && npm run test:python-worker` → ✅ todo verde
+      (sin fallos; solo warnings de deprecación de Pydantic v2, no bloqueantes).
+- [x] `apps/provider_mobile`: `flutter analyze` → tenía 1 warning `unnecessary_cast`
+      en `provider_analytics_page.dart:107`; **corregido** (se quitó el `as Map`
+      redundante dentro de la rama `item is Map`).
+
+### Estado de build/verificación: TODO VERDE
+| Componente | Estado |
+|------------|--------|
+| Backend (contracts + api, tsc) | ✅ compila |
+| API smoke (health endpoints) | ✅ 5/5 |
+| Admin web (`next build`) | ✅ 37 rutas |
+| Provider web (`next build`) | ✅ 25 rutas |
+| App móvil paciente (`flutter analyze`) | ✅ sin issues |
+| App móvil médico (`flutter analyze`) | ✅ sin issues (tras fix) |
+| Python worker (pytest) | ✅ todos pasan |
+| Gates S0/S1 (secrets, workspace, config) | ✅ |
+
+**Fases 0 y 1 (verificación + estabilización del build) CERRADAS.**
