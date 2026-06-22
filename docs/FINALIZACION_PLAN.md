@@ -181,8 +181,10 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
   verifica que aparecen en sus listados, y rechaza cuerpos inválidos (400).
   Limpieza completa a nivel de Prisma en `afterAll` (audit, onboarding state,
   perfiles, usuarios, org).
-- ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **53/53
-  tests pasan** (4 archivos), incluidos los de BD, lectura y escritura.
+- ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **60/60
+  tests pasan** (7 archivos): health, guards, auth/validación, lecturas,
+  escrituras (org/catálogo/paciente/proveedor), transiciones de estado y
+  creación de prescripción.
 
 **🔴 Bug real encontrado por los tests de escritura de cuentas:** el modelo
 `ProviderRoleCatalog` (y la relación `roleCatalog`/`roleCatalogId` en
