@@ -198,9 +198,14 @@ alineados con la migración. Requiere `npm run prisma:generate`. Esto además
 elimina un drift previo entre migraciones y schema.
 
 **Pendiente:**
-- [ ] Flujo de **citas** (booking): requiere hold→book-with-hold con slots
-      publicados; multi-paso, pendiente de un harness de seed dedicado.
 - [ ] Pruebas de widgets/smoke en las apps Flutter.
+
+**Flujo de citas (booking, con BD):**
+- `appointment-booking.integration.test.ts`: flujo completo de paciente
+  `crear hold → subir documentos INSURANCE + IDENTITY → book-with-hold` → 201,
+  cita persistida y visible en el listado; y rechazo de confirmación sin
+  intake/documentos → 400. Siembra paciente (con perfil) + proveedor; cleanup
+  completo (la cita borra en cascada su `AppointmentSubjectContext`).
 
 **Transiciones de estado y prescripciones (con BD):**
 - `state-transitions.integration.test.ts`: suspende/reactiva una cuenta de
