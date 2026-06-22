@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createApp } from '../app';
 import { signAccessToken } from '../lib/jwt';
 import { disconnectPrisma, getDatabaseHealth, prisma } from '../lib/prisma';
+import { createManualPublishedSlot } from '../lib/scheduling-store';
 
 // End-to-end appointment booking flow (patient session):
 //   create slot hold -> upload INSURANCE + IDENTITY booking documents -> book.
@@ -21,6 +22,8 @@ const base = new Date(Date.now() + 36 * 60 * 60 * 1000);
 const day = base.toISOString().slice(0, 10);
 const startsAt = `${day}T10:00:00.000Z`;
 const endsAt = `${day}T10:30:00.000Z`;
+const altStartsAt = `${day}T11:00:00.000Z`;
+const altEndsAt = `${day}T11:30:00.000Z`;
 const service = 'General Consultation';
 const location = 'Main Clinic';
 
@@ -70,6 +73,21 @@ describe.skipIf(!dbReady)('appointment booking flow (hold -> documents -> book)'
       data: { userId: providerUser.id, organizationId: org.id, specialty: 'General Medicine' },
     });
     providerProfileId = providerProfile.id;
+
+    // Publish the slots so the patient can hold them (createSlotHold requires a
+    // published slot matching the exact provider/service/location/time).
+    for (const [s, e] of [[startsAt, endsAt], [altStartsAt, altEndsAt]] as const) {
+      await createManualPublishedSlot({
+        organizationId: org.id,
+        providerId: providerProfile.id,
+        service,
+        location,
+        startsAt: new Date(s),
+        endsAt: new Date(e),
+        capacity: 1,
+        modality: 'IN_PERSON',
+      });
+    }
 
     // Patient session token (slot holds derive patientId from the patient context).
     token = signAccessToken({ sub: patientUser.id, role: 'PATIENT', organizationId: org.id });
@@ -155,9 +173,7 @@ describe.skipIf(!dbReady)('appointment booking flow (hold -> documents -> book)'
   });
 
   it('rejects booking confirmation without intake/documents (400)', async () => {
-    // Use a different slot so it never collides with the booked appointment above.
-    const altStartsAt = `${day}T11:00:00.000Z`;
-    const altEndsAt = `${day}T11:30:00.000Z`;
+    // Uses a different slot (also pre-published) so it never collides with the booked appointment above.
     const holdRes = await request(app)
       .post('/api/appointments/holds')
       .set('Authorization', `Bearer ${token}`)
