@@ -13,7 +13,7 @@ COPY apps/provider/package*.json apps/provider/
 COPY packages/contracts/package*.json packages/contracts/
 COPY services/api/package*.json services/api/
 
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
 
