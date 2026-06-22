@@ -7,6 +7,7 @@ import { writeAuditLog } from '../../lib/audit';
 import { OtpChannel, getAuthChallengeStoreMode, issueOtpChallenge, issuePrivilegedSignInChallenge, resendPrivilegedSignInChallenge, verifyOtpChallenge, verifyPrivilegedSignInChallenge } from '../../lib/auth-otp-store';
 import { buildPrivilegedRiskAssessment, enforceApprovedPrivilegedDomain } from '../../lib/auth-risk';
 import { buildSsoAuthorizeUrl, getSsoConfiguration, type SsoRoleHint } from '../../lib/auth-sso';
+import { sendOtpEmail } from '../../lib/mailer';
 
 const PRIVILEGED_SIGN_IN_ROLES = new Set(['SUPER_ADMIN', 'COMPANY_ADMIN', 'COMPANY_SUPPORT', 'PROVIDER', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'FINANCE']);
 
@@ -266,6 +267,15 @@ export async function startPrivilegedSignInChallenge(input: {
     },
   });
 
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({
+      to: issued.challenge.identifier,
+      code: issued.challenge.code,
+      expiresInSeconds: issued.expiresInSeconds,
+      purpose: 'privileged sign-in',
+    });
+  }
+
   return {
     challengeId: issued.challenge.id,
     channel: issued.challenge.channel,
@@ -305,6 +315,15 @@ export async function resendPrivilegedChallenge(input: { challengeId: string }) 
       challengeStoreMode,
     },
   });
+
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({
+      to: issued.challenge.identifier,
+      code: issued.challenge.code,
+      expiresInSeconds: issued.expiresInSeconds,
+      purpose: 'privileged sign-in',
+    });
+  }
 
   return {
     challengeId: issued.challenge.id,
@@ -384,6 +403,15 @@ export async function requestPatientOtp(input: { identifier: string; channel?: O
       challengeStoreMode,
     },
   });
+
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({
+      to: issued.challenge.identifier,
+      code: issued.challenge.code,
+      expiresInSeconds: issued.expiresInSeconds,
+      purpose: 'patient sign-in',
+    });
+  }
 
   return {
     challengeId: identifier,
