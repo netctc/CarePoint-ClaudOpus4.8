@@ -1,0 +1,827 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V6",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v5",
+  "generatedAt": "2026-05-21T17:15:52.592Z",
+  "purpose": "Prepare production readiness, deployment, rollback, observability, UAT consumption, and go-live/pilot decision evidence.",
+  "readinessDomains": [
+    {
+      "id": "ENV",
+      "name": "Environment and configuration",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gates": [
+        "Environment variables are documented in .env.example without real secrets.",
+        "Deployment target identifies environment name, URL, release package, and owner.",
+        "API, Admin, Provider, and Python worker configuration are reviewed before promotion.",
+        "Runtime feature flags and dry-run/advisory boundaries are documented."
+      ]
+    },
+    {
+      "id": "BUILD",
+      "name": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gates": [
+        "npm install completes on the deployment workstation or CI environment.",
+        "npm run build:api completes without errors.",
+        "npm run build:web completes or is formally deferred for a backend-only pilot.",
+        "npm run audit:qa completes with QA-V1 through QA-V6 coverage.",
+        "Release ZIP and SHA-256 are archived as immutable evidence."
+      ]
+    },
+    {
+      "id": "DATA",
+      "name": "Database, migration, seed, and backup",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gates": [
+        "Database connection target is confirmed for the intended environment.",
+        "Migration command is known and tested in staging or equivalent environment.",
+        "Backup/restore procedure is documented before go-live.",
+        "Seed or demo data strategy is documented for pilot/UAT continuity."
+      ]
+    },
+    {
+      "id": "SEC",
+      "name": "Security and privacy smoke",
+      "owner": "Security or technical owner",
+      "priority": "P0",
+      "gates": [
+        "No real secrets are committed to the repository.",
+        "Protected routes and APIs reject unauthenticated access.",
+        "Role boundaries from QA-V1 and QA-V2 are validated before signoff.",
+        "Logs and error evidence avoid sensitive data exposure."
+      ]
+    },
+    {
+      "id": "OBS",
+      "name": "Observability, monitoring, and support readiness",
+      "owner": "Operations owner",
+      "priority": "P1",
+      "gates": [
+        "Operational logs are available to the support owner.",
+        "Known error classes and escalation paths are documented.",
+        "Post-go-live monitoring window and owner are assigned.",
+        "Support runbook references final V64, UX-V6, and QA evidence."
+      ]
+    },
+    {
+      "id": "ROLLBACK",
+      "name": "Rollback and continuity",
+      "owner": "Deployment owner",
+      "priority": "P0",
+      "gates": [
+        "Rollback trigger criteria are defined for P0/P1 failures.",
+        "Prior stable baseline and release artifacts are retained.",
+        "Database rollback or recovery strategy is documented.",
+        "Communication owner is assigned for go/no-go and rollback decisions."
+      ]
+    },
+    {
+      "id": "UAT",
+      "name": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gates": [
+        "Admin acceptance package is available from QA-V5.",
+        "Provider acceptance package is available from QA-V5.",
+        "Platform/Technical Owner signoff package is available from QA-V5.",
+        "No unresolved P0 defect remains open before production readiness signoff.",
+        "P1/P2 deferrals have owner, mitigation, and target follow-up."
+      ]
+    },
+    {
+      "id": "GOLIVE",
+      "name": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gates": [
+        "Go/no-go meeting has named decision owner and attendees.",
+        "Go-live checklist completion percentage is recorded.",
+        "Open risks are listed with owner and mitigation.",
+        "Pilot/staging/production target is explicitly selected.",
+        "Post-go-live hypercare window is assigned."
+      ]
+    }
+  ],
+  "goLiveChecklist": [
+    {
+      "id": "ENV-001",
+      "domain": "Environment and configuration",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Environment variables are documented in .env.example without real secrets.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ENV-002",
+      "domain": "Environment and configuration",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Deployment target identifies environment name, URL, release package, and owner.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ENV-003",
+      "domain": "Environment and configuration",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "API, Admin, Provider, and Python worker configuration are reviewed before promotion.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ENV-004",
+      "domain": "Environment and configuration",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Runtime feature flags and dry-run/advisory boundaries are documented.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "BUILD-001",
+      "domain": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gate": "npm install completes on the deployment workstation or CI environment.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "BUILD-002",
+      "domain": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gate": "npm run build:api completes without errors.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "BUILD-003",
+      "domain": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gate": "npm run build:web completes or is formally deferred for a backend-only pilot.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "BUILD-004",
+      "domain": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gate": "npm run audit:qa completes with QA-V1 through QA-V6 coverage.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "BUILD-005",
+      "domain": "Build and release package",
+      "owner": "Technical owner",
+      "priority": "P0",
+      "gate": "Release ZIP and SHA-256 are archived as immutable evidence.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "DATA-001",
+      "domain": "Database, migration, seed, and backup",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Database connection target is confirmed for the intended environment.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "DATA-002",
+      "domain": "Database, migration, seed, and backup",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Migration command is known and tested in staging or equivalent environment.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "DATA-003",
+      "domain": "Database, migration, seed, and backup",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Backup/restore procedure is documented before go-live.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "DATA-004",
+      "domain": "Database, migration, seed, and backup",
+      "owner": "Platform owner",
+      "priority": "P0",
+      "gate": "Seed or demo data strategy is documented for pilot/UAT continuity.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "SEC-001",
+      "domain": "Security and privacy smoke",
+      "owner": "Security or technical owner",
+      "priority": "P0",
+      "gate": "No real secrets are committed to the repository.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "SEC-002",
+      "domain": "Security and privacy smoke",
+      "owner": "Security or technical owner",
+      "priority": "P0",
+      "gate": "Protected routes and APIs reject unauthenticated access.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "SEC-003",
+      "domain": "Security and privacy smoke",
+      "owner": "Security or technical owner",
+      "priority": "P0",
+      "gate": "Role boundaries from QA-V1 and QA-V2 are validated before signoff.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "SEC-004",
+      "domain": "Security and privacy smoke",
+      "owner": "Security or technical owner",
+      "priority": "P0",
+      "gate": "Logs and error evidence avoid sensitive data exposure.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "OBS-001",
+      "domain": "Observability, monitoring, and support readiness",
+      "owner": "Operations owner",
+      "priority": "P1",
+      "gate": "Operational logs are available to the support owner.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must be triaged before go-live readiness signoff."
+    },
+    {
+      "id": "OBS-002",
+      "domain": "Observability, monitoring, and support readiness",
+      "owner": "Operations owner",
+      "priority": "P1",
+      "gate": "Known error classes and escalation paths are documented.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must be triaged before go-live readiness signoff."
+    },
+    {
+      "id": "OBS-003",
+      "domain": "Observability, monitoring, and support readiness",
+      "owner": "Operations owner",
+      "priority": "P1",
+      "gate": "Post-go-live monitoring window and owner are assigned.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must be triaged before go-live readiness signoff."
+    },
+    {
+      "id": "OBS-004",
+      "domain": "Observability, monitoring, and support readiness",
+      "owner": "Operations owner",
+      "priority": "P1",
+      "gate": "Support runbook references final V64, UX-V6, and QA evidence.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must be triaged before go-live readiness signoff."
+    },
+    {
+      "id": "ROLLBACK-001",
+      "domain": "Rollback and continuity",
+      "owner": "Deployment owner",
+      "priority": "P0",
+      "gate": "Rollback trigger criteria are defined for P0/P1 failures.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ROLLBACK-002",
+      "domain": "Rollback and continuity",
+      "owner": "Deployment owner",
+      "priority": "P0",
+      "gate": "Prior stable baseline and release artifacts are retained.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ROLLBACK-003",
+      "domain": "Rollback and continuity",
+      "owner": "Deployment owner",
+      "priority": "P0",
+      "gate": "Database rollback or recovery strategy is documented.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "ROLLBACK-004",
+      "domain": "Rollback and continuity",
+      "owner": "Deployment owner",
+      "priority": "P0",
+      "gate": "Communication owner is assigned for go/no-go and rollback decisions.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "UAT-001",
+      "domain": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gate": "Admin acceptance package is available from QA-V5.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "UAT-002",
+      "domain": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gate": "Provider acceptance package is available from QA-V5.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "UAT-003",
+      "domain": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gate": "Platform/Technical Owner signoff package is available from QA-V5.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "UAT-004",
+      "domain": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gate": "No unresolved P0 defect remains open before production readiness signoff.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "UAT-005",
+      "domain": "UAT signoff consumption",
+      "owner": "QA facilitator",
+      "priority": "P0",
+      "gate": "P1/P2 deferrals have owner, mitigation, and target follow-up.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "GOLIVE-001",
+      "domain": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gate": "Go/no-go meeting has named decision owner and attendees.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "GOLIVE-002",
+      "domain": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gate": "Go-live checklist completion percentage is recorded.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "GOLIVE-003",
+      "domain": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gate": "Open risks are listed with owner and mitigation.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "GOLIVE-004",
+      "domain": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gate": "Pilot/staging/production target is explicitly selected.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    },
+    {
+      "id": "GOLIVE-005",
+      "domain": "Go-live or pilot decision",
+      "owner": "Release owner",
+      "priority": "P0",
+      "gate": "Post-go-live hypercare window is assigned.",
+      "status": "not-started",
+      "requiredEvidence": [
+        "environment",
+        "release package or build identifier",
+        "tester/owner",
+        "date",
+        "pass/fail or accepted deferral",
+        "evidence link, screenshot, command output, or approval reference"
+      ],
+      "acceptance": "Must pass or have release-owner-approved mitigation before go-live."
+    }
+  ],
+  "productionReadinessCommands": [
+    {
+      "id": "CMD-001",
+      "command": "npm install",
+      "purpose": "Install dependencies before build and audit execution.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-002",
+      "command": "npm run build:api",
+      "purpose": "Validate API and shared contract build.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-003",
+      "command": "npm run build:web",
+      "purpose": "Validate Admin and Provider web builds.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-004",
+      "command": "npm run audit:qa",
+      "purpose": "Run QA-V1 through QA-V6 evidence scanners.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-005",
+      "command": "PYTHONPATH=services/python-worker python scripts/option_b/verify_python_worker.py",
+      "purpose": "Validate Option B Python worker readiness.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-006",
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=services/python-worker python -m pytest -q services/python-worker/tests/test_worker_contracts.py --disable-warnings",
+      "purpose": "Validate Python worker contract tests.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-007",
+      "command": "npm run check:secrets",
+      "purpose": "Run repository secret smoke check.",
+      "priority": "P0"
+    },
+    {
+      "id": "CMD-008",
+      "command": "npm run verify:workspace",
+      "purpose": "Validate workspace structure and expected package layout.",
+      "priority": "P1"
+    }
+  ],
+  "defectGate": {
+    "p0": "Blocks production readiness until resolved or release owner approves documented mitigation.",
+    "p1": "Must be triaged with owner, mitigation, target release, and explicit release-owner decision.",
+    "p2": "May move to post-go-live backlog if not blocking pilot or production use.",
+    "unknown": "Cannot be ignored; classify before go/no-go review."
+  },
+  "riskRegisterTemplate": [
+    {
+      "id": "RISK-001",
+      "area": "Build",
+      "risk": "Environment-specific build failure after package extraction.",
+      "severity": "P0",
+      "mitigation": "Run npm install, npm run build:api, npm run build:web, and archive logs before promotion.",
+      "owner": "Technical owner"
+    },
+    {
+      "id": "RISK-002",
+      "area": "Data",
+      "risk": "Migration or seed mismatch between staging and production.",
+      "severity": "P0",
+      "mitigation": "Confirm migration plan, backup, restore path, and dry-run result.",
+      "owner": "Platform owner"
+    },
+    {
+      "id": "RISK-003",
+      "area": "UAT",
+      "risk": "Incomplete role signoff or unresolved P0/P1 defects.",
+      "severity": "P0",
+      "mitigation": "Use QA-V5 role acceptance gates before go/no-go.",
+      "owner": "QA facilitator"
+    },
+    {
+      "id": "RISK-004",
+      "area": "Operations",
+      "risk": "No assigned owner for post-go-live monitoring or support.",
+      "severity": "P1",
+      "mitigation": "Assign hypercare owner, monitoring window, escalation path, and rollback owner.",
+      "owner": "Operations owner"
+    },
+    {
+      "id": "RISK-005",
+      "area": "Security",
+      "risk": "Sensitive data appears in logs or committed configuration.",
+      "severity": "P0",
+      "mitigation": "Run secret checks and review logs/errors before signoff.",
+      "owner": "Security or technical owner"
+    }
+  ],
+  "decisionRecordTemplate": {
+    "target": "staging | pilot | production",
+    "releasePackage": "",
+    "sha256": "",
+    "environment": "",
+    "goNoGoDecision": "go | go-with-deferrals | no-go",
+    "decisionOwner": "",
+    "decisionDate": "",
+    "p0OpenDefects": 0,
+    "p1OpenDefects": 0,
+    "acceptedDeferrals": [],
+    "rollbackOwner": "",
+    "hypercareOwner": "",
+    "notes": ""
+  },
+  "exitGates": [
+    "QA-V1 through QA-V5 evidence is present and complete.",
+    "Build/API/Web/Python worker validation commands are executed in the target environment and archived.",
+    "No unresolved P0 defect remains open.",
+    "P1/P2 deferrals have explicit owner, mitigation, and follow-up target.",
+    "Environment, migration, backup, rollback, and monitoring owners are named.",
+    "Go/no-go decision is recorded before pilot, staging signoff, or production go-live."
+  ],
+  "nextRecommendedDelivery": "QA-V7 - Final QA/UAT closure certificate"
+}

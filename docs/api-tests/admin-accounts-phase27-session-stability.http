@@ -1,0 +1,16 @@
+### Admin auth me should work with current token
+GET http://localhost:4000/api/auth/me
+Authorization: Bearer {{admin_token}}
+
+### Admin account patients should remain lightweight by default
+GET http://localhost:4000/api/admin/users/patients?limit=100
+Authorization: Bearer {{admin_token}}
+
+### Admin account providers should remain lightweight by default
+GET http://localhost:4000/api/admin/users/providers?limit=100
+Authorization: Bearer {{admin_token}}
+
+### Refresh access token using refresh cookie
+POST http://localhost:4000/api/auth/refresh
+Cookie: refreshToken={{refresh_token}}
+Content-Type: application/json

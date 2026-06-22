@@ -1,0 +1,297 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V5",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v4",
+  "generatedAt": "2026-05-21T17:15:52.512Z",
+  "purpose": "Provide role-based UAT execution packages, signoff criteria, evidence templates, and defect gates before production readiness review.",
+  "roleAcceptancePackages": [
+    {
+      "role": "Admin",
+      "ownerType": "business-stakeholder",
+      "sessionId": "UAT-ADMIN-001",
+      "priority": "P0",
+      "requiredParticipants": [
+        "Admin stakeholder",
+        "QA facilitator",
+        "Implementation representative"
+      ],
+      "scenarioRefs": [
+        "AUTH-001",
+        "RBAC-001",
+        "ADMIN-001",
+        "ADMIN-004",
+        "ADMIN-005",
+        "UX-001",
+        "RESP-001",
+        "UAT-001"
+      ],
+      "requiredEvidence": [
+        "signed acceptance checklist",
+        "screenshots for account/audit/report flows",
+        "defect references for deviations",
+        "environment and build identifiers"
+      ],
+      "exitCriterion": "Admin can complete critical account, audit, report, and navigation workflows without unresolved P0 defects."
+    },
+    {
+      "role": "Provider",
+      "ownerType": "clinical-stakeholder",
+      "sessionId": "UAT-PROVIDER-001",
+      "priority": "P0",
+      "requiredParticipants": [
+        "Provider stakeholder",
+        "QA facilitator",
+        "Clinical workflow reviewer"
+      ],
+      "scenarioRefs": [
+        "AUTH-002",
+        "PROV-001",
+        "PROV-002",
+        "PROV-003",
+        "PROV-005",
+        "PROV-006",
+        "A11Y-001",
+        "RESP-002",
+        "UAT-002"
+      ],
+      "requiredEvidence": [
+        "signed acceptance checklist",
+        "screenshots for queue/calendar/prescription/encounter flows",
+        "clinical validation notes",
+        "defect references for deviations"
+      ],
+      "exitCriterion": "Provider can complete critical clinical workflows without unresolved P0 defects and without usability blockers."
+    },
+    {
+      "role": "Operator/Reviewer",
+      "ownerType": "operations-stakeholder",
+      "sessionId": "UAT-OPS-001",
+      "priority": "P1",
+      "requiredParticipants": [
+        "Operations or reviewer stakeholder",
+        "QA facilitator",
+        "Admin representative"
+      ],
+      "scenarioRefs": [
+        "ADMIN-004",
+        "E2E-002",
+        "E2E-003",
+        "OBS-001",
+        "REL-001",
+        "UAT-003"
+      ],
+      "requiredEvidence": [
+        "signed acceptance checklist or triage note",
+        "audit evidence screenshots",
+        "report/KPI evidence",
+        "observability or log reference when applicable"
+      ],
+      "exitCriterion": "Operational review workflows are understandable, traceable, and ready for production readiness review."
+    },
+    {
+      "role": "Platform/Technical Owner",
+      "ownerType": "technical-stakeholder",
+      "sessionId": "UAT-PLATFORM-001",
+      "priority": "P0",
+      "requiredParticipants": [
+        "Technical owner",
+        "QA facilitator",
+        "Deployment owner"
+      ],
+      "scenarioRefs": [
+        "API-001",
+        "API-002",
+        "PY-001",
+        "PY-002",
+        "SEC-001",
+        "SEC-002",
+        "PROD-001"
+      ],
+      "requiredEvidence": [
+        "build logs",
+        "audit:qa output",
+        "Python worker verification output",
+        "security smoke evidence",
+        "production readiness checklist references"
+      ],
+      "exitCriterion": "Technical readiness evidence supports production readiness review and no P0 integration defect remains open."
+    }
+  ],
+  "uatSessions": [
+    {
+      "id": "QA5-UAT-001",
+      "role": "Admin",
+      "title": "Admin acceptance session for accounts, audit, reports, and configuration",
+      "priority": "P0",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-002",
+      "role": "Provider",
+      "title": "Provider acceptance session for queue, calendar, prescriptions, encounters, and clinical navigation",
+      "priority": "P0",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-003",
+      "role": "Operator/Reviewer",
+      "title": "Operations/reviewer acceptance session for audit evidence, reports, and supportability",
+      "priority": "P1",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-004",
+      "role": "Platform/Technical Owner",
+      "title": "Technical owner signoff for build, integration, worker, and security smoke evidence",
+      "priority": "P0",
+      "method": "evidence-review"
+    },
+    {
+      "id": "QA5-UAT-005",
+      "role": "Cross-role",
+      "title": "Cross-role handoff from Admin-created provider to Provider portal access",
+      "priority": "P0",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-006",
+      "role": "Cross-role",
+      "title": "Provider clinical action visible in Admin audit evidence",
+      "priority": "P0",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-007",
+      "role": "Cross-role",
+      "title": "Report/KPI evidence reflects clinical activity after refresh",
+      "priority": "P1",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-008",
+      "role": "Admin",
+      "title": "Admin high-density surface usability review on audit logs and report builder",
+      "priority": "P1",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-009",
+      "role": "Provider",
+      "title": "Provider accessibility and keyboard-only clinical flow smoke",
+      "priority": "P0",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-010",
+      "role": "Provider",
+      "title": "Provider responsive review on dashboard, queue, calendar, and prescriptions",
+      "priority": "P1",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-011",
+      "role": "Admin",
+      "title": "Admin responsive review on dashboard, accounts, audit, and reports",
+      "priority": "P1",
+      "method": "facilitated-uat"
+    },
+    {
+      "id": "QA5-UAT-012",
+      "role": "Platform/Technical Owner",
+      "title": "Production readiness evidence handoff and unresolved defect review",
+      "priority": "P0",
+      "method": "evidence-review"
+    }
+  ],
+  "defectWorkflow": [
+    {
+      "severity": "P0",
+      "action": "Block production readiness until resolved or formally deferred by owner with mitigation.",
+      "sla": "same-day triage"
+    },
+    {
+      "severity": "P1",
+      "action": "Must be triaged before production readiness; may proceed only with owner-approved mitigation.",
+      "sla": "before readiness signoff"
+    },
+    {
+      "severity": "P2",
+      "action": "Can move to post-go-live backlog if not blocking acceptance.",
+      "sla": "post-close backlog review"
+    }
+  ],
+  "signoffFields": [
+    "role",
+    "stakeholder name",
+    "environment",
+    "build or package identifier",
+    "scenario ids executed",
+    "accepted yes/no",
+    "blocking defects",
+    "accepted limitations or deferrals",
+    "signature or approval reference",
+    "approval date"
+  ],
+  "evidenceTemplate": {
+    "tester": "",
+    "role": "",
+    "environment": "",
+    "buildIdentifier": "",
+    "sessionId": "",
+    "scenarioIds": [],
+    "stepsExecuted": "",
+    "expectedResult": "",
+    "actualResult": "",
+    "passFail": "",
+    "defectReferences": [],
+    "screenshotOrLogReferences": [],
+    "stakeholderDecision": "accepted | accepted-with-deferrals | rejected",
+    "notes": ""
+  },
+  "scenarioMapping": {
+    "masterScenarioCount": 44,
+    "adminScenarioCount": 18,
+    "providerScenarioCount": 20,
+    "integrationScenarioCount": 22,
+    "mappedScenarioRefs": [
+      "A11Y-001",
+      "ADMIN-001",
+      "ADMIN-004",
+      "ADMIN-005",
+      "API-001",
+      "API-002",
+      "AUTH-001",
+      "AUTH-002",
+      "E2E-002",
+      "E2E-003",
+      "OBS-001",
+      "PROD-001",
+      "PROV-001",
+      "PROV-002",
+      "PROV-003",
+      "PROV-005",
+      "PROV-006",
+      "PY-001",
+      "PY-002",
+      "RBAC-001",
+      "REL-001",
+      "RESP-001",
+      "RESP-002",
+      "SEC-001",
+      "SEC-002",
+      "UAT-001",
+      "UAT-002",
+      "UAT-003",
+      "UX-001"
+    ]
+  },
+  "exitGates": [
+    "All P0 UAT sessions pass or have approved mitigation.",
+    "No unresolved P0 defect remains open.",
+    "P1 defects are triaged with owner, severity, target release, and mitigation.",
+    "Admin and Provider stakeholder acceptance is recorded.",
+    "Platform technical owner confirms QA-V1 through QA-V4 evidence is available for production readiness.",
+    "Deferred items are moved to a controlled post-readiness backlog."
+  ],
+  "nextRecommendedDelivery": "QA-V6 - Production readiness and go-live checklist"
+}

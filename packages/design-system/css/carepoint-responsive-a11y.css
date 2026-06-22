@@ -1,0 +1,159 @@
+/* CarePoint UX-V4 responsive, accessibility, and visual QA hardening primitives.
+   This layer is intentionally framework-agnostic and safe for progressive adoption. */
+:root {
+  --cp-touch-target-min: 44px;
+  --cp-focus-outline-width: 3px;
+  --cp-focus-outline-offset: 3px;
+  --cp-focus-color: #1e63d7;
+  --cp-disabled-opacity: 0.62;
+  --cp-scroll-margin-top: 96px;
+  --cp-mobile-table-min-width: 640px;
+  --cp-mobile-card-padding: 16px;
+  --cp-stack-gap: 12px;
+}
+
+:where(a, button, input, select, textarea, summary, [role='button'], [tabindex]):focus-visible {
+  outline: var(--cp-focus-outline-width) solid var(--cp-focus-color);
+  outline-offset: var(--cp-focus-outline-offset);
+  box-shadow: var(--cp-shadow-focus, 0 0 0 4px rgba(30, 99, 215, 0.18));
+}
+
+.cp-touch-target,
+:where(button, input, select, textarea, [role='button']).cp-touch-target {
+  min-height: var(--cp-touch-target-min);
+  min-width: var(--cp-touch-target-min);
+}
+
+.cp-responsive-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cp-stack-gap);
+}
+
+.cp-mobile-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-stack-gap);
+}
+
+.cp-overflow-region {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+}
+
+.cp-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-screen-reader-only,
+.cp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cp-density-compact {
+  --cp-control-height: 44px;
+  --cp-table-cell-pad-y: 12px;
+  --cp-table-cell-pad-x: 12px;
+  --cp-dashboard-stat-min-height: 132px;
+}
+
+:where(main, section, article, form, [id]) {
+  scroll-margin-top: var(--cp-scroll-margin-top);
+}
+
+:where(button, .button, .btn, .icon-button, .nav-item, .sidebar-cta, .sidebar-meta-link, .header-triage-button) {
+  touch-action: manipulation;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :where(button, .button, .btn, .icon-button, .nav-item, .sidebar-cta, .sidebar-meta-link, .header-triage-button) {
+    min-height: var(--cp-touch-target-min);
+  }
+}
+
+@media (max-width: 540px) {
+  .cp-main-content {
+    padding-inline: var(--cp-mobile-card-padding);
+  }
+
+  .cp-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp-responsive-cluster {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cp-responsive-cluster > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cp-data-table {
+    min-width: var(--cp-mobile-table-min-width);
+  }
+
+  .cp-kpi-value {
+    font-size: clamp(1.55rem, 10vw, 2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(button, .button, .btn, .icon-button, .nav-item, input, select, textarea) {
+    forced-color-adjust: auto;
+    border: 1px solid ButtonText;
+  }
+
+  :where(a, button, input, select, textarea, [role='button'], [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+
+  .cp-empty-state,
+  .cp-dashboard-card,
+  .cp-table-surface {
+    border: 1px solid CanvasText;
+  }
+}
+
+@media print {
+  .cp-sidebar,
+  .cp-topbar,
+  .skip-link,
+  .topbar,
+  .top-header,
+  .sidebar {
+    display: none !important;
+  }
+
+  .cp-main-content,
+  .main-content,
+  .portal-main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}

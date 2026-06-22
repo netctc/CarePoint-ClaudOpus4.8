@@ -1,0 +1,318 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V6",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v5",
+  "generatedAt": "2026-05-21T17:15:52.592Z",
+  "scope": "Production readiness and go-live checklist",
+  "technicalBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "designRefinementUx": "closed at UX-V6",
+    "qaV1MasterPlan": "complete",
+    "qaV2AdminFunctionalQa": "complete",
+    "qaV3ProviderFunctionalQa": "complete",
+    "qaV4NodeApiPythonE2E": "complete",
+    "qaV5UatRoleAcceptance": "complete",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false,
+    "applicationRuntimeCodeChanged": false,
+    "qaArtifactsOnly": true
+  },
+  "inventory": {
+    "readinessDomainCount": 8,
+    "goLiveChecklistItemCount": 35,
+    "productionCommandCount": 8,
+    "riskTemplateCount": 5,
+    "requiredRootFiles": [
+      "package.json",
+      ".env.example",
+      ".dockerignore",
+      ".github/workflows/ci.yml",
+      "services/api/package.json",
+      "packages/contracts/package.json",
+      "scripts/s0/check-secrets.mjs",
+      "scripts/s0/verify-workspace.mjs",
+      "scripts/option_b/verify_python_worker.py",
+      "scripts/option_b/run_python_worker_contract_tests.py",
+      "docs/design/UX_PHASE_CLOSURE_CERTIFICATE.md",
+      "docs/option-b/FINAL_HANDOVER_AND_PHASE_CLOSURE_V64.md"
+    ],
+    "requiredDocs": [
+      "docs/qa/QA_V6_PRODUCTION_READINESS_AND_GO_LIVE.md",
+      "docs/qa/QA_V6_GO_LIVE_CHECKLIST.md",
+      "docs/qa/QA_V6_ENVIRONMENT_DEPLOYMENT_ROLLBACK.md",
+      "docs/qa/QA_V6_VALIDATION.md",
+      "docs/qa/CHANGELOG_QA_V5_TO_QA_V6.md"
+    ],
+    "requiredReports": [
+      "validation/qa/qa-v6-production-readiness-audit.json",
+      "validation/qa/qa-v6-go-live-checklist.json"
+    ]
+  },
+  "checks": [
+    {
+      "id": "qa_v1_complete",
+      "passed": true,
+      "observed": 100
+    },
+    {
+      "id": "qa_v2_complete",
+      "passed": true,
+      "observed": 100
+    },
+    {
+      "id": "qa_v3_complete",
+      "passed": true,
+      "observed": 100
+    },
+    {
+      "id": "qa_v4_complete",
+      "passed": true,
+      "observed": 100
+    },
+    {
+      "id": "qa_v5_complete",
+      "passed": true,
+      "observed": 100
+    },
+    {
+      "id": "qa_v5_has_role_acceptance_packages",
+      "passed": true,
+      "observed": 4
+    },
+    {
+      "id": "qa_v5_has_uat_sessions",
+      "passed": true,
+      "observed": 12
+    },
+    {
+      "id": "script_audit_qa_production_readiness_registered",
+      "passed": true
+    },
+    {
+      "id": "script_audit_qa_aggregate_includes_qav6",
+      "passed": true
+    },
+    {
+      "id": "script_build_api_available",
+      "passed": true
+    },
+    {
+      "id": "script_build_web_available",
+      "passed": true
+    },
+    {
+      "id": "script_build_all_available",
+      "passed": true
+    },
+    {
+      "id": "script_check_secrets_available",
+      "passed": true
+    },
+    {
+      "id": "script_verify_workspace_available",
+      "passed": true
+    },
+    {
+      "id": "script_verify_python_worker_available",
+      "passed": true
+    },
+    {
+      "id": "script_python_contract_tests_available",
+      "passed": true
+    },
+    {
+      "id": "file_present_package_json",
+      "passed": true,
+      "path": "package.json"
+    },
+    {
+      "id": "file_present__env_example",
+      "passed": true,
+      "path": ".env.example"
+    },
+    {
+      "id": "file_present__dockerignore",
+      "passed": true,
+      "path": ".dockerignore"
+    },
+    {
+      "id": "file_present__github_workflows_ci_yml",
+      "passed": true,
+      "path": ".github/workflows/ci.yml"
+    },
+    {
+      "id": "file_present_services_api_package_json",
+      "passed": true,
+      "path": "services/api/package.json"
+    },
+    {
+      "id": "file_present_packages_contracts_package_json",
+      "passed": true,
+      "path": "packages/contracts/package.json"
+    },
+    {
+      "id": "file_present_scripts_s0_check_secrets_mjs",
+      "passed": true,
+      "path": "scripts/s0/check-secrets.mjs"
+    },
+    {
+      "id": "file_present_scripts_s0_verify_workspace_mjs",
+      "passed": true,
+      "path": "scripts/s0/verify-workspace.mjs"
+    },
+    {
+      "id": "file_present_scripts_option_b_verify_python_worker_py",
+      "passed": true,
+      "path": "scripts/option_b/verify_python_worker.py"
+    },
+    {
+      "id": "file_present_scripts_option_b_run_python_worker_contract_tests_py",
+      "passed": true,
+      "path": "scripts/option_b/run_python_worker_contract_tests.py"
+    },
+    {
+      "id": "file_present_docs_design_ux_phase_closure_certificate_md",
+      "passed": true,
+      "path": "docs/design/UX_PHASE_CLOSURE_CERTIFICATE.md"
+    },
+    {
+      "id": "file_present_docs_option_b_final_handover_and_phase_closure_v64_md",
+      "passed": true,
+      "path": "docs/option-b/FINAL_HANDOVER_AND_PHASE_CLOSURE_V64.md"
+    },
+    {
+      "id": "env_example_present",
+      "passed": true
+    },
+    {
+      "id": "env_example_uses_placeholders",
+      "passed": true
+    },
+    {
+      "id": "env_example_has_database_or_api_configuration",
+      "passed": true
+    },
+    {
+      "id": "env_example_has_no_obvious_private_key",
+      "passed": true
+    },
+    {
+      "id": "readiness_domains_cover_8_areas",
+      "passed": true,
+      "observed": 8
+    },
+    {
+      "id": "go_live_checklist_has_at_least_30_gates",
+      "passed": true,
+      "observed": 35
+    },
+    {
+      "id": "go_live_checklist_has_p0_coverage",
+      "passed": true,
+      "observed": 31
+    },
+    {
+      "id": "production_commands_have_at_least_8_items",
+      "passed": true,
+      "observed": 8
+    },
+    {
+      "id": "production_commands_include_api_build",
+      "passed": true
+    },
+    {
+      "id": "production_commands_include_web_build",
+      "passed": true
+    },
+    {
+      "id": "production_commands_include_qa_audit",
+      "passed": true
+    },
+    {
+      "id": "production_commands_include_python_worker",
+      "passed": true
+    },
+    {
+      "id": "production_commands_include_python_contract_tests",
+      "passed": true
+    },
+    {
+      "id": "defect_gate_covers_p0_p1_p2",
+      "passed": true
+    },
+    {
+      "id": "risk_register_has_at_least_5_risks",
+      "passed": true,
+      "observed": 5
+    },
+    {
+      "id": "decision_record_template_has_go_no_go",
+      "passed": true
+    },
+    {
+      "id": "decision_record_template_has_rollback_and_hypercare",
+      "passed": true
+    },
+    {
+      "id": "manifest_is_phase_3",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_is_qa_artifacts_only",
+      "passed": true
+    },
+    {
+      "id": "doc_present_qa_v6_production_readiness_and_go_live_md",
+      "passed": true,
+      "path": "docs/qa/QA_V6_PRODUCTION_READINESS_AND_GO_LIVE.md"
+    },
+    {
+      "id": "doc_present_qa_v6_go_live_checklist_md",
+      "passed": true,
+      "path": "docs/qa/QA_V6_GO_LIVE_CHECKLIST.md"
+    },
+    {
+      "id": "doc_present_qa_v6_environment_deployment_rollback_md",
+      "passed": true,
+      "path": "docs/qa/QA_V6_ENVIRONMENT_DEPLOYMENT_ROLLBACK.md"
+    },
+    {
+      "id": "doc_present_qa_v6_validation_md",
+      "passed": true,
+      "path": "docs/qa/QA_V6_VALIDATION.md"
+    },
+    {
+      "id": "doc_present_changelog_qa_v5_to_qa_v6_md",
+      "passed": true,
+      "path": "docs/qa/CHANGELOG_QA_V5_TO_QA_V6.md"
+    },
+    {
+      "id": "report_declared_qa_v6_production_readiness_audit_json",
+      "passed": true,
+      "path": "validation/qa/qa-v6-production-readiness-audit.json"
+    },
+    {
+      "id": "report_declared_qa_v6_go_live_checklist_json",
+      "passed": true,
+      "path": "validation/qa/qa-v6-go-live-checklist.json"
+    }
+  ],
+  "aggregate": {
+    "passed": 54,
+    "total": 54,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "checklistFile": "validation/qa/qa-v6-go-live-checklist.json",
+    "docs": [
+      "docs/qa/QA_V6_PRODUCTION_READINESS_AND_GO_LIVE.md",
+      "docs/qa/QA_V6_GO_LIVE_CHECKLIST.md",
+      "docs/qa/QA_V6_ENVIRONMENT_DEPLOYMENT_ROLLBACK.md",
+      "docs/qa/QA_V6_VALIDATION.md",
+      "docs/qa/CHANGELOG_QA_V5_TO_QA_V6.md"
+    ],
+    "nextRecommendedDelivery": "QA-V7 - Final QA/UAT closure certificate"
+  },
+  "readinessPosition": "ready-for-final-qa-uat-closure"
+}

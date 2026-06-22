@@ -1,0 +1,13 @@
+### Phase 23 - Admin auth redirect normalization smoke tests
+
+### Unauthenticated portal access should redirect once with a clean next target
+GET http://localhost:3001/portal/dashboard
+
+### Sign-in page should render without creating nested next URLs
+GET http://localhost:3001/auth/sign-in?next=/portal/dashboard
+
+### Nested sign-in next should be sanitized by the client after login
+GET http://localhost:3001/auth/sign-in?next=%2Fauth%2Fsign-in%3Fnext%3D%2Fportal%2Fdashboard
+
+### Direct sign-in without next should render normally
+GET http://localhost:3001/auth/sign-in

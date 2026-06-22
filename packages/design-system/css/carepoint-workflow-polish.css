@@ -1,0 +1,147 @@
+/* UX-V5 - provider clinical workflow and admin density polish primitives. */
+:root {
+  --cp-clinical-task-card-min-height: 128px;
+  --cp-clinical-task-card-gap: 14px;
+  --cp-worklist-row-padding: 16px;
+  --cp-handoff-panel-min-height: 180px;
+  --cp-decision-cluster-gap: 10px;
+  --cp-calendar-day-min-height: 210px;
+  --cp-calendar-slot-gap: 10px;
+  --cp-calendar-density-column-min: 260px;
+  --cp-admin-density-panel-min-width: 320px;
+  --cp-admin-evidence-rail-width: 380px;
+  --cp-admin-metric-row-min-height: 56px;
+  --cp-admin-quick-action-gap: 10px;
+}
+
+.cp-clinical-flow,
+.cp-admin-density-flow {
+  display: grid;
+  gap: clamp(16px, 2vw, 24px);
+}
+
+.cp-workflow-kpi-strip,
+.cp-density-kpi-strip {
+  align-items: stretch;
+}
+
+.cp-workflow-kpi-strip > *,
+.cp-density-kpi-strip > * {
+  min-height: var(--cp-dashboard-stat-min-height, 156px);
+}
+
+.cp-workflow-filter-bar,
+.cp-density-filter-bar {
+  align-items: end;
+  border: 1px solid var(--cp-border, #d9e3f2);
+  box-shadow: var(--cp-shadow-sm, 0 10px 22px rgba(17, 39, 73, 0.05));
+}
+
+.cp-workflow-filter-bar :where(input, select),
+.cp-density-filter-bar :where(input, select) {
+  min-height: var(--cp-control-height, 48px);
+}
+
+.cp-clinical-worklist,
+.cp-density-worklist,
+.cp-report-builder-flow .card,
+.cp-audit-evidence-flow .card {
+  border-color: color-mix(in srgb, var(--cp-border, #d9e3f2) 82%, var(--cp-primary, #1e63d7));
+}
+
+.cp-clinical-task-card,
+.cp-density-record-card {
+  min-height: var(--cp-clinical-task-card-min-height);
+  padding: var(--cp-worklist-row-padding);
+  border: 1px solid var(--cp-border, #d9e3f2);
+  border-radius: var(--cp-radius-lg, 20px);
+  background: linear-gradient(180deg, var(--cp-surface, #ffffff) 0%, var(--cp-surface-muted, #f8fbff) 100%);
+  box-shadow: var(--cp-shadow-sm, 0 10px 22px rgba(17, 39, 73, 0.05));
+}
+
+.cp-clinical-task-card .inline-actions,
+.cp-clinical-task-card .action-row,
+.cp-density-record-card .inline-actions,
+.cp-density-record-card .action-row {
+  gap: var(--cp-decision-cluster-gap);
+}
+
+.cp-clinical-task-card :where(.status-chip, .badge),
+.cp-density-record-card :where(.status-chip, .badge) {
+  white-space: nowrap;
+}
+
+.cp-calendar-board {
+  grid-template-columns: repeat(auto-fit, minmax(var(--cp-calendar-density-column-min), 1fr));
+  gap: var(--cp-calendar-slot-gap);
+}
+
+.cp-calendar-board .calendar-day-card,
+.cp-calendar-flow .calendar-day-card {
+  min-height: var(--cp-calendar-day-min-height);
+}
+
+.cp-prescription-flow .panel-card,
+.cp-provider-queue-flow .panel-card {
+  scroll-margin-top: var(--cp-scroll-margin-top, 96px);
+}
+
+.cp-admin-density-shell,
+.cp-report-density-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(var(--cp-admin-density-panel-min-width), var(--cp-admin-evidence-rail-width));
+  gap: clamp(18px, 2vw, 28px);
+  align-items: start;
+}
+
+.cp-admin-density-shell :where(.metric-item),
+.cp-report-density-shell :where(.metric-item) {
+  min-height: var(--cp-admin-metric-row-min-height);
+}
+
+.cp-admin-density-actions,
+.cp-report-density-actions {
+  gap: var(--cp-admin-quick-action-gap);
+  flex-wrap: wrap;
+}
+
+.cp-density-table,
+.cp-clinical-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.cp-density-table :where(th, td),
+.cp-clinical-table :where(th, td) {
+  vertical-align: top;
+}
+
+.cp-workflow-card:focus-within,
+.cp-density-record-card:focus-within,
+.cp-clinical-task-card:focus-within {
+  outline: var(--cp-focus-outline-width, 3px) solid var(--cp-focus-color, #1e63d7);
+  outline-offset: var(--cp-focus-outline-offset, 3px);
+}
+
+@media (max-width: 1100px) {
+  .cp-admin-density-shell,
+  .cp-report-density-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .cp-workflow-filter-bar,
+  .cp-density-filter-bar {
+    align-items: stretch;
+  }
+
+  .cp-clinical-task-card .list-row,
+  .cp-density-record-card .list-row,
+  .cp-admin-density-shell .page-header,
+  .cp-report-density-shell .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

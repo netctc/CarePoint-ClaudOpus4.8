@@ -1,0 +1,3 @@
+Command: cd apps/admin && npm run build
+Result: SUCCESS
+Notes: Next.js production build completed successfully. Admin catalog + RBAC routes were included in the generated route summary.

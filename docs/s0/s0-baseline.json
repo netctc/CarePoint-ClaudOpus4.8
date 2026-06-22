@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-05-03T01:08:23.514Z",
+  "hasRootEnv": false,
+  "hasApiEnv": false,
+  "checks": [
+    {
+      "command": "node --version",
+      "ok": true,
+      "output": "v22.16.0"
+    },
+    {
+      "command": "npm --version",
+      "ok": true,
+      "output": "10.9.2"
+    },
+    {
+      "command": "npm pkg get workspaces",
+      "ok": true,
+      "output": "[\n  \"apps/*\",\n  \"packages/*\",\n  \"services/*\"\n]"
+    },
+    {
+      "command": "npm run check:secrets --silent",
+      "ok": true,
+      "output": "S0 secret/artifact check passed: no committed .env, leaked S0 credentials, zip, .old or copy artifacts detected."
+    },
+    {
+      "command": "npm run verify:workspace --silent",
+      "ok": true,
+      "output": "S0 workspace verification passed."
+    }
+  ]
+}

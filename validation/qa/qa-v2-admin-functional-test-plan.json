@@ -1,0 +1,403 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V2",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v1",
+  "generatedAt": "2026-05-21T17:15:52.147Z",
+  "purpose": "Define Admin functional QA and configuration validation scope after QA-V1 master planning.",
+  "scenarioCount": 18,
+  "priorityCounts": {
+    "P0": 10,
+    "P1": 8
+  },
+  "scenarios": [
+    {
+      "id": "QA2-ADMIN-001",
+      "area": "Authentication",
+      "title": "Admin user reaches Admin portal after login and can return to sign-in after logout",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-002",
+      "area": "Authorization",
+      "title": "Non-admin role is blocked from Admin-only surfaces",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-003",
+      "area": "Accounts",
+      "title": "Account list loads, filters can be applied, and account detail actions are visible",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-004",
+      "area": "Accounts",
+      "title": "Create account flow validates required fields and shows success/failure evidence",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-005",
+      "area": "Accounts",
+      "title": "Edit and disable account actions require confirmation and preserve auditability",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-006",
+      "area": "Accounts export",
+      "title": "CSV/export routes respond only to authorized Admin sessions",
+      "priority": "P1",
+      "method": "scripted-or-manual",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-007",
+      "area": "Audit logs",
+      "title": "Audit logs filter by actor, action, subject, and date without losing context",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-008",
+      "area": "Reports",
+      "title": "Report builder creates or previews a KPI/report configuration with validation",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-009",
+      "area": "RBAC",
+      "title": "RBAC matrix displays roles, permissions, and denied access behavior clearly",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-010",
+      "area": "Organizations",
+      "title": "Organization configuration surface loads and preserves required identifiers",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-011",
+      "area": "Providers",
+      "title": "Provider directory and onboarding surfaces support provider review and setup",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-012",
+      "area": "Settings",
+      "title": "Integration settings do not expose secrets and validate configuration fields",
+      "priority": "P0",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-013",
+      "area": "Support",
+      "title": "Support console shows operational context without exposing sensitive data",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-014",
+      "area": "Safety",
+      "title": "Safety incidents surface supports review, triage, and evidence capture",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-015",
+      "area": "Configuration",
+      "title": "Required package scripts are available: build:admin, build:web, build:api, audit:qa",
+      "priority": "P0",
+      "method": "automated",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-016",
+      "area": "Configuration",
+      "title": "Environment template is present and does not contain committed secret values",
+      "priority": "P0",
+      "method": "manual-or-scripted",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-017",
+      "area": "Regression",
+      "title": "Admin surfaces retain UX-V6 layout, focus, responsive, and accessibility evidence",
+      "priority": "P1",
+      "method": "manual-or-e2e-automation-candidate",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA2-ADMIN-018",
+      "area": "Production readiness",
+      "title": "Admin QA evidence can be attached to final readiness package",
+      "priority": "P1",
+      "method": "manual",
+      "role": "admin",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "admin role used",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    }
+  ],
+  "evidenceTemplate": {
+    "tester": "",
+    "environment": "local | staging | pilot",
+    "buildReference": "CarePoint_qa_uat_production_readiness_v2",
+    "testDate": "",
+    "role": "admin",
+    "result": "pass | fail | blocked",
+    "defectReference": "",
+    "screenshotOrLogReference": "",
+    "reviewerSignoff": ""
+  }
+}

@@ -1,0 +1,15 @@
+### Phase 16 - Account audit filter with actor/date criteria
+GET http://localhost:4000/api/admin/users/audit?resource=provider_credential_document&actor=admin&from=2026-04-01&to=2026-04-30&limit=100
+Authorization: Bearer {{admin_token}}
+
+### Phase 16 - Account-specific provider audit, including related credential evidence
+GET http://localhost:4000/api/admin/users/audit?type=PROVIDER&id={{provider_profile_id}}&includeRelated=true&limit=100
+Authorization: Bearer {{admin_token}}
+
+### Phase 16 - Filtered audit CSV export
+GET http://localhost:4000/api/admin/users/audit/export?resource=provider_credential_notification&action=failed&limit=100
+Authorization: Bearer {{admin_token}}
+
+### Phase 16 - Patient account audit export
+GET http://localhost:4000/api/admin/users/audit/export?type=PATIENT&id={{patient_profile_id}}&includeRelated=false&limit=100
+Authorization: Bearer {{admin_token}}

@@ -1,0 +1,14 @@
+V22.1 static checks
+
+Confirmed source changes:
+- apps/mobile/lib/core/network/api_client.dart includes no-store headers and GET cache-busting query parameter __cp_t.
+- services/api/src/modules/providers/providers.routes.ts extracts nested provider services/careModes/locations from ProviderProfile.services object.
+- services/api/src/lib/scheduling-store.ts uses relaxed service/location matching for published slots.
+- services/api/prisma/reset-pilot-seed.ts stores serviceMode Both and actual in-person + virtual locations in provider metadata.
+- apps/provider/next.config.mjs no longer contains deprecated eslint key for Next.js 16.
+- provider/admin browser session redirect helpers prevent nested sign-in next URLs.
+
+Runtime notes:
+- Backend TypeScript build passed.
+- Provider Next build compiled and generated routes; the wrapper timed out after route output while waiting for process exit.
+- Flutter/Dart SDK is not installed in this environment, so mobile validation is static only.

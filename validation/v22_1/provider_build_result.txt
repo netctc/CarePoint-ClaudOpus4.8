@@ -1,0 +1,63 @@
+
+> care-center-platform@0.1.0 build:provider
+> npm run build --workspace @care-center/provider
+
+
+> @care-center/provider@0.1.0 build
+> next build
+
+▲ Next.js 16.2.4 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 15.8s
+  Skipping validation of types
+  Finished TypeScript config validation in 12ms ...
+  Collecting page data using 36 workers ...
+  Generating static pages using 36 workers (0/25) ...
+  Generating static pages using 36 workers (6/25) 
+  Generating static pages using 36 workers (12/25) 
+  Generating static pages using 36 workers (18/25) 
+✓ Generating static pages using 36 workers (25/25) in 1313ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /onboarding
+├ ƒ /portal
+├ ƒ /portal/alerts
+├ ƒ /portal/analytics
+├ ƒ /portal/appointments/[id]
+├ ƒ /portal/billing
+├ ƒ /portal/calendar
+├ ƒ /portal/calendar/templates
+├ ƒ /portal/chart/[patientId]
+├ ƒ /portal/compliance
+├ ƒ /portal/dashboard
+├ ƒ /portal/encounters/[encounterId]/note
+├ ƒ /portal/labs/inbox
+├ ƒ /portal/labs/results/[id]
+├ ƒ /portal/messages
+├ ƒ /portal/messages/[threadId]
+├ ƒ /portal/orders/[orderId]
+├ ƒ /portal/orders/new
+├ ƒ /portal/patients
+├ ƒ /portal/prescriptions/[prescriptionId]
+├ ƒ /portal/prescriptions/new
+├ ƒ /portal/queue
+├ ƒ /portal/rpm
+├ ƒ /portal/rpm/[patientId]
+├ ƒ /portal/settings
+├ ƒ /portal/settings/access
+├ ƒ /portal/settings/facilities
+├ ƒ /portal/team
+├ ƒ /portal/telehealth
+├ ƒ /portal/telehealth/live/[appointmentId]
+├ ƒ /portal/telehealth/waiting/[appointmentId]
+└ ƒ /sign-in
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+

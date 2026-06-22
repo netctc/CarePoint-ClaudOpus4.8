@@ -1,0 +1,33 @@
+@apiBase = http://localhost:4000
+@token = paste-admin-token-here
+
+### Create provider without explicit organization
+POST {{apiBase}}/api/admin/users/providers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Runtime",
+  "lastName": "Provider",
+  "email": "runtime.provider@example.test",
+  "role": "PROVIDER",
+  "specialty": "General Medicine",
+  "licenseNumber": "LIC-RUNTIME-001",
+  "services": "telehealth, clinic",
+  "status": "ACTIVE",
+  "onboardingStatus": "DRAFT"
+}
+
+### Create provider with selected organization
+POST {{apiBase}}/api/admin/users/providers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "organizationId": "paste-organization-id-here",
+  "firstName": "Organization",
+  "lastName": "Provider",
+  "email": "organization.provider@example.test",
+  "role": "PROVIDER",
+  "status": "ACTIVE"
+}

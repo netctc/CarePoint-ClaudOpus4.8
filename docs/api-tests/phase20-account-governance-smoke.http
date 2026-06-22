@@ -1,0 +1,81 @@
+### Phase 20 Account Governance Smoke Tests
+### Replace placeholders before execution.
+
+@apiBase=http://localhost:4000
+@adminToken=REPLACE_WITH_ADMIN_ACCESS_TOKEN
+@providerToken=REPLACE_WITH_PROVIDER_ACCESS_TOKEN
+@patientId=REPLACE_WITH_PATIENT_ID
+@providerId=REPLACE_WITH_PROVIDER_ID
+@organizationId=REPLACE_WITH_ORGANIZATION_ID
+
+### Admin: list patients
+GET {{apiBase}}/api/admin/users/patients
+Authorization: Bearer {{adminToken}}
+
+### Admin: list providers
+GET {{apiBase}}/api/admin/users/providers
+Authorization: Bearer {{adminToken}}
+
+### Admin: list organizations
+GET {{apiBase}}/api/admin/users/organizations
+Authorization: Bearer {{adminToken}}
+
+### Admin: create organization
+POST {{apiBase}}/api/admin/users/organizations
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Phase 20 Smoke Test Organization"
+}
+
+### Admin: update organization
+PUT {{apiBase}}/api/admin/users/organizations/{{organizationId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Phase 20 Smoke Test Organization Updated"
+}
+
+### Admin: account audit filtered by patient
+GET {{apiBase}}/api/admin/users/audit?accountType=PATIENT&patientId={{patientId}}
+Authorization: Bearer {{adminToken}}
+
+### Admin: account audit filtered by provider
+GET {{apiBase}}/api/admin/users/audit?accountType=PROVIDER&providerId={{providerId}}
+Authorization: Bearer {{adminToken}}
+
+### Admin: audit export
+GET {{apiBase}}/api/admin/users/audit/export?accountType=PROVIDER&providerId={{providerId}}
+Authorization: Bearer {{adminToken}}
+
+### Admin: governance summary
+GET {{apiBase}}/api/admin/users/governance-summary
+Authorization: Bearer {{adminToken}}
+
+### Admin: data quality report
+GET {{apiBase}}/api/admin/users/data-quality
+Authorization: Bearer {{adminToken}}
+
+### Admin: credential governance sweep preview
+POST {{apiBase}}/api/admin/users/credential-governance/sweep
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "previewOnly": true,
+  "expiringSoonDays": 30,
+  "reviewTaskDueDays": 7,
+  "providerLimit": 25,
+  "markExpiredDocuments": true,
+  "createReviewTasks": true,
+  "queueReminders": false
+}
+
+### Provider: logout
+POST {{apiBase}}/api/auth/logout
+Authorization: Bearer {{providerToken}}
+Content-Type: application/json
+
+{}

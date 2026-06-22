@@ -1,0 +1,36 @@
+CarePoint V21 controlled pilot accounts
+Default password for all seeded users: ChangeMe123!
+
+Admin access:
+- admin@carecenter.local / ChangeMe123!
+- super.admin@carecenter.local / ChangeMe123!
+- support@carecenter.local / ChangeMe123!
+
+Provider HSP access:
+- cardiology.hsp@carepoint.local / ChangeMe123! / Cardiology
+- pediatrics.hsp@carepoint.local / ChangeMe123! / Pediatrics
+- dermatology.hsp@carepoint.local / ChangeMe123! / Dermatology
+- neurology.hsp@carepoint.local / ChangeMe123! / Neurology
+- general.medicine.hsp@carepoint.local / ChangeMe123! / General Medicine
+
+Patient access:
+- sofia.alvarez.patient@carepoint.local / ChangeMe123!
+- mateo.rojas.patient@carepoint.local / ChangeMe123!
+- isabella.mendez.patient@carepoint.local / ChangeMe123!
+- diego.castillo.patient@carepoint.local / ChangeMe123!
+- valentina.suarez.patient@carepoint.local / ChangeMe123!
+- nicolas.fernandez.patient@carepoint.local / ChangeMe123!
+- camila.garcia.patient@carepoint.local / ChangeMe123!
+- sebastian.morales.patient@carepoint.local / ChangeMe123!
+- emilia.navarro.patient@carepoint.local / ChangeMe123!
+- thiago.rivera.patient@carepoint.local / ChangeMe123!
+- mia.vargas.patient@carepoint.local / ChangeMe123!
+- alejandro.peralta.patient@carepoint.local / ChangeMe123!
+- renata.torres.patient@carepoint.local / ChangeMe123!
+- samuel.cruz.patient@carepoint.local / ChangeMe123!
+- daniela.arias.patient@carepoint.local / ChangeMe123!
+- martin.ortiz.patient@carepoint.local / ChangeMe123!
+- victoria.pena.patient@carepoint.local / ChangeMe123!
+- joaquin.reyes.patient@carepoint.local / ChangeMe123!
+- elena.medina.patient@carepoint.local / ChangeMe123!
+- rafael.silva.patient@carepoint.local / ChangeMe123!

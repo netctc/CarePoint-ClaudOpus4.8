@@ -1,0 +1,53 @@
+### Phase 25 - Provider role maintenance and account form validation
+@baseUrl = http://localhost:4000
+@token = REPLACE_WITH_ADMIN_ACCESS_TOKEN
+
+### List provider roles
+GET {{baseUrl}}/api/admin/users/provider-roles
+Authorization: Bearer {{token}}
+
+### Create provider role
+POST {{baseUrl}}/api/admin/users/provider-roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "label": "Home Care Nurse",
+  "code": "HOME_CARE_NURSE",
+  "systemRole": "NURSE",
+  "isActive": true,
+  "sortOrder": 50,
+  "description": "Nurse role used for home-care visits"
+}
+
+### Update provider role
+PUT {{baseUrl}}/api/admin/users/provider-roles/REPLACE_ROLE_ID
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "label": "Home Care Nurse Lead",
+  "code": "HOME_CARE_NURSE",
+  "systemRole": "NURSE",
+  "isActive": true,
+  "sortOrder": 55
+}
+
+### Delete provider role - only works if it is custom and unused
+DELETE {{baseUrl}}/api/admin/users/provider-roles/REPLACE_ROLE_ID
+Authorization: Bearer {{token}}
+
+### Create provider using a catalog role code
+POST {{baseUrl}}/api/admin/users/providers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Rana",
+  "lastName": "Haddad",
+  "email": "rana.haddad@example.com",
+  "role": "HOME_CARE_NURSE",
+  "specialty": "Home care",
+  "licenseNumber": "LIC-HOME-1001",
+  "services": "Home visit, Telehealth"
+}

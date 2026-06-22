@@ -1,0 +1,8 @@
+Admin V17 build validation
+Command: cd apps/admin && npm run build
+Result: SUCCESS
+Summary: Next.js production build completed successfully. Static page generation completed for all detected admin routes. Provider directory and onboarding routes were present in the final route manifest:
+- /portal/providers
+- /portal/providers/[providerId]
+- /portal/providers/onboarding
+- /portal/providers/onboarding/[providerId]

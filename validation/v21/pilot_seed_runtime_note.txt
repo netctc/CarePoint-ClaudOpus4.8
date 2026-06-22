@@ -1,0 +1,7 @@
+The V21 reset seed script was not executed in this sandbox because no PostgreSQL DATABASE_URL is available and Prisma engine generation attempted to fetch binaries from binaries.prisma.sh, which is blocked in this environment.
+
+Validated here:
+- npm run build:backend completed successfully.
+- Static checks confirm 5 HSP seed definitions and 20 patient seed definitions.
+
+Runtime validation is built into services/api/prisma/reset-pilot-seed.ts and runs automatically after npm run db:reset:pilot in the target development environment.

@@ -1,0 +1,665 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V3",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v2",
+  "generatedAt": "2026-05-21T17:15:52.257Z",
+  "scope": "Provider functional QA and clinical workflow validation",
+  "technicalBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "designRefinementUx": "closed at UX-V6",
+    "qaV1MasterPlan": "complete",
+    "qaV2AdminFunctionalQa": "complete",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false,
+    "applicationRuntimeCodeChanged": false
+  },
+  "inventory": {
+    "providerApplicationFiles": 59,
+    "providerPortalPageFiles": 29,
+    "providerSharedComponents": 9,
+    "providerLibFiles": 9,
+    "qaDocs": 35,
+    "qaValidationReports": 12,
+    "providerSurfaces": [
+      {
+        "id": "PROVIDER-ROOT-SHELL",
+        "path": "apps/provider/app/layout.tsx",
+        "area": "Provider shell",
+        "priority": "P0",
+        "evidence": "Provider app shell exists."
+      },
+      {
+        "id": "PROVIDER-PORTAL-SHELL",
+        "path": "apps/provider/app/portal/layout.tsx",
+        "area": "Provider shell",
+        "priority": "P0",
+        "evidence": "Provider portal layout exists."
+      },
+      {
+        "id": "PROVIDER-PORTAL-COMPONENT-SHELL",
+        "path": "apps/provider/components/layout/portal-shell.tsx",
+        "area": "Provider shell",
+        "priority": "P0",
+        "evidence": "Provider shell component includes main content landmark."
+      },
+      {
+        "id": "PROVIDER-SIDEBAR-NAV",
+        "path": "apps/provider/components/layout/sidebar-nav.tsx",
+        "area": "Navigation",
+        "priority": "P0",
+        "evidence": "Provider sidebar navigation exists."
+      },
+      {
+        "id": "PROVIDER-TOP-HEADER",
+        "path": "apps/provider/components/layout/top-header.tsx",
+        "area": "Navigation",
+        "priority": "P1",
+        "evidence": "Provider top header exists."
+      },
+      {
+        "id": "PROVIDER-SIGN-IN",
+        "path": "apps/provider/app/sign-in/page.tsx",
+        "area": "Authentication",
+        "priority": "P0",
+        "evidence": "Provider sign-in surface exists."
+      },
+      {
+        "id": "PROVIDER-DASHBOARD",
+        "path": "apps/provider/app/portal/dashboard/page.tsx",
+        "area": "Dashboard",
+        "priority": "P0",
+        "evidence": "Provider dashboard exists."
+      },
+      {
+        "id": "PROVIDER-QUEUE",
+        "path": "apps/provider/app/portal/queue/page.tsx",
+        "area": "Queue",
+        "priority": "P0",
+        "evidence": "Provider clinical/refill queue exists."
+      },
+      {
+        "id": "PROVIDER-CALENDAR",
+        "path": "apps/provider/app/portal/calendar/page.tsx",
+        "area": "Calendar",
+        "priority": "P0",
+        "evidence": "Provider calendar exists."
+      },
+      {
+        "id": "PROVIDER-CALENDAR-TEMPLATES",
+        "path": "apps/provider/app/portal/calendar/templates/page.tsx",
+        "area": "Calendar",
+        "priority": "P1",
+        "evidence": "Schedule template surface exists."
+      },
+      {
+        "id": "PROVIDER-APPOINTMENT-DETAIL",
+        "path": "apps/provider/app/portal/appointments/[id]/page.tsx",
+        "area": "Appointments",
+        "priority": "P0",
+        "evidence": "Appointment detail surface exists."
+      },
+      {
+        "id": "PROVIDER-PRESCRIPTION-NEW",
+        "path": "apps/provider/app/portal/prescriptions/new/page.tsx",
+        "area": "Prescriptions",
+        "priority": "P0",
+        "evidence": "Prescription creation flow exists."
+      },
+      {
+        "id": "PROVIDER-PRESCRIPTION-DETAIL",
+        "path": "apps/provider/app/portal/prescriptions/[prescriptionId]/page.tsx",
+        "area": "Prescriptions",
+        "priority": "P1",
+        "evidence": "Prescription detail flow exists."
+      },
+      {
+        "id": "PROVIDER-ENCOUNTER-NOTE",
+        "path": "apps/provider/app/portal/encounters/[encounterId]/note/page.tsx",
+        "area": "Encounter notes",
+        "priority": "P0",
+        "evidence": "Encounter note workflow exists."
+      },
+      {
+        "id": "PROVIDER-CHART",
+        "path": "apps/provider/app/portal/chart/[patientId]/page.tsx",
+        "area": "Patient chart",
+        "priority": "P1",
+        "evidence": "Patient chart surface exists."
+      },
+      {
+        "id": "PROVIDER-MESSAGES",
+        "path": "apps/provider/app/portal/messages/page.tsx",
+        "area": "Messages",
+        "priority": "P1",
+        "evidence": "Messages surface exists."
+      },
+      {
+        "id": "PROVIDER-LABS-INBOX",
+        "path": "apps/provider/app/portal/labs/inbox/page.tsx",
+        "area": "Labs",
+        "priority": "P1",
+        "evidence": "Labs inbox exists."
+      },
+      {
+        "id": "PROVIDER-LABS-RESULT",
+        "path": "apps/provider/app/portal/labs/results/[id]/page.tsx",
+        "area": "Labs",
+        "priority": "P2",
+        "evidence": "Lab result detail exists."
+      },
+      {
+        "id": "PROVIDER-TELEHEALTH",
+        "path": "apps/provider/app/portal/telehealth/page.tsx",
+        "area": "Telehealth",
+        "priority": "P1",
+        "evidence": "Telehealth surface exists."
+      },
+      {
+        "id": "PROVIDER-TELEHEALTH-LIVE",
+        "path": "apps/provider/app/portal/telehealth/live/[appointmentId]/page.tsx",
+        "area": "Telehealth",
+        "priority": "P1",
+        "evidence": "Live telehealth surface exists."
+      },
+      {
+        "id": "PROVIDER-ORDERS-NEW",
+        "path": "apps/provider/app/portal/orders/new/page.tsx",
+        "area": "Orders",
+        "priority": "P1",
+        "evidence": "Order creation surface exists."
+      },
+      {
+        "id": "PROVIDER-SETTINGS",
+        "path": "apps/provider/app/portal/settings/page.tsx",
+        "area": "Settings",
+        "priority": "P1",
+        "evidence": "Provider settings exists."
+      },
+      {
+        "id": "PROVIDER-SETTINGS-ACCESS",
+        "path": "apps/provider/app/portal/settings/access/page.tsx",
+        "area": "Settings",
+        "priority": "P1",
+        "evidence": "Provider access settings exists."
+      },
+      {
+        "id": "PROVIDER-TEAM",
+        "path": "apps/provider/app/portal/team/page.tsx",
+        "area": "Team",
+        "priority": "P2",
+        "evidence": "Provider team surface exists."
+      }
+    ],
+    "providerArtifacts": [
+      {
+        "id": "PROVIDER-PACKAGE",
+        "path": "apps/provider/package.json",
+        "priority": "P0",
+        "purpose": "Provider workspace package exists."
+      },
+      {
+        "id": "PROVIDER-API-CLIENT",
+        "path": "apps/provider/services/api-client.ts",
+        "priority": "P0",
+        "purpose": "Provider API client exists."
+      },
+      {
+        "id": "PROVIDER-MOCK-API",
+        "path": "apps/provider/services/mock-api.ts",
+        "priority": "P1",
+        "purpose": "Provider fallback/mock data exists for QA scenarios."
+      },
+      {
+        "id": "PROVIDER-SESSION",
+        "path": "apps/provider/lib/auth/session.ts",
+        "priority": "P0",
+        "purpose": "Provider session helper exists."
+      },
+      {
+        "id": "PROVIDER-BROWSER-SESSION",
+        "path": "apps/provider/lib/auth/browser-session.ts",
+        "priority": "P1",
+        "purpose": "Browser session helper exists."
+      },
+      {
+        "id": "PROVIDER-ACCESS-PERMISSIONS",
+        "path": "apps/provider/lib/permissions/access.ts",
+        "priority": "P0",
+        "purpose": "Provider permission model exists."
+      },
+      {
+        "id": "PROVIDER-ROLE-PERMISSIONS",
+        "path": "apps/provider/lib/permissions/roles.ts",
+        "priority": "P0",
+        "purpose": "Provider roles helper exists."
+      },
+      {
+        "id": "PROVIDER-DICTIONARY",
+        "path": "apps/provider/lib/i18n/provider-dictionary.ts",
+        "priority": "P1",
+        "purpose": "Provider i18n dictionary exists."
+      },
+      {
+        "id": "PROVIDER-PORTAL-COPY",
+        "path": "apps/provider/lib/i18n/provider-portal-copy.ts",
+        "priority": "P1",
+        "purpose": "Provider portal copy exists."
+      },
+      {
+        "id": "PROVIDER-DETAIL-COPY",
+        "path": "apps/provider/lib/i18n/provider-detail-copy.ts",
+        "priority": "P2",
+        "purpose": "Provider detail copy exists."
+      },
+      {
+        "id": "PROVIDER-STAT-CARD",
+        "path": "apps/provider/components/shared/stat-card.tsx",
+        "priority": "P1",
+        "purpose": "Provider KPI component exists."
+      },
+      {
+        "id": "PROVIDER-EVIDENCE-PANEL",
+        "path": "apps/provider/components/shared/evidence-panel.tsx",
+        "priority": "P1",
+        "purpose": "Provider evidence panel exists."
+      },
+      {
+        "id": "PROVIDER-WORKSPACE-STATE-STRIP",
+        "path": "apps/provider/components/shared/workspace-state-strip.tsx",
+        "priority": "P1",
+        "purpose": "Provider workspace state strip exists."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "root_audit_qa_registered",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_provider_script_registered",
+      "passed": true
+    },
+    {
+      "id": "audit_qa_runs_v1_v2_v3",
+      "passed": true
+    },
+    {
+      "id": "build_provider_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_web_script_available",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_root_shell",
+      "surfaceId": "PROVIDER-ROOT-SHELL",
+      "path": "apps/provider/app/layout.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_portal_shell",
+      "surfaceId": "PROVIDER-PORTAL-SHELL",
+      "path": "apps/provider/app/portal/layout.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_portal_component_shell",
+      "surfaceId": "PROVIDER-PORTAL-COMPONENT-SHELL",
+      "path": "apps/provider/components/layout/portal-shell.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_sidebar_nav",
+      "surfaceId": "PROVIDER-SIDEBAR-NAV",
+      "path": "apps/provider/components/layout/sidebar-nav.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_top_header",
+      "surfaceId": "PROVIDER-TOP-HEADER",
+      "path": "apps/provider/components/layout/top-header.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_sign_in",
+      "surfaceId": "PROVIDER-SIGN-IN",
+      "path": "apps/provider/app/sign-in/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_dashboard",
+      "surfaceId": "PROVIDER-DASHBOARD",
+      "path": "apps/provider/app/portal/dashboard/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_queue",
+      "surfaceId": "PROVIDER-QUEUE",
+      "path": "apps/provider/app/portal/queue/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_calendar",
+      "surfaceId": "PROVIDER-CALENDAR",
+      "path": "apps/provider/app/portal/calendar/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_calendar_templates",
+      "surfaceId": "PROVIDER-CALENDAR-TEMPLATES",
+      "path": "apps/provider/app/portal/calendar/templates/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_appointment_detail",
+      "surfaceId": "PROVIDER-APPOINTMENT-DETAIL",
+      "path": "apps/provider/app/portal/appointments/[id]/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_prescription_new",
+      "surfaceId": "PROVIDER-PRESCRIPTION-NEW",
+      "path": "apps/provider/app/portal/prescriptions/new/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_prescription_detail",
+      "surfaceId": "PROVIDER-PRESCRIPTION-DETAIL",
+      "path": "apps/provider/app/portal/prescriptions/[prescriptionId]/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_encounter_note",
+      "surfaceId": "PROVIDER-ENCOUNTER-NOTE",
+      "path": "apps/provider/app/portal/encounters/[encounterId]/note/page.tsx",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_chart",
+      "surfaceId": "PROVIDER-CHART",
+      "path": "apps/provider/app/portal/chart/[patientId]/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_messages",
+      "surfaceId": "PROVIDER-MESSAGES",
+      "path": "apps/provider/app/portal/messages/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_labs_inbox",
+      "surfaceId": "PROVIDER-LABS-INBOX",
+      "path": "apps/provider/app/portal/labs/inbox/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_labs_result",
+      "surfaceId": "PROVIDER-LABS-RESULT",
+      "path": "apps/provider/app/portal/labs/results/[id]/page.tsx",
+      "priority": "P2",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_telehealth",
+      "surfaceId": "PROVIDER-TELEHEALTH",
+      "path": "apps/provider/app/portal/telehealth/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_telehealth_live",
+      "surfaceId": "PROVIDER-TELEHEALTH-LIVE",
+      "path": "apps/provider/app/portal/telehealth/live/[appointmentId]/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_orders_new",
+      "surfaceId": "PROVIDER-ORDERS-NEW",
+      "path": "apps/provider/app/portal/orders/new/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_settings",
+      "surfaceId": "PROVIDER-SETTINGS",
+      "path": "apps/provider/app/portal/settings/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_settings_access",
+      "surfaceId": "PROVIDER-SETTINGS-ACCESS",
+      "path": "apps/provider/app/portal/settings/access/page.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "surface_provider_team",
+      "surfaceId": "PROVIDER-TEAM",
+      "path": "apps/provider/app/portal/team/page.tsx",
+      "priority": "P2",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_package",
+      "artifactId": "PROVIDER-PACKAGE",
+      "path": "apps/provider/package.json",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_api_client",
+      "artifactId": "PROVIDER-API-CLIENT",
+      "path": "apps/provider/services/api-client.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_mock_api",
+      "artifactId": "PROVIDER-MOCK-API",
+      "path": "apps/provider/services/mock-api.ts",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_session",
+      "artifactId": "PROVIDER-SESSION",
+      "path": "apps/provider/lib/auth/session.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_browser_session",
+      "artifactId": "PROVIDER-BROWSER-SESSION",
+      "path": "apps/provider/lib/auth/browser-session.ts",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_access_permissions",
+      "artifactId": "PROVIDER-ACCESS-PERMISSIONS",
+      "path": "apps/provider/lib/permissions/access.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_role_permissions",
+      "artifactId": "PROVIDER-ROLE-PERMISSIONS",
+      "path": "apps/provider/lib/permissions/roles.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_dictionary",
+      "artifactId": "PROVIDER-DICTIONARY",
+      "path": "apps/provider/lib/i18n/provider-dictionary.ts",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_portal_copy",
+      "artifactId": "PROVIDER-PORTAL-COPY",
+      "path": "apps/provider/lib/i18n/provider-portal-copy.ts",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_detail_copy",
+      "artifactId": "PROVIDER-DETAIL-COPY",
+      "path": "apps/provider/lib/i18n/provider-detail-copy.ts",
+      "priority": "P2",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_stat_card",
+      "artifactId": "PROVIDER-STAT-CARD",
+      "path": "apps/provider/components/shared/stat-card.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_evidence_panel",
+      "artifactId": "PROVIDER-EVIDENCE-PANEL",
+      "path": "apps/provider/components/shared/evidence-panel.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "artifact_provider_workspace_state_strip",
+      "artifactId": "PROVIDER-WORKSPACE-STATE-STRIP",
+      "path": "apps/provider/components/shared/workspace-state-strip.tsx",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "provider_shell_has_skip_link_and_main_content",
+      "passed": true
+    },
+    {
+      "id": "provider_sidebar_has_aria_current",
+      "passed": true
+    },
+    {
+      "id": "provider_dashboard_uses_api_and_fallback",
+      "passed": true
+    },
+    {
+      "id": "provider_queue_mentions_refill_and_audit",
+      "passed": true
+    },
+    {
+      "id": "provider_calendar_mentions_slots_or_schedule",
+      "passed": true
+    },
+    {
+      "id": "provider_prescription_new_has_submit_and_validation_language",
+      "passed": true
+    },
+    {
+      "id": "provider_encounter_note_has_soap_and_signature",
+      "passed": true
+    },
+    {
+      "id": "provider_api_client_has_dashboard_and_appointments",
+      "passed": true
+    },
+    {
+      "id": "provider_i18n_provider_present",
+      "passed": true
+    },
+    {
+      "id": "provider_stat_card_accessible_label",
+      "passed": true
+    },
+    {
+      "id": "provider_evidence_panel_present",
+      "passed": true
+    },
+    {
+      "id": "provider_types_available",
+      "passed": true
+    },
+    {
+      "id": "provider_proxy_or_middleware_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v1_audit_completion_100",
+      "passed": true
+    },
+    {
+      "id": "qa_v2_audit_completion_100",
+      "passed": true
+    },
+    {
+      "id": "qa_v1_matrix_has_provider_scenarios",
+      "passed": true
+    },
+    {
+      "id": "qa_v2_plan_has_admin_scenarios",
+      "passed": true
+    },
+    {
+      "id": "ux_v6_closure_doc_present",
+      "passed": true
+    },
+    {
+      "id": "qa_phase_manifest_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_has_provider_functional_scenarios",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_has_p0_provider_clinical_coverage",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_covers_dashboard_queue_calendar_prescription_encounter",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_covers_a11y_responsive_provider",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 65,
+    "total": 65,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "auditFile": "validation/qa/qa-v3-provider-functional-workflows-audit.json",
+    "providerFunctionalPlanFile": "validation/qa/qa-v3-provider-functional-test-plan.json",
+    "docs": [
+      "docs/qa/QA_V3_PROVIDER_FUNCTIONAL_QA.md",
+      "docs/qa/QA_V3_CLINICAL_WORKFLOW_VALIDATION.md",
+      "docs/qa/QA_V3_VALIDATION.md",
+      "docs/qa/CHANGELOG_QA_V2_TO_QA_V3.md"
+    ],
+    "nextRecommendedDelivery": "QA-V4 - Node/API/Python worker E2E validation"
+  },
+  "readinessPosition": "ready-for-provider-qa-execution"
+}

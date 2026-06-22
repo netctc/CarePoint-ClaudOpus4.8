@@ -1,0 +1,26 @@
+### Phase 15 — Account audit drill-down
+@baseUrl = http://localhost:4000
+@adminToken = REPLACE_WITH_ADMIN_ACCESS_TOKEN
+@providerProfileId = REPLACE_WITH_PROVIDER_PROFILE_ID
+@patientProfileId = REPLACE_WITH_PATIENT_PROFILE_ID
+@credentialDocumentId = REPLACE_WITH_PROVIDER_CREDENTIAL_DOCUMENT_ID
+
+### Patient profile audit only
+GET {{baseUrl}}/api/admin/users/audit?type=PATIENT&id={{patientProfileId}}&includeRelated=false&limit=100
+Authorization: Bearer {{adminToken}}
+
+### Provider account lifecycle audit only
+GET {{baseUrl}}/api/admin/users/audit?type=PROVIDER&id={{providerProfileId}}&includeRelated=false&limit=100
+Authorization: Bearer {{adminToken}}
+
+### Provider account plus credential governance evidence
+GET {{baseUrl}}/api/admin/users/audit?type=PROVIDER&id={{providerProfileId}}&includeRelated=true&limit=100
+Authorization: Bearer {{adminToken}}
+
+### Specific credential document audit evidence
+GET {{baseUrl}}/api/admin/users/audit?resource=provider_credential_document&resourceId={{credentialDocumentId}}&limit=100
+Authorization: Bearer {{adminToken}}
+
+### Filter by action substring
+GET {{baseUrl}}/api/admin/users/audit?type=PROVIDER&id={{providerProfileId}}&includeRelated=true&action=credential&limit=100
+Authorization: Bearer {{adminToken}}

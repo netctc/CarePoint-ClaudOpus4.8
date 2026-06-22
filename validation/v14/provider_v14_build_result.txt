@@ -1,0 +1,6 @@
+Command: cd apps/provider && npm run build
+Result: SUCCESS
+Notes:
+- Next.js build compiled successfully.
+- Static page generation completed for 24 provider app routes.
+- Existing next.config.mjs warnings about unsupported eslint key remain non-blocking and pre-existing.

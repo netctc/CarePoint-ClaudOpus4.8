@@ -1,0 +1,12 @@
+Static check: apps/provider/app/portal/prescriptions/new/page.tsx
+
+Confirmed:
+- drug state initializes with fallback.medication ?? ''
+- dosage state initializes with fallback.dosage ?? ''
+- frequency state initializes with fallback.frequency ?? ''
+- duration state initializes with fallback.duration ?? ''
+- pharmacyName state initializes with fallback.pharmacyName ?? ''
+- each affected input renders a string fallback with value={... ?? ''}
+
+Expected result:
+- React no longer emits uncontrolled-to-controlled warnings for the prescription composer fields.

@@ -1,0 +1,165 @@
+{
+  "phase": "CarePoint Phase 4 - Controlled Pilot / Go-Live Execution",
+  "delivery": "PILOT-V2",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v7",
+  "generatedAt": "2026-05-21T19:42:21.390Z",
+  "purpose": "Validate that staging deployment rehearsal, environment activation, smoke, backup, rollback, support, and go/no-go readiness are defined before PILOT-V3.",
+  "checks": [
+    {
+      "id": "pilot_manifest_delivery_v2",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_current_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_present",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_audit_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v6_go_live_checklist_present",
+      "passed": true
+    },
+    {
+      "id": "staging_rehearsal_script_registered",
+      "passed": true
+    },
+    {
+      "id": "pilot_aggregate_runs_v1_and_v2",
+      "passed": true
+    },
+    {
+      "id": "required_pilot_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_entry_reports_present",
+      "passed": true
+    },
+    {
+      "id": "env_example_present",
+      "passed": true
+    },
+    {
+      "id": "api_package_present",
+      "passed": true
+    },
+    {
+      "id": "contracts_package_present",
+      "passed": true
+    },
+    {
+      "id": "admin_package_present",
+      "passed": true
+    },
+    {
+      "id": "provider_package_present",
+      "passed": true
+    },
+    {
+      "id": "api_dockerfile_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_dockerfile_present",
+      "passed": true
+    },
+    {
+      "id": "prisma_schema_present",
+      "passed": true
+    },
+    {
+      "id": "build_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_web_script_available",
+      "passed": true
+    },
+    {
+      "id": "check_secrets_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_workspace_script_available",
+      "passed": true
+    },
+    {
+      "id": "smoke_api_ci_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_python_worker_script_available",
+      "passed": true
+    },
+    {
+      "id": "python_worker_contract_tests_available",
+      "passed": true
+    },
+    {
+      "id": "deployment_domains_defined",
+      "passed": true
+    },
+    {
+      "id": "rehearsal_steps_defined",
+      "passed": true
+    },
+    {
+      "id": "activation_checklist_has_p0_coverage",
+      "passed": true
+    },
+    {
+      "id": "rollback_rehearsal_included",
+      "passed": true
+    },
+    {
+      "id": "go_no_go_rehearsal_included",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "next_delivery_declared",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 35,
+    "total": 35,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "environmentActivationPlan": "validation/pilot/pilot-v2-staging-environment-activation-plan.json",
+    "rehearsalDocs": [
+      "docs/pilot/PILOT_V2_STAGING_DEPLOYMENT_REHEARSAL.md",
+      "docs/pilot/PILOT_V2_ENVIRONMENT_ACTIVATION_CHECKLIST.md",
+      "docs/pilot/PILOT_V2_DEPLOYMENT_SMOKE_AND_ROLLBACK_REHEARSAL.md",
+      "docs/pilot/PILOT_V2_VALIDATION.md"
+    ],
+    "nextRecommendedDelivery": "PILOT-V3 - Controlled pilot launch runbook and day-0/day-1 execution"
+  },
+  "readinessPosition": "ready-for-controlled-pilot-launch-runbook"
+}

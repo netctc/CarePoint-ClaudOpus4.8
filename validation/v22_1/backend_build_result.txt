@@ -1,0 +1,28 @@
+
+> care-center-platform@0.1.0 build:backend
+> npm run build:contracts && npm run build:api
+
+
+> care-center-platform@0.1.0 build:contracts
+> npm run build --workspace @care-center/contracts
+
+
+> @care-center/contracts@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> care-center-platform@0.1.0 build:api
+> npm run build --workspace @care-center/api
+
+
+> @care-center/api@0.1.0 prebuild
+> npm run build --workspace @care-center/contracts
+
+
+> @care-center/contracts@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> @care-center/api@0.1.0 build
+> tsc -p tsconfig.json
+

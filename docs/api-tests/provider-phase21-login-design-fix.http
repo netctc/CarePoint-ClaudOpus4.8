@@ -1,0 +1,8 @@
+### Provider sign-in page should render
+GET http://localhost:3000/sign-in
+
+### Provider root should redirect to sign-in
+GET http://localhost:3000/
+
+### Provider protected route should redirect to sign-in when unauthenticated
+GET http://localhost:3000/portal/dashboard

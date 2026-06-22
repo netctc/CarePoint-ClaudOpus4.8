@@ -1,0 +1,126 @@
+/* CarePoint UX-V6 - final visual QA, accessibility QA, and phase close */
+:root {
+  --cp-phase-close-badge-bg: #eef6ff;
+  --cp-phase-close-badge-border: #b9d4ff;
+  --cp-phase-close-badge-text: #164b9f;
+  --cp-qa-pass-bg: #e8f8ef;
+  --cp-qa-pass-text: #17683a;
+  --cp-qa-watch-bg: #fff4e3;
+  --cp-qa-watch-text: #87530f;
+  --cp-qa-risk-bg: #fdece6;
+  --cp-qa-risk-text: #9c3518;
+  --cp-qa-checklist-gap: 12px;
+  --cp-qa-evidence-radius: 20px;
+}
+
+.cp-ux-phase-close-shell,
+.cp-visual-qa-shell {
+  display: grid;
+  gap: clamp(18px, 2vw, 28px);
+}
+
+.cp-qa-evidence-card {
+  border: 1px solid var(--border, var(--cp-border-default, #d9e3f2));
+  border-radius: var(--cp-qa-evidence-radius);
+  background: var(--surface, var(--cp-color-surface, #fff));
+  box-shadow: var(--shadow-sm, var(--cp-shadow-sm, 0 10px 22px rgba(17, 39, 73, 0.05)));
+  padding: clamp(16px, 2vw, 24px);
+}
+
+.cp-qa-checklist {
+  display: grid;
+  gap: var(--cp-qa-checklist-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp-qa-checklist-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-height: var(--cp-touch-target-min, 44px);
+}
+
+.cp-qa-checklist-item::before {
+  content: '✓';
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--cp-qa-pass-bg);
+  color: var(--cp-qa-pass-text);
+  font-weight: 800;
+}
+
+.cp-qa-status-badge,
+.cp-phase-close-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--cp-phase-close-badge-border);
+  background: var(--cp-phase-close-badge-bg);
+  color: var(--cp-phase-close-badge-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cp-qa-status-badge[data-status='pass'] {
+  border-color: #bde8cc;
+  background: var(--cp-qa-pass-bg);
+  color: var(--cp-qa-pass-text);
+}
+
+.cp-qa-status-badge[data-status='watch'] {
+  border-color: #ffd99b;
+  background: var(--cp-qa-watch-bg);
+  color: var(--cp-qa-watch-text);
+}
+
+.cp-qa-status-badge[data-status='risk'] {
+  border-color: #f3b7a4;
+  background: var(--cp-qa-risk-bg);
+  color: var(--cp-qa-risk-text);
+}
+
+.cp-visual-qa-target {
+  scroll-margin-top: var(--cp-scroll-margin-top, 96px);
+}
+
+.cp-visual-qa-target:focus-within {
+  outline: var(--cp-focus-outline-width, 3px) solid var(--cp-focus-color, #1e63d7);
+  outline-offset: var(--cp-focus-outline-offset, 3px);
+}
+
+.cp-qa-handoff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+}
+
+@media (max-width: 540px) {
+  .cp-qa-evidence-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .cp-qa-handoff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-ux-phase-close-shell *,
+  .cp-visual-qa-shell * {
+    animation-duration: var(--cp-reduced-motion-duration, 1ms) !important;
+    transition-duration: var(--cp-reduced-motion-duration, 1ms) !important;
+  }
+}

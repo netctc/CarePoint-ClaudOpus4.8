@@ -1,0 +1,513 @@
+{
+  "phase": "CarePoint Phase 4 - Controlled Pilot / Go-Live Execution",
+  "delivery": "PILOT-V3",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v7",
+  "generatedAt": "2026-05-21T19:42:21.545Z",
+  "purpose": "Define controlled pilot launch execution for day-0 and day-1 using QA-V7 closure evidence and PILOT-V2 staging rehearsal evidence.",
+  "entryPosition": {
+    "qaV7": "closed",
+    "pilotV1": "completed",
+    "pilotV2": "completed",
+    "executionMode": "controlled pilot launch; no runtime code change in this package"
+  },
+  "launchGates": [
+    {
+      "id": "LG-001",
+      "name": "Release candidate frozen",
+      "owner": "Release owner",
+      "severity": "P0",
+      "evidence": [
+        "selected ZIP/checksum",
+        "source baseline",
+        "deployment target"
+      ],
+      "passCriteria": "One approved release candidate is identified for the pilot launch window."
+    },
+    {
+      "id": "LG-002",
+      "name": "QA/UAT closure evidence accepted",
+      "owner": "QA/UAT owner",
+      "severity": "P0",
+      "evidence": [
+        "QA-V7 closure audit",
+        "role acceptance package",
+        "open defect list"
+      ],
+      "passCriteria": "QA phase is closed and any remaining items are explicitly accepted or deferred."
+    },
+    {
+      "id": "LG-003",
+      "name": "Staging rehearsal passed or approved with waiver",
+      "owner": "Pilot owner",
+      "severity": "P0",
+      "evidence": [
+        "PILOT-V2 rehearsal audit",
+        "activation plan",
+        "go/no-go record"
+      ],
+      "passCriteria": "PILOT-V2 has a continue outcome or signed exception with owner/date."
+    },
+    {
+      "id": "LG-004",
+      "name": "Pilot cohort confirmed",
+      "owner": "Pilot owner",
+      "severity": "P0",
+      "evidence": [
+        "cohort list",
+        "role mapping",
+        "support contacts"
+      ],
+      "passCriteria": "Pilot users, roles, support window and communication channel are confirmed."
+    },
+    {
+      "id": "LG-005",
+      "name": "Support command center active",
+      "owner": "Support owner",
+      "severity": "P0",
+      "evidence": [
+        "support channel",
+        "incident owner",
+        "severity matrix",
+        "daily check-in time"
+      ],
+      "passCriteria": "Support owner and escalation path are active before day-0 launch."
+    },
+    {
+      "id": "LG-006",
+      "name": "Rollback and pause authority confirmed",
+      "owner": "Release owner",
+      "severity": "P0",
+      "evidence": [
+        "rollback trigger map",
+        "rollback owner",
+        "pause criteria",
+        "backup evidence"
+      ],
+      "passCriteria": "A named owner can pause, rollback or continue during day-0/day-1."
+    },
+    {
+      "id": "LG-007",
+      "name": "Day-0 smoke path ready",
+      "owner": "QA/UAT owner",
+      "severity": "P0",
+      "evidence": [
+        "Admin smoke",
+        "Provider smoke",
+        "API smoke",
+        "Python worker verification"
+      ],
+      "passCriteria": "Critical smoke path is defined and assigned."
+    },
+    {
+      "id": "LG-008",
+      "name": "Day-1 monitoring window scheduled",
+      "owner": "Pilot owner",
+      "severity": "P1",
+      "evidence": [
+        "daily health review",
+        "defect triage time",
+        "adoption evidence owner"
+      ],
+      "passCriteria": "Monitoring, support and evidence review window exists for first operational day."
+    }
+  ],
+  "day0Runbook": [
+    {
+      "order": 1,
+      "id": "D0-001",
+      "phase": "pre-launch",
+      "owner": "Release owner",
+      "action": "Confirm selected release package, checksum and staging target.",
+      "expectedEvidence": "Release candidate record and checksum captured.",
+      "decision": "continue-or-hold"
+    },
+    {
+      "order": 2,
+      "id": "D0-002",
+      "phase": "pre-launch",
+      "owner": "Technical owner",
+      "action": "Confirm environment variables, secrets, backup, migration and rollback status.",
+      "expectedEvidence": "Environment activation checklist reviewed.",
+      "decision": "continue-or-hold"
+    },
+    {
+      "order": 3,
+      "id": "D0-003",
+      "phase": "pre-launch",
+      "owner": "QA/UAT owner",
+      "action": "Run launch gate audit and confirm QA-V7/PILOT-V2 evidence is present.",
+      "expectedEvidence": "npm run audit:qa and npm run audit:pilot outputs captured.",
+      "decision": "continue-or-hold"
+    },
+    {
+      "order": 4,
+      "id": "D0-004",
+      "phase": "launch",
+      "owner": "Release owner",
+      "action": "Activate the pilot release in the controlled target environment.",
+      "expectedEvidence": "Deployment/activation timestamp and owner recorded.",
+      "decision": "continue-or-rollback"
+    },
+    {
+      "order": 5,
+      "id": "D0-005",
+      "phase": "launch",
+      "owner": "QA/UAT owner",
+      "action": "Execute Admin smoke: login, protected route, account/configuration surface, audit visibility.",
+      "expectedEvidence": "Admin smoke pass/fail evidence.",
+      "decision": "continue-hold-or-rollback"
+    },
+    {
+      "order": 6,
+      "id": "D0-006",
+      "phase": "launch",
+      "owner": "QA/UAT owner",
+      "action": "Execute Provider smoke: login, dashboard, queue, calendar, prescription or encounter-note surface.",
+      "expectedEvidence": "Provider smoke pass/fail evidence.",
+      "decision": "continue-hold-or-rollback"
+    },
+    {
+      "order": 7,
+      "id": "D0-007",
+      "phase": "launch",
+      "owner": "Technical owner",
+      "action": "Execute API/Python smoke: API build evidence, hybrid prepare endpoint coverage, worker verification.",
+      "expectedEvidence": "API/Python smoke log or references.",
+      "decision": "continue-hold-or-rollback"
+    },
+    {
+      "order": 8,
+      "id": "D0-008",
+      "phase": "support-activation",
+      "owner": "Support owner",
+      "action": "Open command center and confirm support coverage with pilot cohort.",
+      "expectedEvidence": "Support channel and on-call owner active.",
+      "decision": "continue-or-hold"
+    },
+    {
+      "order": 9,
+      "id": "D0-009",
+      "phase": "pilot-cohort-access",
+      "owner": "Pilot owner",
+      "action": "Enable pilot cohort access and send launch communication.",
+      "expectedEvidence": "Cohort activation record and communication timestamp.",
+      "decision": "continue-hold-or-rollback"
+    },
+    {
+      "order": 10,
+      "id": "D0-010",
+      "phase": "day-0-close",
+      "owner": "Pilot owner",
+      "action": "Record day-0 status: continue, hold, rollback or retry launch.",
+      "expectedEvidence": "Day-0 decision record with blockers and owners.",
+      "decision": "continue-hold-rollback-or-retry"
+    }
+  ],
+  "day1Runbook": [
+    {
+      "order": 1,
+      "id": "D1-001",
+      "phase": "start-of-day-health",
+      "owner": "Support owner",
+      "action": "Review overnight/early support events, access issues and P0/P1 defects.",
+      "expectedEvidence": "Day-1 health snapshot."
+    },
+    {
+      "order": 2,
+      "id": "D1-002",
+      "phase": "usage-smoke",
+      "owner": "Pilot owner",
+      "action": "Confirm pilot cohort can use expected Admin/Provider workflows.",
+      "expectedEvidence": "Cohort activity and pass/fail notes."
+    },
+    {
+      "order": 3,
+      "id": "D1-003",
+      "phase": "defect-triage",
+      "owner": "QA/UAT owner",
+      "action": "Triage defects with severity, owner, target date and pilot impact.",
+      "expectedEvidence": "Triage log with P0/P1/P2 classification."
+    },
+    {
+      "order": 4,
+      "id": "D1-004",
+      "phase": "operational-check",
+      "owner": "Technical owner",
+      "action": "Confirm logs, API/Python behavior, performance smoke and data handling evidence.",
+      "expectedEvidence": "Technical health notes."
+    },
+    {
+      "order": 5,
+      "id": "D1-005",
+      "phase": "stakeholder-feedback",
+      "owner": "Pilot owner",
+      "action": "Collect structured feedback from Admin, Provider and Operator/Reviewer representatives.",
+      "expectedEvidence": "Feedback summary mapped to continue/hold/fix/expand."
+    },
+    {
+      "order": 6,
+      "id": "D1-006",
+      "phase": "daily-decision",
+      "owner": "Pilot owner",
+      "action": "Record daily pilot decision: continue, hold, rollback, hotfix, or expand-preparation.",
+      "expectedEvidence": "Signed daily decision record."
+    }
+  ],
+  "communicationPlan": [
+    {
+      "id": "COMMS-001",
+      "audience": "Pilot cohort",
+      "owner": "Pilot owner",
+      "timing": "day-0 before access activation",
+      "message": "Pilot scope, supported workflows, support channel, known limits and feedback process."
+    },
+    {
+      "id": "COMMS-002",
+      "audience": "Support command center",
+      "owner": "Support owner",
+      "timing": "day-0 launch window",
+      "message": "Severity matrix, escalation owner, response expectations and evidence capture."
+    },
+    {
+      "id": "COMMS-003",
+      "audience": "Technical/release owners",
+      "owner": "Release owner",
+      "timing": "day-0 and day-1",
+      "message": "Deployment state, rollback triggers, open risks and go/no-go decision updates."
+    },
+    {
+      "id": "COMMS-004",
+      "audience": "Stakeholders",
+      "owner": "Pilot owner",
+      "timing": "day-1 close",
+      "message": "Pilot health, defects, feedback, adoption evidence and next recommended action."
+    }
+  ],
+  "pauseRollbackTriggers": [
+    {
+      "id": "TRIG-001",
+      "trigger": "Authentication outage or repeated access failure for pilot cohort",
+      "action": "hold-or-rollback",
+      "severity": "P0"
+    },
+    {
+      "id": "TRIG-002",
+      "trigger": "Role boundary or protected route failure",
+      "action": "rollback",
+      "severity": "P0"
+    },
+    {
+      "id": "TRIG-003",
+      "trigger": "Clinical Provider workflow blocker",
+      "action": "hold-or-rollback",
+      "severity": "P0"
+    },
+    {
+      "id": "TRIG-004",
+      "trigger": "Data integrity issue or suspected data loss",
+      "action": "rollback",
+      "severity": "P0"
+    },
+    {
+      "id": "TRIG-005",
+      "trigger": "API/Python worker failure blocking critical workflow",
+      "action": "hold-or-retry",
+      "severity": "P0"
+    },
+    {
+      "id": "TRIG-006",
+      "trigger": "Inability to capture logs/evidence for incident review",
+      "action": "hold",
+      "severity": "P1"
+    },
+    {
+      "id": "TRIG-007",
+      "trigger": "Support channel unavailable during launch window",
+      "action": "hold",
+      "severity": "P1"
+    }
+  ],
+  "decisionStates": [
+    {
+      "state": "continue",
+      "meaning": "Pilot remains active and moves to daily monitoring."
+    },
+    {
+      "state": "hold",
+      "meaning": "Pilot access or expansion pauses until blockers have owners and dates."
+    },
+    {
+      "state": "rollback",
+      "meaning": "Pilot activation is reverted according to approved rollback path."
+    },
+    {
+      "state": "retry-launch",
+      "meaning": "Launch runbook is repeated after correction of an activation or smoke issue."
+    },
+    {
+      "state": "hotfix-required",
+      "meaning": "A controlled correction is required before pilot can continue or expand."
+    }
+  ],
+  "evidenceOutputs": {
+    "audit": "validation/pilot/pilot-v3-controlled-launch-audit.json",
+    "runbook": "validation/pilot/pilot-v3-day0-day1-execution-runbook.json",
+    "nextDeliveryInput": "PILOT-V4 monitoring, support, incident triage, and daily health review"
+  },
+  "checks": [
+    {
+      "id": "pilot_manifest_delivery_v3",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v3_current_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_present",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_audit_present",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_activation_plan_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_closure_audit_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_closure_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v5_role_acceptance_available",
+      "passed": true
+    },
+    {
+      "id": "launch_runbook_script_registered",
+      "passed": true
+    },
+    {
+      "id": "pilot_aggregate_runs_v1_v2_v3",
+      "passed": true
+    },
+    {
+      "id": "required_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_reports_present",
+      "passed": true
+    },
+    {
+      "id": "launch_gates_defined",
+      "passed": true
+    },
+    {
+      "id": "launch_gates_have_p0_coverage",
+      "passed": true
+    },
+    {
+      "id": "day0_runbook_defined",
+      "passed": true
+    },
+    {
+      "id": "day1_runbook_defined",
+      "passed": true
+    },
+    {
+      "id": "support_communication_defined",
+      "passed": true
+    },
+    {
+      "id": "pause_rollback_triggers_defined",
+      "passed": true
+    },
+    {
+      "id": "rollback_trigger_p0_coverage",
+      "passed": true
+    },
+    {
+      "id": "day0_admin_smoke_included",
+      "passed": true
+    },
+    {
+      "id": "day0_provider_smoke_included",
+      "passed": true
+    },
+    {
+      "id": "day0_api_python_smoke_included",
+      "passed": true
+    },
+    {
+      "id": "day0_support_activation_included",
+      "passed": true
+    },
+    {
+      "id": "day1_defect_triage_included",
+      "passed": true
+    },
+    {
+      "id": "day1_stakeholder_feedback_included",
+      "passed": true
+    },
+    {
+      "id": "check_secrets_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_web_script_available",
+      "passed": true
+    },
+    {
+      "id": "audit_qa_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_python_worker_script_available",
+      "passed": true
+    },
+    {
+      "id": "python_worker_contract_tests_available",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "next_delivery_declared",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 37,
+    "total": 37,
+    "completionPercent": 100
+  },
+  "nextRecommendedDelivery": "PILOT-V4 - Pilot monitoring, support, incident triage, and daily health review"
+}

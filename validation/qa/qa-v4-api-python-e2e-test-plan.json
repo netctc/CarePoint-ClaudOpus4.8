@@ -1,0 +1,485 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V4",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v3",
+  "generatedAt": "2026-05-21T17:15:52.415Z",
+  "purpose": "Define and validate the Node/API/Python worker E2E evidence set before UAT execution.",
+  "scenarioCount": 22,
+  "priorityCounts": {
+    "P0": 18,
+    "P1": 4
+  },
+  "requiredLocalCommands": [
+    "npm install",
+    "npm run build:contracts",
+    "npm run build:api",
+    "npm run audit:qa",
+    "python -m compileall -q services/python-worker/carepoint_python_worker",
+    "PYTHONPATH=services/python-worker python scripts/option_b/verify_python_worker.py",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=services/python-worker python -m pytest -q services/python-worker/tests/test_worker_contracts.py --disable-warnings"
+  ],
+  "scenarios": [
+    {
+      "id": "QA4-INT-001",
+      "area": "Workspace build",
+      "title": "Shared contracts package builds before API build",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-002",
+      "area": "Workspace build",
+      "title": "API build passes against compiled contracts",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-003",
+      "area": "Workspace build",
+      "title": "Backend build executes build:contracts followed by build:api",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-004",
+      "area": "Route readiness",
+      "title": "Hybrid Python prepare route source exposes at least 100 prepare endpoints",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-005",
+      "area": "Route readiness",
+      "title": "Hybrid Python routes validate request bodies before worker preparation",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-006",
+      "area": "Route readiness",
+      "title": "Hybrid Python routes preserve requestId/correlationId in response evidence",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-007",
+      "area": "Idempotency",
+      "title": "Hybrid Python prepare endpoints derive deterministic idempotency keys",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-008",
+      "area": "Contracts",
+      "title": "TypeScript contracts expose hybrid Python schemas and job type evidence",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "contracts-api",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-009",
+      "area": "Contracts",
+      "title": "Compiled contract bundle is syntax-checkable for runtime usage",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "contracts-api",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-010",
+      "area": "Node helper",
+      "title": "Node hybrid Python helper exposes runHybridPython helpers for domain prepare flows",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-011",
+      "area": "Node helper",
+      "title": "Compiled Node helper is syntax-checkable",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-012",
+      "area": "Python worker",
+      "title": "Python worker verification passes",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "python-worker",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-013",
+      "area": "Python worker",
+      "title": "Python worker contract test runner executes contract suite",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "python-worker",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-014",
+      "area": "Python worker",
+      "title": "Python worker source compiles recursively",
+      "priority": "P0",
+      "method": "automated-scripted",
+      "role": "python-worker",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-015",
+      "area": "Python worker",
+      "title": "Worker processor decisions support pass, hold, and rollback",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "python-worker",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-016",
+      "area": "Python worker",
+      "title": "Dry-run/advisory policies remain metadata-only and non-mutating",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "python-worker",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-017",
+      "area": "Cross-boundary error handling",
+      "title": "API validation errors and worker warnings produce stable status/code/message evidence",
+      "priority": "P1",
+      "method": "manual-or-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-018",
+      "area": "Cross-boundary evidence",
+      "title": "API and worker evidence can be attached to production readiness package",
+      "priority": "P1",
+      "method": "manual-or-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-019",
+      "area": "Regression",
+      "title": "QA-V1, QA-V2, and QA-V3 audits remain complete before integration validation",
+      "priority": "P0",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-020",
+      "area": "Security smoke",
+      "title": "Hybrid Python endpoints remain protected by API auth/context middleware chain",
+      "priority": "P1",
+      "method": "manual-or-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-021",
+      "area": "Observability",
+      "title": "Worker preparation preserves traceable correlation and request identifiers",
+      "priority": "P1",
+      "method": "automated-static",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "QA4-INT-022",
+      "area": "Production readiness",
+      "title": "Node/API/Python validation evidence is ready for UAT and readiness signoff",
+      "priority": "P0",
+      "method": "manual-or-scripted",
+      "role": "platform",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "command or endpoint under test",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "log output or screenshot reference when applicable",
+        "linked defect id when failed"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    }
+  ]
+}

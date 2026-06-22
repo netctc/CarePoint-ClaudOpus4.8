@@ -1,0 +1,9 @@
+### Provider logout should clear API session cookies
+# Login first from the Provider web UI or send the provider challenge flow before testing.
+POST http://localhost:4000/api/auth/logout
+Content-Type: application/json
+
+{}
+
+### After logout, /me should fail without a valid token
+GET http://localhost:4000/api/auth/me

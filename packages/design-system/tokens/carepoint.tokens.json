@@ -1,0 +1,244 @@
+{
+  "$schema": "https://carepoint.local/design-tokens.schema.json",
+  "name": "CarePoint Design System Tokens",
+  "version": "ux-v6",
+  "status": "visual-accessibility-qa-phase-close",
+  "sourcePhase": "CarePoint Option B Python Progressive V64 closed baseline",
+  "principles": [
+    "Clinical clarity over decoration",
+    "Consistent admin and provider surfaces",
+    "Accessible defaults before visual polish",
+    "Responsive behavior as a first-class requirement",
+    "No backend or hybrid Python contract changes in UX phase"
+  ],
+  "color": {
+    "background": {
+      "canvas": "#f4f7fc",
+      "subtle": "#eef3fb",
+      "surface": "#ffffff",
+      "surfaceMuted": "#f8fbff",
+      "panel": "#e9f0fd"
+    },
+    "border": {
+      "default": "#d9e3f2",
+      "strong": "#c8d5ea"
+    },
+    "text": {
+      "default": "#13233d",
+      "muted": "#667892",
+      "strongMuted": "#42536c",
+      "inverse": "#ffffff"
+    },
+    "brand": {
+      "primary": "#1e63d7",
+      "primaryStrong": "#0f56d0",
+      "primarySoft": "#e9f1ff"
+    },
+    "state": {
+      "success": "#1d8f4f",
+      "successSoft": "#e8f8ef",
+      "warning": "#b66f18",
+      "warningSoft": "#fff4e3",
+      "danger": "#c4481c",
+      "dangerSoft": "#fdece6",
+      "infoSoft": "#e6f1ff"
+    }
+  },
+  "radius": {
+    "xs": "8px",
+    "sm": "12px",
+    "md": "16px",
+    "lg": "20px",
+    "xl": "28px",
+    "pill": "999px"
+  },
+  "space": {
+    "0": "0",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "10": "40px",
+    "12": "48px"
+  },
+  "shadow": {
+    "sm": "0 10px 22px rgba(17, 39, 73, 0.05)",
+    "md": "0 18px 44px rgba(17, 39, 73, 0.08)",
+    "lg": "0 22px 50px rgba(17, 39, 73, 0.12)",
+    "focus": "0 0 0 4px rgba(30, 99, 215, 0.18)"
+  },
+  "type": {
+    "fontSans": "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "fontDisplay": "Manrope, Inter, ui-sans-serif, system-ui, sans-serif",
+    "size": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.5rem",
+      "2xl": "2rem",
+      "3xl": "2.5rem"
+    },
+    "lineHeight": {
+      "tight": "1.1",
+      "normal": "1.45",
+      "relaxed": "1.65"
+    }
+  },
+  "motion": {
+    "fast": "140ms ease",
+    "base": "180ms ease",
+    "slow": "260ms ease"
+  },
+  "breakpoints": {
+    "tablet": "900px",
+    "desktopNarrow": "1100px",
+    "desktopWide": "1320px"
+  },
+  "layout": {
+    "sidebarWidth": "272px",
+    "providerSidebarWidth": "260px",
+    "sidebarCompactWidth": "84px",
+    "topbarHeight": "72px",
+    "contentMaxWidth": "1440px",
+    "contentPadding": {
+      "desktop": "28px",
+      "tablet": "22px",
+      "mobile": "16px"
+    },
+    "gridGutter": "24px"
+  },
+  "navigation": {
+    "itemMinHeight": "48px",
+    "itemRadius": "16px",
+    "iconSlot": "28px",
+    "sectionGap": "18px",
+    "activeIndicatorWidth": "4px"
+  },
+  "component": {
+    "control": {
+      "height": "48px",
+      "heightSmall": "40px",
+      "paddingX": "16px",
+      "gap": "10px",
+      "borderRadius": "16px"
+    },
+    "table": {
+      "cellPaddingY": "15px",
+      "cellPaddingX": "14px",
+      "headerHeight": "48px",
+      "rowHover": "#f4f8ff",
+      "minReadableWidth": "760px"
+    },
+    "emptyState": {
+      "minHeight": "132px",
+      "iconSize": "44px",
+      "borderStyle": "1px dashed #c8d5ea"
+    },
+    "dashboard": {
+      "statMinHeight": "156px",
+      "statValueSize": "2rem",
+      "statGridMin": "220px"
+    }
+  },
+  "accessibility": {
+    "touchTargetMin": "44px",
+    "focusOutlineWidth": "3px",
+    "focusOutlineOffset": "3px",
+    "focusColor": "#1e63d7",
+    "disabledOpacity": "0.62",
+    "reducedMotionDuration": "1ms",
+    "scrollMarginTop": "96px"
+  },
+  "responsive": {
+    "mobileCompact": "540px",
+    "mobileNarrow": "480px",
+    "safeContentWidth": "100%",
+    "mobileTableMinWidth": "640px",
+    "mobileCardPadding": "16px",
+    "stackGap": "12px"
+  },
+  "qa": {
+    "visualAuditRequired": true,
+    "keyboardSmokeRequired": true,
+    "responsiveSmokeRequired": true,
+    "contrastSmokeRequired": true,
+    "targetBrowsers": [
+      "Chrome latest",
+      "Safari latest",
+      "Edge latest",
+      "Mobile Safari",
+      "Chrome Android"
+    ],
+    "phaseCloseRequired": true,
+    "visualRegressionSmokeRequired": true,
+    "accessibilityAcceptanceRequired": true,
+    "handoverEvidenceRequired": true,
+    "closedPhaseBacklogRequired": true
+  },
+  "workflow": {
+    "clinical": {
+      "taskCardMinHeight": "128px",
+      "taskCardGap": "14px",
+      "worklistRowPadding": "16px",
+      "handoffPanelMinHeight": "180px",
+      "decisionClusterGap": "10px"
+    },
+    "calendar": {
+      "dayMinHeight": "210px",
+      "slotGap": "10px",
+      "densityColumnMin": "260px"
+    },
+    "adminDensity": {
+      "panelMinWidth": "320px",
+      "evidenceRailWidth": "380px",
+      "metricRowMinHeight": "56px",
+      "quickActionGap": "10px"
+    },
+    "visualQa": {
+      "targetProviderSurfaces": [
+        "queue",
+        "calendar",
+        "prescriptions",
+        "dashboard"
+      ],
+      "targetAdminSurfaces": [
+        "audit-logs",
+        "reports-builder",
+        "dashboard"
+      ]
+    }
+  },
+  "phaseClose": {
+    "closureVersion": "UX-V6",
+    "releaseLabel": "CarePoint_design_refinement_phase_ux_v6",
+    "minimumAcceptance": {
+      "designSurfaceAudit": "pass",
+      "layoutNavigationAudit": "pass",
+      "componentNormalizationAudit": "pass",
+      "responsiveAccessibilityAudit": "pass",
+      "workflowPolishAudit": "pass",
+      "finalVisualQaAudit": "pass"
+    },
+    "manualQaBrowsers": [
+      "Chrome latest",
+      "Safari latest",
+      "Edge latest",
+      "Mobile Safari",
+      "Chrome Android"
+    ],
+    "manualQaBreakpoints": [
+      "1440px",
+      "1280px",
+      "1100px",
+      "900px",
+      "768px",
+      "540px",
+      "390px"
+    ],
+    "acceptanceStatus": "ready-for-stakeholder-signoff"
+  }
+}

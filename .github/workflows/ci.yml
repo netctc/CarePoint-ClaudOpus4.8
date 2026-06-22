@@ -1,0 +1,62 @@
+name: CarePoint CI
+on:
+  pull_request:
+  push:
+    branches: [main, develop, 'release/**']
+jobs:
+  s1-build-and-runtime:
+    name: S1 backend build and runtime smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: care_center
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      NODE_ENV: test
+      API_PORT: 4000
+      HEALTH_CHECK_TIMEOUT_MS: 2500
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/care_center
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/care_center
+      REDIS_URL: redis://localhost:6379
+      JWT_ACCESS_SECRET: ci-access-secret-minimum-32-characters
+      JWT_REFRESH_SECRET: ci-refresh-secret-minimum-32-characters
+      MEDICAL_PROFILE_ENCRYPTION_KEY: ci-medical-profile-key-minimum-32-chars
+      FRONTEND_PROVIDER_URL: http://localhost:3000
+      FRONTEND_ADMIN_URL: http://localhost:3001
+      FRONTEND_PATIENT_URL: http://localhost:3002
+      FRONTEND_PROVIDER_MOBILE_URL: http://localhost:8081
+      FRONTEND_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8081
+      ALLOW_LOCALHOST_CORS_WILDCARD: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -r services/python-worker/requirements.txt
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check:secrets
+      - run: npm run verify:workspace
+      - run: npm run verify:python-worker
+      - run: npm run test:python-worker
+      - run: npm run verify:s1:config
+      - run: npm run prisma:generate
+      - run: npm run build:backend
+      - run: npm run smoke:api:ci

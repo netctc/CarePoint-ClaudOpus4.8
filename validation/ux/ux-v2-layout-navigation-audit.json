@@ -1,0 +1,89 @@
+{
+  "phase": "CarePoint Phase 2 - Design Refinement & UX Stabilization",
+  "delivery": "UX-V2",
+  "sourceBaseline": "CarePoint_design_refinement_phase_ux_v1",
+  "generatedAt": "2026-05-21T15:40:29.294Z",
+  "scope": {
+    "focus": "Layout, sidebar/topbar navigation, hierarchy, responsive shell behavior",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false
+  },
+  "aggregate": {
+    "score": 22,
+    "maxScore": 22,
+    "completionPercent": 100
+  },
+  "appReports": [
+    {
+      "app": "admin",
+      "files": {
+        "shell": "apps/admin/src/components/layout/portal-shell.tsx",
+        "sidebar": "apps/admin/src/components/layout/sidebar-nav.tsx",
+        "topbar": "apps/admin/src/components/layout/topbar.tsx",
+        "css": "apps/admin/src/app/globals.css"
+      },
+      "checks": {
+        "hasSkipLink": true,
+        "mainHasStableId": true,
+        "mainIsFocusable": true,
+        "sidebarHasAriaLabel": true,
+        "primaryNavHasLabel": true,
+        "activeNavUsesAriaCurrent": true,
+        "topbarHasBannerRole": true,
+        "searchHasSearchRole": true,
+        "cssHasResponsiveRules": true,
+        "cssHasSkipLinkStyle": true,
+        "cssHasNavigationAliases": true
+      },
+      "score": 11,
+      "maxScore": 11,
+      "completionPercent": 100,
+      "counts": {
+        "navLinks": 3,
+        "ariaCurrentReferences": 2,
+        "landmarks": 8,
+        "mediaQueries": 18,
+        "cpClassAliases": 236
+      }
+    },
+    {
+      "app": "provider",
+      "files": {
+        "shell": "apps/provider/components/layout/portal-shell.tsx",
+        "sidebar": "apps/provider/components/layout/sidebar-nav.tsx",
+        "topbar": "apps/provider/components/layout/top-header.tsx",
+        "css": "apps/provider/app/globals.css"
+      },
+      "checks": {
+        "hasSkipLink": true,
+        "mainHasStableId": true,
+        "mainIsFocusable": true,
+        "sidebarHasAriaLabel": true,
+        "primaryNavHasLabel": true,
+        "activeNavUsesAriaCurrent": true,
+        "topbarHasBannerRole": true,
+        "searchHasSearchRole": true,
+        "cssHasResponsiveRules": true,
+        "cssHasSkipLinkStyle": true,
+        "cssHasNavigationAliases": true
+      },
+      "score": 11,
+      "maxScore": 11,
+      "completionPercent": 100,
+      "counts": {
+        "navLinks": 4,
+        "ariaCurrentReferences": 1,
+        "landmarks": 10,
+        "mediaQueries": 17,
+        "cpClassAliases": 235
+      }
+    }
+  ],
+  "recommendedNextDelivery": "UX-V3 - Forms, tables, empty states, and dashboard component normalization",
+  "residualDesignRisks": [
+    "Visual QA in a browser is still required to validate exact spacing across viewport widths.",
+    "Several high-density pages still need component-level table and form normalization in UX-V3.",
+    "Mobile navigation is improved but not yet a full dedicated mobile drawer pattern."
+  ]
+}

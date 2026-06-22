@@ -1,0 +1,24 @@
+### Phase 28 smoke tests
+### Login first and set ADMIN_TOKEN manually if your REST client does not share browser cookies.
+@apiBase = http://localhost:4000
+@ADMIN_TOKEN = paste-admin-access-token-here
+
+### Verify provider roles endpoint
+GET {{apiBase}}/api/admin/users/provider-roles
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Verify provider directory no longer fails on ProviderProfile.roleCatalogId
+GET {{apiBase}}/api/providers
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Verify provider queue no longer fails on ProviderProfile.roleCatalogId
+GET {{apiBase}}/api/providers/queue
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Verify payment summary no longer cascades ProviderProfile.roleCatalogId failure
+GET {{apiBase}}/api/payments/admin/summary
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Verify reconciliation no longer cascades ProviderProfile.roleCatalogId failure
+GET {{apiBase}}/api/payments/reconciliation
+Authorization: Bearer {{ADMIN_TOKEN}}

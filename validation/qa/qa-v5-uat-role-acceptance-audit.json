@@ -1,0 +1,209 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V5",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v4",
+  "generatedAt": "2026-05-21T17:15:52.512Z",
+  "scope": "UAT package and acceptance by role",
+  "technicalBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "designRefinementUx": "closed at UX-V6",
+    "qaV1MasterPlan": "complete",
+    "qaV2AdminFunctionalQa": "complete",
+    "qaV3ProviderFunctionalQa": "complete",
+    "qaV4NodeApiPythonE2E": "complete",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false,
+    "applicationRuntimeCodeChanged": false,
+    "qaArtifactsOnly": true
+  },
+  "inventory": {
+    "roleAcceptancePackageCount": 4,
+    "uatSessionCount": 12,
+    "masterScenarioCount": 44,
+    "adminScenarioCount": 18,
+    "providerScenarioCount": 20,
+    "integrationScenarioCount": 22,
+    "mappedScenarioReferenceCount": 29,
+    "p0UatSessionCount": 7
+  },
+  "checks": [
+    {
+      "id": "doc_present_qa_v5_uat_package_and_role_acceptance_md",
+      "passed": true,
+      "path": "docs/qa/QA_V5_UAT_PACKAGE_AND_ROLE_ACCEPTANCE.md"
+    },
+    {
+      "id": "doc_present_qa_v5_role_signoff_checklists_md",
+      "passed": true,
+      "path": "docs/qa/QA_V5_ROLE_SIGNOFF_CHECKLISTS.md"
+    },
+    {
+      "id": "doc_present_qa_v5_defect_triage_and_acceptance_gates_md",
+      "passed": true,
+      "path": "docs/qa/QA_V5_DEFECT_TRIAGE_AND_ACCEPTANCE_GATES.md"
+    },
+    {
+      "id": "doc_present_qa_v5_validation_md",
+      "passed": true,
+      "path": "docs/qa/QA_V5_VALIDATION.md"
+    },
+    {
+      "id": "doc_present_changelog_qa_v4_to_qa_v5_md",
+      "passed": true,
+      "path": "docs/qa/CHANGELOG_QA_V4_TO_QA_V5.md"
+    },
+    {
+      "id": "report_declared_qa_v5_uat_role_acceptance_audit_json",
+      "passed": true,
+      "path": "validation/qa/qa-v5-uat-role-acceptance-audit.json"
+    },
+    {
+      "id": "report_declared_qa_v5_uat_role_acceptance_package_json",
+      "passed": true,
+      "path": "validation/qa/qa-v5-uat-role-acceptance-package.json"
+    },
+    {
+      "id": "audit_qa_master_plan",
+      "passed": true,
+      "script": "audit:qa:master-plan"
+    },
+    {
+      "id": "audit_qa_admin_config",
+      "passed": true,
+      "script": "audit:qa:admin-config"
+    },
+    {
+      "id": "audit_qa_provider_workflows",
+      "passed": true,
+      "script": "audit:qa:provider-workflows"
+    },
+    {
+      "id": "audit_qa_api_python_e2e",
+      "passed": true,
+      "script": "audit:qa:api-python-e2e"
+    },
+    {
+      "id": "audit_qa_uat_role_acceptance",
+      "passed": true,
+      "script": "audit:qa:uat-role-acceptance"
+    },
+    {
+      "id": "audit_qa_aggregate",
+      "passed": true,
+      "script": "audit:qa"
+    },
+    {
+      "id": "qa_v1_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v2_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v4_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v1_matrix_has_44_scenarios",
+      "passed": true,
+      "observed": 44
+    },
+    {
+      "id": "qa_v2_admin_plan_has_18_scenarios",
+      "passed": true,
+      "observed": 18
+    },
+    {
+      "id": "qa_v3_provider_plan_has_20_scenarios",
+      "passed": true,
+      "observed": 20
+    },
+    {
+      "id": "qa_v4_integration_plan_has_22_scenarios",
+      "passed": true,
+      "observed": 22
+    },
+    {
+      "id": "uat_packages_cover_four_roles",
+      "passed": true,
+      "observed": 4
+    },
+    {
+      "id": "uat_packages_include_admin",
+      "passed": true
+    },
+    {
+      "id": "uat_packages_include_provider",
+      "passed": true
+    },
+    {
+      "id": "uat_packages_include_operator_reviewer",
+      "passed": true
+    },
+    {
+      "id": "uat_packages_include_platform_owner",
+      "passed": true
+    },
+    {
+      "id": "uat_sessions_have_at_least_12_items",
+      "passed": true,
+      "observed": 12
+    },
+    {
+      "id": "uat_sessions_have_p0_coverage",
+      "passed": true,
+      "observed": 7
+    },
+    {
+      "id": "all_role_packages_have_exit_criteria",
+      "passed": true
+    },
+    {
+      "id": "all_role_packages_have_required_evidence",
+      "passed": true
+    },
+    {
+      "id": "all_role_packages_reference_master_scenarios",
+      "passed": true
+    },
+    {
+      "id": "defect_workflow_covers_p0_p1_p2",
+      "passed": true
+    },
+    {
+      "id": "signoff_fields_have_minimum_acceptance_data",
+      "passed": true
+    },
+    {
+      "id": "evidence_template_has_defect_and_screenshot_refs",
+      "passed": true
+    },
+    {
+      "id": "uat_package_maps_admin_provider_platform_evidence",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 35,
+    "total": 35,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "acceptancePackageFile": "validation/qa/qa-v5-uat-role-acceptance-package.json",
+    "docs": [
+      "docs/qa/QA_V5_UAT_PACKAGE_AND_ROLE_ACCEPTANCE.md",
+      "docs/qa/QA_V5_ROLE_SIGNOFF_CHECKLISTS.md",
+      "docs/qa/QA_V5_DEFECT_TRIAGE_AND_ACCEPTANCE_GATES.md",
+      "docs/qa/QA_V5_VALIDATION.md",
+      "docs/qa/CHANGELOG_QA_V4_TO_QA_V5.md"
+    ],
+    "nextRecommendedDelivery": "QA-V6 - Production readiness and go-live checklist"
+  },
+  "readinessPosition": "ready-for-production-readiness-checklist"
+}

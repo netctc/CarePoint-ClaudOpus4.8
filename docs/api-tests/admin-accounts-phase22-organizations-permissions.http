@@ -1,0 +1,39 @@
+### Phase 22 — Organization permission smoke tests
+@apiBase = http://localhost:4000
+@token = paste-admin-token-here
+@organizationId = paste-organization-id-here
+
+### List organizations
+GET {{apiBase}}/api/admin/users/organizations
+Authorization: Bearer {{token}}
+
+### Create organization
+POST {{apiBase}}/api/admin/users/organizations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Phase 22 Test Organization"
+}
+
+### Reject duplicate organization name
+POST {{apiBase}}/api/admin/users/organizations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Phase 22 Test Organization"
+}
+
+### Update organization
+PUT {{apiBase}}/api/admin/users/organizations/{{organizationId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Phase 22 Test Organization Updated"
+}
+
+### Delete organization
+DELETE {{apiBase}}/api/admin/users/organizations/{{organizationId}}
+Authorization: Bearer {{token}}

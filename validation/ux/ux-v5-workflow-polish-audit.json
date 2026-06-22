@@ -1,0 +1,255 @@
+{
+  "delivery": "UX-V5",
+  "focus": "Provider clinical workflow polish and Admin high-density surface refinement",
+  "phaseBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false
+  },
+  "generatedAt": "2026-05-21T15:40:29.710Z",
+  "aggregate": {
+    "passedChecks": 45,
+    "totalChecks": 45,
+    "completionPercent": 100
+  },
+  "targetResults": [
+    {
+      "id": "provider-queue",
+      "path": "apps/provider/app/portal/queue/page.tsx",
+      "checks": [
+        {
+          "pattern": "cp-provider-queue-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-workflow-kpi-strip",
+          "present": true
+        },
+        {
+          "pattern": "cp-workflow-filter-bar",
+          "present": true
+        },
+        {
+          "pattern": "cp-refill-worklist",
+          "present": true
+        },
+        {
+          "pattern": "cp-appointment-worklist",
+          "present": true
+        },
+        {
+          "pattern": "cp-clinical-table",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "provider-calendar",
+      "path": "apps/provider/app/portal/calendar/page.tsx",
+      "checks": [
+        {
+          "pattern": "cp-calendar-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-workflow-kpi-strip",
+          "present": true
+        },
+        {
+          "pattern": "cp-workflow-filter-bar",
+          "present": true
+        },
+        {
+          "pattern": "cp-calendar-board",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "provider-prescriptions",
+      "path": "apps/provider/app/portal/prescriptions/new/page.tsx",
+      "checks": [
+        {
+          "pattern": "cp-prescription-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-clinical-worklist",
+          "present": true
+        },
+        {
+          "pattern": "cp-workflow-card",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "admin-audit-logs",
+      "path": "apps/admin/src/app/portal/audit/logs/page.tsx",
+      "checks": [
+        {
+          "pattern": "cp-admin-density-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-audit-evidence-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-admin-density-shell",
+          "present": true
+        },
+        {
+          "pattern": "cp-density-filter-bar",
+          "present": true
+        },
+        {
+          "pattern": "cp-density-record-card",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "admin-reports-builder",
+      "path": "apps/admin/src/app/portal/reports/builder/page.tsx",
+      "checks": [
+        {
+          "pattern": "cp-admin-density-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-report-builder-flow",
+          "present": true
+        },
+        {
+          "pattern": "cp-density-kpi-strip",
+          "present": true
+        },
+        {
+          "pattern": "cp-report-density-shell",
+          "present": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "cssResults": [
+    {
+      "path": "packages/design-system/css/carepoint-workflow-polish.css",
+      "checks": [
+        {
+          "pattern": "--cp-clinical-task-card-min-height",
+          "present": true
+        },
+        {
+          "pattern": ".cp-clinical-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-calendar-board",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-shell",
+          "present": true
+        },
+        {
+          "pattern": ".cp-workflow-card:focus-within",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "path": "apps/admin/src/app/globals.css",
+      "checks": [
+        {
+          "pattern": "--cp-clinical-task-card-min-height",
+          "present": true
+        },
+        {
+          "pattern": ".cp-clinical-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-calendar-board",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-shell",
+          "present": true
+        },
+        {
+          "pattern": ".cp-workflow-card:focus-within",
+          "present": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "path": "apps/provider/app/globals.css",
+      "checks": [
+        {
+          "pattern": "--cp-clinical-task-card-min-height",
+          "present": true
+        },
+        {
+          "pattern": ".cp-clinical-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-flow",
+          "present": true
+        },
+        {
+          "pattern": ".cp-calendar-board",
+          "present": true
+        },
+        {
+          "pattern": ".cp-admin-density-shell",
+          "present": true
+        },
+        {
+          "pattern": ".cp-workflow-card:focus-within",
+          "present": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "tokenChecks": [
+    {
+      "pattern": "version",
+      "present": true
+    },
+    {
+      "pattern": "workflow.clinical",
+      "present": true
+    },
+    {
+      "pattern": "workflow.calendar",
+      "present": true
+    },
+    {
+      "pattern": "workflow.adminDensity",
+      "present": true
+    },
+    {
+      "pattern": "workflow.visualQa",
+      "present": true
+    }
+  ]
+}

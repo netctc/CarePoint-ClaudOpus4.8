@@ -1,0 +1,74 @@
+V22 Patient Mobile static validation
+Generated at: 2026-05-25
+
+Checks:
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:24:  final List<FocusNode> _focusNodes = List<FocusNode>.generate(6, (_) => FocusNode());
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:49:    for (final FocusNode node in _focusNodes) {
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:135:                    return OtpDigitBox(
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:138:                      previousFocusNode: index == 0 ? null : _focusNodes[index - 1],
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:139:                      nextFocusNode: index == _focusNodes.length - 1 ? null : _focusNodes[index + 1],
+apps/mobile/lib/features/auth/presentation/screens/otp_verification_page.dart:140:                      onCompleted: _verify,
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:7:  const OtpDigitBox({
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:10:    this.previousFocusNode,
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:11:    this.nextFocusNode,
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:17:  final FocusNode focusNode;
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:18:  final FocusNode? previousFocusNode;
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:19:  final FocusNode? nextFocusNode;
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:29:      if (nextFocusNode != null) {
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:30:        nextFocusNode!.requestFocus();
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:48:        textInputAction: nextFocusNode == null ? TextInputAction.done : TextInputAction.next,
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:51:              fontSize: 24,
+apps/mobile/lib/features/auth/presentation/widgets/otp_digit_box.dart:71:        onSubmitted: (_) => nextFocusNode == null ? onCompleted?.call() : nextFocusNode!.requestFocus(),
+apps/mobile/lib/core/localization/app_localizations.dart:70:      'profile.nationalId': 'National ID',
+apps/mobile/lib/core/localization/app_localizations.dart:292:      'profile.nationalId': 'الهوية الوطنية',
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:97:  _CountryOption('Asia', 'Lebanon'),
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:220:const List<String> _nationalityOptions = <String>[
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:245:  if (_nationalityOptions.contains(trimmed)) return trimmed;
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:270:  String _selectedRegion = 'Lebanon';
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:637:          AppTextField(label: l10n.t('profile.nationalId'), controller: _nationalIdController),
+apps/mobile/lib/features/profile/presentation/screens/profile_setup_page.dart:645:            items: _nationalityOptions
+19:  _ReminderData _currentData = const _ReminderData(summary: <String, dynamic>{}, reminders: <Map<String, dynamic>>[]);
+65:  Future<void> _applySavedReminder(Map<String, dynamic> item) async {
+68:      for (final Map<String, dynamic> reminder in _currentData.reminders)
+78:      ..._currentData.summary,
+84:        _currentData = _ReminderData(summary: summary, reminders: next);
+85:        _future = Future<_ReminderData>.value(_currentData);
+93:    if (item != null) await _applySavedReminder(item);
+94:    unawaited(_refresh());
+149:                    Text('Schedule type', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+234:      if (item != null) await _applySavedReminder(item);
+237:      unawaited(_refresh());
+260:          _currentData = data;
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:63:        .map((Map<String, dynamic> item) => <String, dynamic>{...item, 'diagnosticSource': 'Released lab result'})
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:125:              'diagnosticSource': 'Patient-uploaded report',
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:364:                    title: 'No diagnostic results yet',
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:365:                    body: 'This section is fed by released provider/lab results from /api/records/patient-labs and patient-uploaded diagnostic reports from the medical profile.',
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:376:                              final String source = item['diagnosticSource']?.toString() ?? '';
+apps/mobile/lib/features/home/presentation/screens/home_dashboard_page.dart:385:                            subtitle: Text('${item['diagnosticSource'] ?? 'Diagnostic'} • ${item['summary']?.toString() ?? item['category']?.toString() ?? _formatDateTime(item['recordedAt'] ?? item['updatedAt'] ?? item['createdAt'] ?? item['reportDate'])}'),
+apps/mobile/lib/features/labs/presentation/screens/lab_results_list_page.dart:109:                  const PatientEmptyState(title: 'No released lab results', body: 'Data source: released provider/lab results from /api/records/patient-labs. Patient-uploaded diagnostic reports are shown on Home and Profile until released as lab records.')
+46:        bottom: bottomAction == null,
+60:                            if (context.canPop()) {
+93:    final int navigationIndex = currentIndex ?? _patientNavigationIndexFor(routePath);
+97:    final Widget? navigation = showGlobalNavigation ? PatientBottomNav(currentIndex: navigationIndex.clamp(0, 3).toInt()) : null;
+102:      bottomNavigationBar: bottomAction == null
+116:int _patientNavigationIndexFor(String path) {
+133:class PatientBottomNav extends StatelessWidget {
+134:  const PatientBottomNav({required this.currentIndex, super.key});
+apps/mobile/lib/features/providers/presentation/screens/filter_sort_page.dart:34:    final String city = _serviceMode == 'Online' ? 'Any' : _city;
+apps/mobile/lib/features/providers/presentation/screens/filter_sort_page.dart:87:                if (_serviceMode != 'Online') ...<Widget>[
+apps/mobile/lib/features/providers/presentation/screens/search_providers_page.dart:48:      final bool cityMatches = filters.serviceMode == 'Online' || filters.city == 'Any' || locations.any((String location) => location.toLowerCase().contains(filters.city.toLowerCase()));
+apps/mobile/lib/core/state/app_session.dart:607:  Future<Map<String, dynamic>> availableSlots({
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:20:  Map<String, dynamic>? _selectedSlot;
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:44:    return AppSession.instance.availableSlots(
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:47:      location: _isOnlineBooking ? null : draft.location,
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:48:      days: 21,
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:72:    if (_selectedSlot == null || draft.providerId == null) {
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:77:    final DateTime? slotStartsAt = DateTime.tryParse(_selectedSlot!['startsAt']?.toString() ?? '');
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:78:    final DateTime? slotEndsAt = DateTime.tryParse(_selectedSlot!['endsAt']?.toString() ?? '');
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:92:      final String slotService = _selectedSlot!['service']?.toString().trim().isNotEmpty == true ? _selectedSlot!['service'].toString() : draft.service;
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:93:      final String slotLocation = _selectedSlot!['location']?.toString().trim().isNotEmpty == true ? _selectedSlot!['location'].toString() : draft.location;
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:207:                  title: 'No published future slots are available',
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:214:                final String selectedId = _selectedSlot?['id']?.toString() ?? _selectedSlot?['startsAt']?.toString() ?? '';
+apps/mobile/lib/features/booking/presentation/screens/select_slot_page.dart:222:                    onTap: () => setState(() => _selectedSlot = slot),
+
+Flutter build/analyze: not run in this environment because Flutter/Dart SDK is not installed.

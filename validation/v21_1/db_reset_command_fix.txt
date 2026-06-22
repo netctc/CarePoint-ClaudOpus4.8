@@ -1,0 +1,13 @@
+V21.1 static validation
+
+Root db:reset:pilot no longer calls npx prisma from repository root.
+Root db:push delegates to @care-center/api workspace.
+@care-center/api now owns prisma:db:push and resolves the local Prisma CLI from workspace dependencies.
+
+Expected Windows command:
+npm run db:reset:pilot
+
+Expected execution chain:
+1. npm run prisma:db:push --workspace @care-center/api -- --force-reset --accept-data-loss
+2. npm run prisma:generate
+3. npm run prisma:reset:pilot --workspace @care-center/api

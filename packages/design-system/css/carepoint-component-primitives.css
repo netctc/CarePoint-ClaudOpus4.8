@@ -1,0 +1,116 @@
+/* CarePoint UX-V3 component primitives.
+   Framework-agnostic normalization for forms, tables, empty states, and dashboard KPIs. */
+:root {
+  --cp-control-height: 48px;
+  --cp-control-height-sm: 40px;
+  --cp-control-pad-x: 16px;
+  --cp-control-gap: 10px;
+  --cp-control-radius: 16px;
+  --cp-table-cell-pad-y: 15px;
+  --cp-table-cell-pad-x: 14px;
+  --cp-table-header-height: 48px;
+  --cp-table-min-width: 760px;
+  --cp-empty-state-min-height: 132px;
+  --cp-empty-state-icon-size: 44px;
+  --cp-dashboard-stat-min-height: 156px;
+  --cp-dashboard-stat-grid-min: 220px;
+}
+
+.cp-form-surface,
+.cp-toolbar-surface {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--cp-space-4, 16px);
+}
+
+.cp-field,
+.cp-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cp-control {
+  min-height: var(--cp-control-height);
+  padding: 0 var(--cp-control-pad-x);
+  border: 1px solid var(--cp-border, #d9e3f2);
+  border-radius: var(--cp-control-radius);
+  background: var(--cp-surface-muted, #f8fbff);
+  color: var(--cp-text, #13233d);
+}
+
+.cp-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.cp-table-surface {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--cp-radius-lg, 20px);
+}
+
+.cp-data-table {
+  width: 100%;
+  min-width: var(--cp-table-min-width);
+  border-collapse: collapse;
+}
+
+.cp-data-table th,
+.cp-data-table td {
+  padding: var(--cp-table-cell-pad-y) var(--cp-table-cell-pad-x);
+  border-bottom: 1px solid var(--cp-border, #d9e3f2);
+  text-align: start;
+  vertical-align: top;
+}
+
+.cp-data-table th {
+  min-height: var(--cp-table-header-height);
+  color: var(--cp-text-muted, #667892);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cp-empty-state {
+  display: grid;
+  place-items: center;
+  min-height: var(--cp-empty-state-min-height);
+  padding: var(--cp-space-6, 24px);
+  border: 1px dashed var(--cp-border-strong, #c8d5ea);
+  border-radius: var(--cp-radius-lg, 20px);
+  background: var(--cp-surface-muted, #f8fbff);
+  color: var(--cp-text-muted, #667892);
+  text-align: center;
+}
+
+.cp-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--cp-dashboard-stat-grid-min), 1fr));
+  gap: var(--cp-space-4, 16px);
+}
+
+.cp-dashboard-card {
+  min-height: var(--cp-dashboard-stat-min-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cp-kpi-label {
+  color: var(--cp-text-muted, #667892);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cp-kpi-value {
+  font-size: var(--cp-dashboard-stat-value-size, 2rem);
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+}

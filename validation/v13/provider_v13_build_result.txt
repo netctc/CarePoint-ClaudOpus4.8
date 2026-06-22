@@ -1,0 +1,3 @@
+Provider build validation completed from apps/provider with npm run build.
+Result: success.
+Warnings: next.config.mjs contains legacy eslint key, non-blocking.

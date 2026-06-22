@@ -1,0 +1,6 @@
+Static implementation checks
+Provider seed definitions: 5
+Patient seed definitions: 20
+Root reset script: 59:    "db:reset:pilot": "npx prisma db push --schema services/api/prisma/schema.prisma --force-reset --accept-data-loss && npm run prisma:generate && npm run prisma:reset:pilot --workspace @care-center/api"
+
+API reset script: 14:    "prisma:reset:pilot": "tsx prisma/reset-pilot-seed.ts"

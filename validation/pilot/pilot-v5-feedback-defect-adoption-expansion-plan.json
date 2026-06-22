@@ -1,0 +1,481 @@
+{
+  "phase": "CarePoint Phase 4 - Controlled Pilot / Go-Live Execution",
+  "delivery": "PILOT-V5",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v7",
+  "generatedAt": "2026-05-21T19:42:21.873Z",
+  "purpose": "Convert pilot monitoring evidence into feedback, defect burn-down, adoption evidence, and an explicit expansion decision.",
+  "entryPosition": {
+    "pilotV1": "completed",
+    "pilotV2": "completed",
+    "pilotV3": "completed",
+    "pilotV4": "completed",
+    "qaV7": "closed",
+    "executionMode": "feedback, defect, adoption, and expansion governance; no runtime code change in this package"
+  },
+  "feedbackChannels": [
+    {
+      "id": "FB-001",
+      "channel": "Admin pilot interview",
+      "owner": "Pilot owner",
+      "cadence": "weekly or exit",
+      "requiredEvidence": [
+        "participant",
+        "role",
+        "workflow",
+        "sentiment",
+        "blockers",
+        "recommendations"
+      ]
+    },
+    {
+      "id": "FB-002",
+      "channel": "Provider pilot interview",
+      "owner": "Pilot owner",
+      "cadence": "weekly or exit",
+      "requiredEvidence": [
+        "participant",
+        "role",
+        "workflow",
+        "clinical friction",
+        "time impact",
+        "recommendations"
+      ]
+    },
+    {
+      "id": "FB-003",
+      "channel": "Operator/reviewer support notes",
+      "owner": "Support owner",
+      "cadence": "daily rollup",
+      "requiredEvidence": [
+        "ticket reference",
+        "workflow",
+        "resolution",
+        "recurrence",
+        "training need"
+      ]
+    },
+    {
+      "id": "FB-004",
+      "channel": "Daily health review action items",
+      "owner": "QA/UAT owner",
+      "cadence": "daily",
+      "requiredEvidence": [
+        "action owner",
+        "severity",
+        "due date",
+        "status",
+        "decision impact"
+      ]
+    },
+    {
+      "id": "FB-005",
+      "channel": "UAT signoff follow-up",
+      "owner": "QA/UAT owner",
+      "cadence": "before expansion decision",
+      "requiredEvidence": [
+        "role",
+        "accepted scope",
+        "open concerns",
+        "waivers",
+        "signature placeholder"
+      ]
+    },
+    {
+      "id": "FB-006",
+      "channel": "Adoption observation log",
+      "owner": "Pilot owner",
+      "cadence": "daily sampling",
+      "requiredEvidence": [
+        "active users",
+        "completed workflows",
+        "drop-offs",
+        "support touches",
+        "qualitative note"
+      ]
+    }
+  ],
+  "defectBurnDownBuckets": [
+    {
+      "id": "DEF-001",
+      "severity": "P0",
+      "expansionPolicy": "blocks expansion and may trigger rollback",
+      "exitRequirement": "zero open P0"
+    },
+    {
+      "id": "DEF-002",
+      "severity": "P1",
+      "expansionPolicy": "blocks expansion unless waived by pilot and technical owner",
+      "exitRequirement": "zero unowned P1 and all open P1 have remediation date"
+    },
+    {
+      "id": "DEF-003",
+      "severity": "P2",
+      "expansionPolicy": "allowed with documented workaround or backlog owner",
+      "exitRequirement": "triaged, grouped by workflow, owner assigned"
+    },
+    {
+      "id": "DEF-004",
+      "severity": "P3",
+      "expansionPolicy": "does not block expansion",
+      "exitRequirement": "captured in post-expansion backlog"
+    },
+    {
+      "id": "DEF-005",
+      "severity": "Training",
+      "expansionPolicy": "blocks expansion only if repeated across cohort",
+      "exitRequirement": "FAQ, job aid, or runbook update prepared"
+    },
+    {
+      "id": "DEF-006",
+      "severity": "Enhancement",
+      "expansionPolicy": "does not block expansion",
+      "exitRequirement": "separated from defects and prioritized after pilot decision"
+    }
+  ],
+  "adoptionEvidenceMetrics": [
+    {
+      "id": "ADOPT-001",
+      "metric": "Pilot cohort access success",
+      "threshold": ">= 95 percent of intended pilot users can sign in and reach assigned portal",
+      "owner": "Support owner"
+    },
+    {
+      "id": "ADOPT-002",
+      "metric": "Provider workflow completion",
+      "threshold": "critical Provider workflows exercised by at least one pilot user or explicitly waived",
+      "owner": "Pilot owner"
+    },
+    {
+      "id": "ADOPT-003",
+      "metric": "Admin workflow completion",
+      "threshold": "critical Admin workflows exercised by at least one pilot user or explicitly waived",
+      "owner": "Pilot owner"
+    },
+    {
+      "id": "ADOPT-004",
+      "metric": "Support burden",
+      "threshold": "no sustained growth in untriaged P0/P1 incidents",
+      "owner": "Support owner"
+    },
+    {
+      "id": "ADOPT-005",
+      "metric": "Feedback sentiment",
+      "threshold": "no repeated role-level blocker without mitigation",
+      "owner": "QA/UAT owner"
+    },
+    {
+      "id": "ADOPT-006",
+      "metric": "Operational evidence completeness",
+      "threshold": "daily health, support, and defect evidence available for decision meeting",
+      "owner": "Pilot owner"
+    },
+    {
+      "id": "ADOPT-007",
+      "metric": "Data and audit confidence",
+      "threshold": "zero unresolved data integrity or audit visibility blockers",
+      "owner": "QA/UAT owner"
+    },
+    {
+      "id": "ADOPT-008",
+      "metric": "Rollback readiness retained",
+      "threshold": "rollback path remains current until expansion is approved",
+      "owner": "Technical owner"
+    }
+  ],
+  "expansionDecisionOptions": [
+    {
+      "decision": "expand",
+      "condition": "All P0 cleared, P1 waived or scheduled, adoption evidence positive, support load stable, rollback ready."
+    },
+    {
+      "decision": "continue-limited-pilot",
+      "condition": "No P0, but more observation needed for adoption, support load, or workflow coverage."
+    },
+    {
+      "decision": "hold-expansion",
+      "condition": "Open P1/P2 trend or feedback issue requires correction before wider rollout."
+    },
+    {
+      "decision": "hotfix-and-retest",
+      "condition": "Focused correction is required, followed by targeted regression and pilot recheck."
+    },
+    {
+      "decision": "rollback",
+      "condition": "P0, data integrity, role boundary, or access issue prevents safe continuation."
+    }
+  ],
+  "decisionMeetingAgenda": [
+    {
+      "id": "DEC-001",
+      "topic": "Pilot scope and cohort recap",
+      "evidence": "PILOT-V1 cohort/scope plan plus actual participation summary"
+    },
+    {
+      "id": "DEC-002",
+      "topic": "Deployment and activation recap",
+      "evidence": "PILOT-V2 staging/environment activation evidence"
+    },
+    {
+      "id": "DEC-003",
+      "topic": "Launch execution recap",
+      "evidence": "PILOT-V3 day-0/day-1 runbook evidence"
+    },
+    {
+      "id": "DEC-004",
+      "topic": "Monitoring and support recap",
+      "evidence": "PILOT-V4 daily health and incident triage evidence"
+    },
+    {
+      "id": "DEC-005",
+      "topic": "Defect burn-down",
+      "evidence": "Open/closed defects by severity, owner, target date, waiver if applicable"
+    },
+    {
+      "id": "DEC-006",
+      "topic": "Adoption evidence",
+      "evidence": "workflow completion, user feedback, support load, role-level acceptance"
+    },
+    {
+      "id": "DEC-007",
+      "topic": "Risk and rollback posture",
+      "evidence": "known risks, mitigations, rollback readiness, go/no-go owner decision"
+    },
+    {
+      "id": "DEC-008",
+      "topic": "Expansion decision",
+      "evidence": "expand, continue-limited-pilot, hold-expansion, hotfix-and-retest, or rollback"
+    }
+  ],
+  "expansionReadinessChecklist": [
+    {
+      "id": "EXP-001",
+      "item": "No open P0 defects",
+      "required": true
+    },
+    {
+      "id": "EXP-002",
+      "item": "No unowned P1 defects",
+      "required": true
+    },
+    {
+      "id": "EXP-003",
+      "item": "All open P1 defects have waiver or committed remediation date",
+      "required": true
+    },
+    {
+      "id": "EXP-004",
+      "item": "Pilot feedback has been grouped by role and workflow",
+      "required": true
+    },
+    {
+      "id": "EXP-005",
+      "item": "Adoption evidence covers Admin and Provider critical workflows",
+      "required": true
+    },
+    {
+      "id": "EXP-006",
+      "item": "Support intake and triage are operating without aged P0/P1 items",
+      "required": true
+    },
+    {
+      "id": "EXP-007",
+      "item": "Data integrity and audit visibility concerns are closed or waived",
+      "required": true
+    },
+    {
+      "id": "EXP-008",
+      "item": "Training or FAQ updates are prepared for repeated support questions",
+      "required": false
+    },
+    {
+      "id": "EXP-009",
+      "item": "Rollback path remains approved and current",
+      "required": true
+    },
+    {
+      "id": "EXP-010",
+      "item": "Expansion decision owner signs the decision record",
+      "required": true
+    },
+    {
+      "id": "EXP-011",
+      "item": "Post-expansion support model is confirmed",
+      "required": true
+    },
+    {
+      "id": "EXP-012",
+      "item": "PILOT-V6 closure criteria are understood before final go-live execution certificate",
+      "required": true
+    }
+  ],
+  "decisionRecordTemplate": {
+    "decision": "expand | continue-limited-pilot | hold-expansion | hotfix-and-retest | rollback",
+    "requiredFields": [
+      "decision owner",
+      "date",
+      "environment",
+      "cohort",
+      "evidence reviewed",
+      "open risks",
+      "waivers",
+      "next action",
+      "signature placeholder"
+    ]
+  },
+  "checks": [
+    {
+      "id": "pilot_manifest_delivery_v5",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v3_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v5_current_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v6_planned_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v3_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_health_plan_available",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_closure_100_percent",
+      "passed": true
+    },
+    {
+      "id": "feedback_expansion_script_registered",
+      "passed": true
+    },
+    {
+      "id": "pilot_aggregate_runs_v1_to_v5",
+      "passed": true
+    },
+    {
+      "id": "required_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_reports_present",
+      "passed": true
+    },
+    {
+      "id": "feedback_channels_defined",
+      "passed": true
+    },
+    {
+      "id": "feedback_channels_have_evidence_schema",
+      "passed": true
+    },
+    {
+      "id": "defect_burndown_buckets_defined",
+      "passed": true
+    },
+    {
+      "id": "defect_burndown_has_p0_p1_policy",
+      "passed": true
+    },
+    {
+      "id": "adoption_evidence_metrics_defined",
+      "passed": true
+    },
+    {
+      "id": "adoption_evidence_covers_admin_provider_support_data",
+      "passed": true
+    },
+    {
+      "id": "expansion_decision_options_defined",
+      "passed": true
+    },
+    {
+      "id": "expansion_decision_includes_expand_hold_hotfix_rollback",
+      "passed": true
+    },
+    {
+      "id": "decision_meeting_agenda_defined",
+      "passed": true
+    },
+    {
+      "id": "decision_meeting_covers_prior_phase_evidence",
+      "passed": true
+    },
+    {
+      "id": "expansion_readiness_checklist_defined",
+      "passed": true
+    },
+    {
+      "id": "expansion_required_items_majority_required",
+      "passed": true
+    },
+    {
+      "id": "no_open_p0_gate_defined",
+      "passed": true
+    },
+    {
+      "id": "rollback_readiness_gate_defined",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "pilot_artifacts_only_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "audit_qa_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_python_worker_script_available",
+      "passed": true
+    },
+    {
+      "id": "next_delivery_declared",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 37,
+    "total": 37,
+    "completionPercent": 100
+  },
+  "nextRecommendedDelivery": "PILOT-V6 - Final go-live execution certificate and phase closure"
+}

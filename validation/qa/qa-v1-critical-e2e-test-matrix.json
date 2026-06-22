@@ -1,0 +1,851 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V1",
+  "sourceBaseline": "CarePoint_design_refinement_phase_ux_v6",
+  "generatedAt": "2026-05-21T17:15:52.069Z",
+  "purpose": "Define the master QA and UAT scope before scripted execution begins.",
+  "scenarioCount": 44,
+  "priorityCounts": {
+    "P0": 24,
+    "P1": 16,
+    "P2": 4
+  },
+  "scenarios": [
+    {
+      "id": "AUTH-001",
+      "area": "Authentication",
+      "title": "Admin login, protected route access, and logout",
+      "role": "admin",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "AUTH-002",
+      "area": "Authentication",
+      "title": "Provider login, protected route access, and logout",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "AUTH-003",
+      "area": "Authentication",
+      "title": "Expired session returns user to sign-in without data exposure",
+      "role": "admin-provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "RBAC-001",
+      "area": "Authorization",
+      "title": "Admin role can access accounts, audit, reports, and settings",
+      "role": "admin",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "RBAC-002",
+      "area": "Authorization",
+      "title": "Provider role cannot access Admin-only surfaces",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-001",
+      "area": "Admin accounts",
+      "title": "Create, read, update, and disable account from Admin portal",
+      "role": "admin",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-002",
+      "area": "Admin accounts",
+      "title": "Bulk account action requires explicit confirmation and evidence",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-003",
+      "area": "Admin accounts",
+      "title": "CSV import drawer handles validation errors and success summary",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-004",
+      "area": "Admin audit",
+      "title": "Audit logs filter by actor, action, date, and subject",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-005",
+      "area": "Admin reports",
+      "title": "Report builder creates a saved KPI/report definition",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "ADMIN-006",
+      "area": "Admin reports",
+      "title": "Report delivery panel validates schedule and recipients",
+      "role": "admin",
+      "priority": "P2",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "PROV-001",
+      "area": "Provider dashboard",
+      "title": "Provider dashboard loads clinical workload and KPI cards",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PROV-002",
+      "area": "Provider queue",
+      "title": "Queue worklist opens patient/refill task and preserves back navigation",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PROV-003",
+      "area": "Provider calendar",
+      "title": "Calendar day/week surface displays slots and appointments",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PROV-004",
+      "area": "Provider appointments",
+      "title": "Appointment worklist supports status review and evidence panel",
+      "role": "provider",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "PROV-005",
+      "area": "Provider prescriptions",
+      "title": "New prescription flow validates required fields and clinical warnings",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PROV-006",
+      "area": "Provider encounters",
+      "title": "Encounter note workflow preserves draft state and submit confirmation",
+      "role": "provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PROV-007",
+      "area": "Provider i18n",
+      "title": "Language switching preserves route and critical clinical labels",
+      "role": "provider",
+      "priority": "P2",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "API-001",
+      "area": "API contracts",
+      "title": "API build passes with shared contract package",
+      "role": "api",
+      "priority": "P0",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "API-002",
+      "area": "API contracts",
+      "title": "Hybrid Python prepare endpoints return contract-compatible payloads",
+      "role": "api-python",
+      "priority": "P0",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "API-003",
+      "area": "API errors",
+      "title": "API validation errors return stable status, code, and message shape",
+      "role": "api",
+      "priority": "P1",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "PY-001",
+      "area": "Python worker",
+      "title": "Option B worker verification passes",
+      "role": "python-worker",
+      "priority": "P0",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PY-002",
+      "area": "Python worker",
+      "title": "Python contract test suite passes",
+      "role": "python-worker",
+      "priority": "P0",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "PY-003",
+      "area": "Python worker",
+      "title": "Dry-run/advisory decisions remain metadata-only",
+      "role": "python-worker",
+      "priority": "P1",
+      "type": "automated-or-scripted",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "E2E-001",
+      "area": "End-to-end",
+      "title": "Admin-created provider can sign in and reach Provider portal",
+      "role": "cross-app",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "E2E-002",
+      "area": "End-to-end",
+      "title": "Provider clinical action is visible in Admin audit evidence",
+      "role": "cross-app",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "E2E-003",
+      "area": "End-to-end",
+      "title": "Report/KPI data reflects clinical workflow activity after refresh",
+      "role": "cross-app",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "UX-001",
+      "area": "UX regression",
+      "title": "Admin navigation, landmarks, focus-visible, and responsive layout pass smoke",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "UX-002",
+      "area": "UX regression",
+      "title": "Provider navigation, landmarks, focus-visible, and responsive layout pass smoke",
+      "role": "provider",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "UX-003",
+      "area": "UX regression",
+      "title": "Forms, tables, empty states, and KPI cards use normalized primitives",
+      "role": "admin-provider",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "A11Y-001",
+      "area": "Accessibility",
+      "title": "Keyboard-only navigation reaches all critical actions",
+      "role": "admin-provider",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "A11Y-002",
+      "area": "Accessibility",
+      "title": "Screen reader labels are present for search, nav, forms, and tables",
+      "role": "admin-provider",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "A11Y-003",
+      "area": "Accessibility",
+      "title": "Reduced motion and forced colors modes remain usable",
+      "role": "admin-provider",
+      "priority": "P2",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "RESP-001",
+      "area": "Responsive",
+      "title": "Critical Admin surfaces pass desktop, tablet, and mobile smoke",
+      "role": "admin",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "RESP-002",
+      "area": "Responsive",
+      "title": "Critical Provider surfaces pass desktop, tablet, and mobile smoke",
+      "role": "provider",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "SEC-001",
+      "area": "Security smoke",
+      "title": "No secret values are committed and environment example remains safe",
+      "role": "platform",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "SEC-002",
+      "area": "Security smoke",
+      "title": "Protected APIs reject unauthenticated requests",
+      "role": "api",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "OBS-001",
+      "area": "Observability",
+      "title": "Errors produce actionable logs without exposing sensitive data",
+      "role": "platform",
+      "priority": "P1",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "REL-001",
+      "area": "Reliability",
+      "title": "Rollback plan and close evidence are present before staging promotion",
+      "role": "platform",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "REL-002",
+      "area": "Reliability",
+      "title": "Repeated smoke execution does not require manual data reset",
+      "role": "platform",
+      "priority": "P2",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    },
+    {
+      "id": "PROD-001",
+      "area": "Production readiness",
+      "title": "Environment, build, migration, backup, and rollback checklist is completed",
+      "role": "platform",
+      "priority": "P0",
+      "type": "manual-or-e2e-automation-candidate",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "UAT-001",
+      "area": "UAT",
+      "title": "Admin stakeholder signs acceptance checklist",
+      "role": "uat",
+      "priority": "P0",
+      "type": "manual-uat",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "UAT-002",
+      "area": "UAT",
+      "title": "Provider stakeholder signs acceptance checklist",
+      "role": "uat",
+      "priority": "P0",
+      "type": "manual-uat",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must pass before production readiness signoff"
+    },
+    {
+      "id": "UAT-003",
+      "area": "UAT",
+      "title": "Operator/reviewer stakeholder signs acceptance checklist",
+      "role": "uat",
+      "priority": "P1",
+      "type": "manual-uat",
+      "expectedEvidence": [
+        "tester",
+        "environment",
+        "date",
+        "steps executed",
+        "expected result",
+        "actual result",
+        "pass/fail",
+        "screenshot or log reference when applicable"
+      ],
+      "acceptance": "Must be triaged before production readiness signoff"
+    }
+  ]
+}

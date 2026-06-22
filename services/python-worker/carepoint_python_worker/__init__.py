@@ -1,0 +1,4 @@
+"""CarePoint hybrid Python worker package."""
+
+__all__ = ["__version__"]
+__version__ = "0.64.0"

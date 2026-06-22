@@ -1,0 +1,7 @@
+This package is a clean Provider app source folder for Next.js 16 compatibility.
+
+Important:
+- Replace the entire apps/provider folder with this one.
+- Do not extract it on top of an older provider folder.
+- This source contains proxy.ts only. It does not contain middleware.ts.
+- The .next build folder was removed intentionally.

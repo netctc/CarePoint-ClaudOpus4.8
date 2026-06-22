@@ -1,0 +1,413 @@
+{
+  "generatedAt": "2026-04-29T20:16:30.165Z",
+  "root": "/tmp/phase20_merged",
+  "status": "READY_WITH_WARNINGS",
+  "totals": {
+    "checks": 50,
+    "passed": 49,
+    "errors": 0,
+    "warnings": 1
+  },
+  "checks": [
+    {
+      "id": "ADMIN_ACCOUNTS_PAGE",
+      "title": "Admin patient/provider account governance page",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/accounts/page.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/admin/src/app/portal/accounts/page.tsx."
+    },
+    {
+      "id": "ADMIN_ORGS_PAGE",
+      "title": "Admin organization management page",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/organizations/page.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/admin/src/app/portal/organizations/page.tsx."
+    },
+    {
+      "id": "ADMIN_AUDIT_LOGS_PAGE",
+      "title": "Admin audit logs page",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/audit/logs/page.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/admin/src/app/portal/audit/logs/page.tsx."
+    },
+    {
+      "id": "ADMIN_AUDIT_EXPORT_PROXY",
+      "title": "Admin filtered audit export proxy",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/audit/logs/export/route.ts",
+      "recommendation": "Apply the missing phase patch that provides apps/admin/src/app/portal/audit/logs/export/route.ts."
+    },
+    {
+      "id": "ADMIN_USERS_ROUTES",
+      "title": "Backend admin-users route module",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Apply the missing phase patch that provides services/api/src/modules/admin-users/admin-users.routes.ts."
+    },
+    {
+      "id": "PRISMA_SCHEMA",
+      "title": "Prisma schema",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Apply the missing phase patch that provides services/api/prisma/schema.prisma."
+    },
+    {
+      "id": "PROVIDER_ROOT_REDIRECT",
+      "title": "Provider root route",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/app/page.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/provider/app/page.tsx."
+    },
+    {
+      "id": "PROVIDER_SIGNIN_PAGE",
+      "title": "Provider sign-in page",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/app/sign-in/page.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/provider/app/sign-in/page.tsx."
+    },
+    {
+      "id": "PROVIDER_SIGNIN_FORM",
+      "title": "Provider sign-in form",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/app/sign-in/sign-in-form.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/provider/app/sign-in/sign-in-form.tsx."
+    },
+    {
+      "id": "PROVIDER_TOP_HEADER",
+      "title": "Provider portal top header",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/components/layout/top-header.tsx",
+      "recommendation": "Apply the missing phase patch that provides apps/provider/components/layout/top-header.tsx."
+    },
+    {
+      "id": "PROVIDER_API_CLIENT",
+      "title": "Provider API client",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/services/api-client.ts",
+      "recommendation": "Apply the missing phase patch that provides apps/provider/services/api-client.ts."
+    },
+    {
+      "id": "PRISMA_ACCOUNT_STATUS",
+      "title": "Account lifecycle enum",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_ONBOARDING_STATUS",
+      "title": "Provider onboarding status enum",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_CREDENTIAL_DOCUMENT",
+      "title": "ProviderCredentialDocument model",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_REVIEW_TASK",
+      "title": "ProviderCredentialReviewTask model",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_NOTIFICATION",
+      "title": "ProviderCredentialNotification model",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_PROVIDER_RELATIONS",
+      "title": "Provider profile credential relations",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "PRISMA_ORG_RELATIONS",
+      "title": "Organization credential governance relations",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/schema.prisma",
+      "recommendation": "Confirm Phase 3-17 schema changes are merged before running Prisma migrations."
+    },
+    {
+      "id": "MIGRATION_20260428100000_provider_credential_documents",
+      "title": "Migration folder 20260428100000_provider_credential_documents",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/migrations",
+      "recommendation": "Add or re-apply migration 20260428100000_provider_credential_documents before running migrate deploy."
+    },
+    {
+      "id": "MIGRATION_20260428103000_provider_credential_review_tasks",
+      "title": "Migration folder 20260428103000_provider_credential_review_tasks",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/migrations",
+      "recommendation": "Add or re-apply migration 20260428103000_provider_credential_review_tasks before running migrate deploy."
+    },
+    {
+      "id": "MIGRATION_20260428110000_provider_credential_notifications",
+      "title": "Migration folder 20260428110000_provider_credential_notifications",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/migrations",
+      "recommendation": "Add or re-apply migration 20260428110000_provider_credential_notifications before running migrate deploy."
+    },
+    {
+      "id": "MIGRATION_20260428113000_provider_credential_notification_dispatch",
+      "title": "Migration folder 20260428113000_provider_credential_notification_dispatch",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/prisma/migrations",
+      "recommendation": "Add or re-apply migration 20260428113000_provider_credential_notification_dispatch before running migrate deploy."
+    },
+    {
+      "id": "MIGRATION_ORDER",
+      "title": "Credential governance migration order",
+      "severity": "warning",
+      "passed": true,
+      "detail": "20260428100000_provider_credential_documents -> 20260428103000_provider_credential_review_tasks -> 20260428110000_provider_credential_notifications -> 20260428113000_provider_credential_notification_dispatch",
+      "recommendation": "Keep timestamped migration folders in chronological order and run them once in staging before production."
+    },
+    {
+      "id": "ROUTE_PATIENTS",
+      "title": "Patient CRUD route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_PROVIDERS",
+      "title": "Provider CRUD route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_ORGANIZATIONS",
+      "title": "Organization management route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_BULK_STATUS",
+      "title": "Bulk lifecycle route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_AUDIT_EXPORT",
+      "title": "Filtered audit export route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_DATA_QUALITY",
+      "title": "Data-quality route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_GOVERNANCE_SWEEP",
+      "title": "Credential governance sweep route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_PROVIDER_ONBOARDING",
+      "title": "Provider onboarding route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_CREDENTIAL_DOCS",
+      "title": "Credential documents route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_REVIEW_TASKS",
+      "title": "Credential review task route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "ROUTE_NOTIFICATIONS",
+      "title": "Credential notifications route surface",
+      "severity": "error",
+      "passed": true,
+      "detail": "services/api/src/modules/admin-users/admin-users.routes.ts",
+      "recommendation": "Re-apply the relevant account governance phase patch."
+    },
+    {
+      "id": "UI_ACCOUNT_AUDIT_LINKS",
+      "title": "Account audit trail links visible",
+      "severity": "warning",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/*",
+      "recommendation": "Review the Admin account governance UI after merge."
+    },
+    {
+      "id": "UI_ORG_CREATE_MODIFY_DELETE",
+      "title": "Organization create/modify/delete UI present",
+      "severity": "warning",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/*",
+      "recommendation": "Review the Admin account governance UI after merge."
+    },
+    {
+      "id": "UI_AUDIT_FILTERS",
+      "title": "Audit page has filter/export support",
+      "severity": "warning",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/*",
+      "recommendation": "Review the Admin account governance UI after merge."
+    },
+    {
+      "id": "UI_ORG_OPTIONAL",
+      "title": "Accounts page supports unassigned organization handling",
+      "severity": "warning",
+      "passed": true,
+      "detail": "apps/admin/src/app/portal/*",
+      "recommendation": "Review the Admin account governance UI after merge."
+    },
+    {
+      "id": "PROVIDER_ROOT_REDIRECTS_SIGNIN",
+      "title": "Provider root redirects directly to sign-in",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/app/page.tsx",
+      "recommendation": "Phase 18 should replace the Provider landing page buttons with a direct /sign-in redirect."
+    },
+    {
+      "id": "PROVIDER_LANDING_BUTTONS_REMOVED",
+      "title": "Provider landing buttons removed",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/app/page.tsx",
+      "recommendation": "Remove the old landing page buttons and keep only the redirect."
+    },
+    {
+      "id": "PROVIDER_LOGOUT_BUTTON",
+      "title": "Provider top header has logout button",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/components/layout/top-header.tsx",
+      "recommendation": "Phase 19 should add a visible logout button in the Provider portal header."
+    },
+    {
+      "id": "PROVIDER_LOGOUT_API",
+      "title": "Provider API client exposes logout",
+      "severity": "error",
+      "passed": true,
+      "detail": "apps/provider/services/api-client.ts",
+      "recommendation": "Ensure logout calls POST /api/auth/logout and clears local cookies on failure."
+    },
+    {
+      "id": "PROVIDER_LOGIN_DEV_OTP",
+      "title": "Provider sign-in preserves development OTP display",
+      "severity": "warning",
+      "passed": true,
+      "detail": "apps/provider/app/sign-in/sign-in-form.tsx",
+      "recommendation": "Confirm development/test OTP display is still present if your API returns it."
+    },
+    {
+      "id": "DOC_PHASE13_MERGE",
+      "title": "Phase 13 merge checklist",
+      "severity": "warning",
+      "passed": true,
+      "detail": "docs/merge-checklists/admin-accounts-phase13-merge-checklist.md",
+      "recommendation": "Add documentation/test files from the phase patches for easier QA handoff."
+    },
+    {
+      "id": "DOC_PHASE17_MERGE",
+      "title": "Phase 17 merge checklist",
+      "severity": "warning",
+      "passed": true,
+      "detail": "docs/merge-checklists/admin-accounts-phase17-merge-checklist.md",
+      "recommendation": "Add documentation/test files from the phase patches for easier QA handoff."
+    },
+    {
+      "id": "DOC_PHASE19_MERGE",
+      "title": "Phase 19 Provider logout merge checklist",
+      "severity": "warning",
+      "passed": true,
+      "detail": "docs/merge-checklists/provider-phase19-logout-merge-checklist.md",
+      "recommendation": "Add documentation/test files from the phase patches for easier QA handoff."
+    },
+    {
+      "id": "HTTP_PHASE17_ORGS",
+      "title": "Organization API test file",
+      "severity": "warning",
+      "passed": true,
+      "detail": "docs/api-tests/admin-accounts-phase17-organizations.http",
+      "recommendation": "Add documentation/test files from the phase patches for easier QA handoff."
+    },
+    {
+      "id": "HTTP_PHASE19_LOGOUT",
+      "title": "Provider logout API test file",
+      "severity": "warning",
+      "passed": true,
+      "detail": "docs/api-tests/provider-phase19-logout.http",
+      "recommendation": "Add documentation/test files from the phase patches for easier QA handoff."
+    },
+    {
+      "id": "PRISMA_VERSION_ALIGNMENT",
+      "title": "Root/API Prisma major versions are aligned",
+      "severity": "warning",
+      "passed": false,
+      "detail": "root prisma=^7.6.0, root @prisma/client=^7.6.0, api prisma=^5.18.0, api @prisma/client=^5.18.0",
+      "recommendation": "Align Prisma CLI and @prisma/client major versions before production migration. Current codebase historically mixes Prisma 7 at root and Prisma 5 in services/api."
+    },
+    {
+      "id": "ENV_FILES_PRESENT_IN_WORKSPACE",
+      "title": "Workspace .env files detected only as local deployment files",
+      "severity": "info",
+      "passed": true,
+      "detail": "No .env files detected under scanned workspace.",
+      "recommendation": "This is informational only. Do not package or commit .env files; keep secrets managed manually as requested."
+    }
+  ]
+}

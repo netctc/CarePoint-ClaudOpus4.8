@@ -1,0 +1,3 @@
+Command: cd apps/provider && npm run build
+Result: SUCCESS
+Notes: Next.js 16.2.4 compiled successfully. Static pages generated successfully. Warnings about deprecated/invalid next.config.mjs eslint key are pre-existing config warnings and did not block the build.

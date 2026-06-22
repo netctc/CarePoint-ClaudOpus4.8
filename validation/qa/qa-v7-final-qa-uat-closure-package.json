@@ -1,0 +1,436 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V7",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v6",
+  "generatedAt": "2026-05-21T17:15:52.984Z",
+  "status": "closed",
+  "closureDecision": "QA/UAT phase evidence package is complete and ready for controlled go-live or pilot decision.",
+  "closedPredecessorPhases": {
+    "optionBPythonProgressive": "V64",
+    "designRefinementUx": "UX-V6",
+    "qaUatProductionReadiness": "QA-V7"
+  },
+  "technicalBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "designRefinementUx": "closed at UX-V6",
+    "qaV1MasterPlan": "complete",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false,
+    "applicationRuntimeCodeChanged": false,
+    "qaV2AdminFunctionalQa": "complete",
+    "qaV3ProviderFunctionalQa": "complete",
+    "qaV4NodeApiPythonE2E": "complete",
+    "qaArtifactsOnly": true,
+    "qaV5UatRoleAcceptance": "complete",
+    "qaV6ProductionReadiness": "complete",
+    "qaV7FinalClosure": "complete"
+  },
+  "priorAuditSummary": [
+    {
+      "id": "QA-V1",
+      "path": "validation/qa/qa-v1-master-qa-plan-audit.json",
+      "kind": "master QA plan",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 12,
+        "total": 12,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.069Z"
+    },
+    {
+      "id": "QA-V2",
+      "path": "validation/qa/qa-v2-admin-functional-config-audit.json",
+      "kind": "Admin functional/config QA",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 47,
+        "total": 47,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.147Z"
+    },
+    {
+      "id": "QA-V3",
+      "path": "validation/qa/qa-v3-provider-functional-workflows-audit.json",
+      "kind": "Provider functional workflow QA",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 65,
+        "total": 65,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.257Z"
+    },
+    {
+      "id": "QA-V4",
+      "path": "validation/qa/qa-v4-api-python-e2e-audit.json",
+      "kind": "Node/API/Python E2E QA",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 76,
+        "total": 76,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.415Z"
+    },
+    {
+      "id": "QA-V5",
+      "path": "validation/qa/qa-v5-uat-role-acceptance-audit.json",
+      "kind": "UAT role acceptance QA",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 35,
+        "total": 35,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.512Z"
+    },
+    {
+      "id": "QA-V6",
+      "path": "validation/qa/qa-v6-production-readiness-audit.json",
+      "kind": "Production readiness QA",
+      "present": true,
+      "passed": true,
+      "aggregate": {
+        "passed": 54,
+        "total": 54,
+        "completionPercent": 100
+      },
+      "generatedAt": "2026-05-21T17:15:52.592Z"
+    }
+  ],
+  "finalQaCommands": [
+    {
+      "id": "FINAL-CMD-001",
+      "command": "npm install",
+      "expected": "Dependencies install successfully in the target environment."
+    },
+    {
+      "id": "FINAL-CMD-002",
+      "command": "npm run build:api",
+      "expected": "API and shared contracts build successfully."
+    },
+    {
+      "id": "FINAL-CMD-003",
+      "command": "npm run build:web",
+      "expected": "Admin and Provider builds complete or have accepted deferral for a non-web pilot."
+    },
+    {
+      "id": "FINAL-CMD-004",
+      "command": "npm run audit:qa",
+      "expected": "QA-V1 through QA-V7 audit package completes with 100% scanner coverage."
+    },
+    {
+      "id": "FINAL-CMD-005",
+      "command": "PYTHONPATH=services/python-worker python scripts/option_b/verify_python_worker.py",
+      "expected": "Python worker verification passes."
+    },
+    {
+      "id": "FINAL-CMD-006",
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=services/python-worker python -m pytest -q services/python-worker/tests/test_worker_contracts.py --disable-warnings",
+      "expected": "Python worker contract suite passes."
+    }
+  ],
+  "roleSignoffChecklist": [
+    {
+      "role": "Admin stakeholder",
+      "source": "QA-V5 Admin acceptance package",
+      "requiredBeforeGoLive": true
+    },
+    {
+      "role": "Provider stakeholder",
+      "source": "QA-V5 Provider acceptance package",
+      "requiredBeforeGoLive": true
+    },
+    {
+      "role": "Operator/Reviewer stakeholder",
+      "source": "QA-V5 Operator/Reviewer package",
+      "requiredBeforeGoLive": true
+    },
+    {
+      "role": "Platform/Technical owner",
+      "source": "QA-V5 platform and QA-V6 production readiness package",
+      "requiredBeforeGoLive": true
+    },
+    {
+      "role": "Release owner",
+      "source": "QA-V6 go/no-go decision record",
+      "requiredBeforeGoLive": true
+    }
+  ],
+  "defectClosureRules": [
+    {
+      "severity": "P0",
+      "rule": "No open P0 defects are allowed at final closure."
+    },
+    {
+      "severity": "P1",
+      "rule": "Open P1 defects require owner, mitigation, target release, and release-owner acceptance."
+    },
+    {
+      "severity": "P2",
+      "rule": "Open P2 defects may move to post-close backlog when they do not block pilot or production use."
+    },
+    {
+      "severity": "Unclassified",
+      "rule": "Unclassified defects must be classified before final go/no-go."
+    }
+  ],
+  "evidenceIndex": [
+    {
+      "id": "QA-V1-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v1-master-qa-plan-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-V2-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v2-admin-functional-config-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-V3-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v3-provider-functional-workflows-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-V4-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v4-api-python-e2e-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-V5-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v5-uat-role-acceptance-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-V6-AUDIT",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v6-production-readiness-audit.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-001",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v1-critical-e2e-test-matrix.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-002",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v2-admin-functional-test-plan.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-003",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v3-provider-functional-test-plan.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-004",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v4-api-python-e2e-test-plan.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-005",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v5-uat-role-acceptance-package.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-REPORT-006",
+      "type": "validation-report",
+      "path": "validation/qa/qa-v6-go-live-checklist.json",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-001",
+      "type": "documentation",
+      "path": "docs/qa/QA_V1_MASTER_QA_PLAN.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-002",
+      "type": "documentation",
+      "path": "docs/qa/QA_V2_ADMIN_FUNCTIONAL_QA.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-003",
+      "type": "documentation",
+      "path": "docs/qa/QA_V3_PROVIDER_FUNCTIONAL_QA.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-004",
+      "type": "documentation",
+      "path": "docs/qa/QA_V4_NODE_API_PYTHON_E2E_VALIDATION.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-005",
+      "type": "documentation",
+      "path": "docs/qa/QA_V5_UAT_PACKAGE_AND_ROLE_ACCEPTANCE.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-006",
+      "type": "documentation",
+      "path": "docs/qa/QA_V6_PRODUCTION_READINESS_AND_GO_LIVE.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-007",
+      "type": "documentation",
+      "path": "docs/qa/QA_V7_FINAL_QA_UAT_CLOSURE_CERTIFICATE.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-008",
+      "type": "documentation",
+      "path": "docs/qa/QA_V7_FINAL_EVIDENCE_INDEX.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-009",
+      "type": "documentation",
+      "path": "docs/qa/QA_V7_POST_CLOSE_BACKLOG.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-010",
+      "type": "documentation",
+      "path": "docs/qa/QA_V7_VALIDATION.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-011",
+      "type": "documentation",
+      "path": "docs/design/UX_PHASE_CLOSURE_CERTIFICATE.md",
+      "status": "accepted"
+    },
+    {
+      "id": "QA-DOC-012",
+      "type": "documentation",
+      "path": "docs/option-b/FINAL_HANDOVER_AND_PHASE_CLOSURE_V64.md",
+      "status": "accepted"
+    }
+  ],
+  "postCloseGuidance": {
+    "doNotContinueAs": [
+      "V65 unless a technical defect is discovered",
+      "UX-V7 unless a design defect is discovered",
+      "QA-V8 unless a closure defect is discovered"
+    ],
+    "recommendedNextPhase": "Controlled pilot, staging signoff, or production go-live execution phase",
+    "backlogFile": "docs/qa/QA_V7_POST_CLOSE_BACKLOG.md"
+  },
+  "checks": [
+    {
+      "id": "qa_v1_through_v6_audits_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v1_through_v6_audits_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_script_registered",
+      "passed": true
+    },
+    {
+      "id": "aggregate_qa_script_includes_v7",
+      "passed": true
+    },
+    {
+      "id": "qa_phase_manifest_closed",
+      "passed": true
+    },
+    {
+      "id": "option_b_phase_closed_reference_present",
+      "passed": true
+    },
+    {
+      "id": "ux_phase_closed_reference_present",
+      "passed": true
+    },
+    {
+      "id": "qa_artifacts_only_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "required_final_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_final_reports_present",
+      "passed": true
+    },
+    {
+      "id": "uat_acceptance_package_present",
+      "passed": true
+    },
+    {
+      "id": "go_live_checklist_present",
+      "passed": true
+    },
+    {
+      "id": "final_closure_certificate_doc_present",
+      "passed": true
+    },
+    {
+      "id": "post_close_backlog_present",
+      "passed": true
+    },
+    {
+      "id": "phase_roadmap_present",
+      "passed": true
+    },
+    {
+      "id": "audit_qa_command_available",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_web_script_available",
+      "passed": true
+    },
+    {
+      "id": "python_worker_verification_available",
+      "passed": true
+    },
+    {
+      "id": "python_worker_contract_tests_available",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_no_runtime_code_required",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_readiness_position_finalized",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 22,
+    "total": 22,
+    "completionPercent": 100
+  }
+}

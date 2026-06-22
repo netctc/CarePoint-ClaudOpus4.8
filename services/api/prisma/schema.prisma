@@ -1,0 +1,783 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  COMPANY_SUPPORT
+  PROVIDER
+  NURSE
+  PHARMACIST
+  LAB_TECH
+  FINANCE
+  PATIENT
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum MessageThreadType {
+  PATIENT_PROVIDER
+  INTERNAL
+}
+
+enum TelehealthStatus {
+  SCHEDULED
+  READY
+  LIVE
+  ENDED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  REFUNDED
+  FAILED
+}
+
+enum ProviderOnboardingStatus {
+  DRAFT
+  READY_FOR_REVIEW
+  REQUEST_CHANGES
+  APPROVED
+  REJECTED
+}
+
+enum CredentialDocumentType {
+  LICENSE
+  ID_DOCUMENT
+  INSURANCE
+  CERTIFICATION
+  DEGREE
+  OTHER
+}
+
+enum CredentialDocumentStatus {
+  MISSING
+  UPLOADED
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum ProviderCredentialReviewTaskStatus {
+  OPEN
+  IN_REVIEW
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProviderCredentialReviewPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ProviderCredentialNotificationChannel {
+  EMAIL
+  IN_APP
+  MANUAL
+}
+
+enum ProviderCredentialNotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model Organization {
+  id           String            @id @default(cuid())
+  name         String
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  users        User[]
+  patients     PatientProfile[]
+  providers    ProviderProfile[]
+  appointments Appointment[]
+  appointmentSubjectContexts AppointmentSubjectContext[]
+  threads      MessageThread[]
+  audits       AuditLog[]
+  onboardingStates ProviderOnboardingState[]
+  serviceCatalogItems ServiceCatalogItem[]
+  coverageRules CoverageRule[]
+  pricingRules PricingRule[]
+  policyTemplates PolicyTemplate[]
+  supportWorkItems SupportWorkItem[]
+  safetyCases    SafetyCase[]
+  reportDefinitions ReportDefinition[]
+  campaigns        Campaign[]
+  integrationConnections IntegrationConnection[]
+  moderationCases  ModerationCase[]
+  providerScheduleTemplates ProviderScheduleTemplate[]
+  clinicalOrders ClinicalOrder[]
+  prescriptionDrafts PrescriptionDraft[]
+  labWorkItems LabWorkItem[]
+  rpmEnrollments RpmEnrollment[]
+  providerAlerts ProviderAlert[]
+  facilitySettings FacilitySetting[]
+  patientFamilyProfiles PatientFamilyProfile[]
+  patientNotificationItems PatientNotificationItem[]
+  patientSupportTickets PatientSupportTicket[]
+  patientReminderPlans PatientReminderPlan[]
+  patientCarePlanItems PatientCarePlanItem[]
+  patientRpmPrograms PatientRpmProgram[]
+  patientConsentRecords PatientConsentRecord[]
+  providerCredentialDocuments ProviderCredentialDocument[]
+  providerCredentialReviewTasks ProviderCredentialReviewTask[]
+  providerCredentialNotifications ProviderCredentialNotification[]
+}
+
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            UserRole
+  status          AccountStatus    @default(ACTIVE)
+  deactivatedAt   DateTime?
+  deactivationReason String?
+  organizationId  String?
+  organization    Organization?    @relation(fields: [organizationId], references: [id])
+  patientProfile  PatientProfile?
+  providerProfile ProviderProfile?
+  refreshTokens   RefreshToken[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sentMessages    Message[]
+  audits          AuditLog[]
+  onboardingActions ProviderOnboardingState[] @relation("OnboardingActor")
+  verifiedCredentialDocuments ProviderCredentialDocument[] @relation("CredentialDocumentVerifier")
+  assignedCredentialReviewTasks ProviderCredentialReviewTask[] @relation("CredentialReviewTaskAssignee")
+  createdCredentialReviewTasks ProviderCredentialReviewTask[] @relation("CredentialReviewTaskCreator")
+  createdCredentialNotifications ProviderCredentialNotification[] @relation("CredentialNotificationCreator")
+
+  @@index([status])
+  @@index([organizationId, status])
+}
+
+model PatientProfile {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  organizationId  String
+  dateOfBirth     DateTime?
+  insuranceNumber String?
+  preferences     Json?
+  user            User           @relation(fields: [userId], references: [id])
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+  appointments    Appointment[]  @relation("PatientAppointments")
+  records         MedicalRecord[]
+  threads         MessageThread[]
+  payments        Payment[]
+}
+
+model ProviderProfile {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  organizationId String
+  specialty      String?
+  licenseNumber  String?
+  services       Json?
+  user           User          @relation(fields: [userId], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  appointments   Appointment[] @relation("ProviderAppointments")
+  threads        MessageThread[]
+  payments       Payment[]     @relation("ProviderPayments")
+  onboardingState ProviderOnboardingState?
+  credentialDocuments ProviderCredentialDocument[]
+  credentialReviewTasks ProviderCredentialReviewTask[]
+  credentialNotifications ProviderCredentialNotification[]
+}
+
+model RefreshToken {
+  id           String   @id @default(cuid())
+  userId       String
+  tokenHash    String
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Appointment {
+  id                String             @id @default(cuid())
+  organizationId    String
+  patientId         String
+  providerId        String
+  service           String
+  location          String
+  startsAt          DateTime
+  endsAt            DateTime
+  notes             String?
+  status            AppointmentStatus  @default(REQUESTED)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+  patient           PatientProfile     @relation("PatientAppointments", fields: [patientId], references: [id])
+  provider          ProviderProfile    @relation("ProviderAppointments", fields: [providerId], references: [id])
+  telehealthSession TelehealthSession?
+  records           MedicalRecord[]
+  payments          Payment[]
+  subjectContext    AppointmentSubjectContext?
+}
+
+model AppointmentSubjectContext {
+  appointmentId        String      @id
+  organizationId       String
+  patientId            String
+  subjectProfileId     String
+  subjectLabel         String?
+  subjectRelationship  String?
+  isFamilySubject      Boolean     @default(true)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  appointment          Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  organization         Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, patientId])
+  @@index([patientId, subjectProfileId])
+}
+
+model MedicalRecord {
+  id            String          @id @default(cuid())
+  patientId     String
+  providerId    String?
+  appointmentId String?
+  summary       Json
+  content       Json
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  patient       PatientProfile  @relation(fields: [patientId], references: [id])
+  appointment   Appointment?    @relation(fields: [appointmentId], references: [id])
+}
+
+model MessageThread {
+  id             String           @id @default(cuid())
+  organizationId String
+  patientId      String?
+  providerId     String?
+  subject        String
+  type           MessageThreadType
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  patient        PatientProfile?  @relation(fields: [patientId], references: [id])
+  provider       ProviderProfile? @relation(fields: [providerId], references: [id])
+  messages       Message[]
+}
+
+model Message {
+  id          String        @id @default(cuid())
+  threadId    String
+  senderId    String
+  body        String
+  attachments Json?
+  createdAt   DateTime      @default(now())
+  thread      MessageThread @relation(fields: [threadId], references: [id])
+  sender      User          @relation(fields: [senderId], references: [id])
+}
+
+model TelehealthSession {
+  id            String           @id @default(cuid())
+  appointmentId String           @unique
+  vendor        String
+  meetingId     String
+  joinUrl       String
+  status        TelehealthStatus @default(SCHEDULED)
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  appointment   Appointment      @relation(fields: [appointmentId], references: [id])
+}
+
+model Payment {
+  id              String           @id @default(cuid())
+  appointmentId   String?
+  patientId       String?
+  providerId      String?
+  amountMinor     Int
+  currency        String
+  status          PaymentStatus    @default(PENDING)
+  gateway         String?
+  externalId      String?
+  commissionMinor Int?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  appointment     Appointment?     @relation(fields: [appointmentId], references: [id])
+  patient         PatientProfile?  @relation(fields: [patientId], references: [id])
+  provider        ProviderProfile? @relation("ProviderPayments", fields: [providerId], references: [id])
+}
+
+model AuditLog {
+  id             String        @id @default(cuid())
+  actorId        String?
+  organizationId String?
+  action         String
+  resource       String
+  resourceId     String?
+  details        Json?
+  createdAt      DateTime      @default(now())
+  actor          User?         @relation(fields: [actorId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+}
+
+
+model ProviderOnboardingState {
+  id             String                   @id @default(cuid())
+  providerId     String                   @unique
+  organizationId String
+  status         ProviderOnboardingStatus @default(DRAFT)
+  checklist      Json?
+  submittedAt    DateTime?
+  reviewedAt     DateTime?
+  decisionNote   String?
+  requestedFields Json?
+  lastAction     String?
+  lastActorId    String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  provider       ProviderProfile          @relation(fields: [providerId], references: [id])
+  organization   Organization             @relation(fields: [organizationId], references: [id])
+  lastActor      User?                    @relation("OnboardingActor", fields: [lastActorId], references: [id])
+}
+
+
+
+
+model ProviderCredentialDocument {
+  id              String                   @id @default(cuid())
+  providerId      String
+  organizationId  String
+  type            CredentialDocumentType
+  title           String
+  status          CredentialDocumentStatus @default(UPLOADED)
+  documentUrl     String?
+  fileName        String?
+  referenceNumber String?
+  issuedAt        DateTime?
+  expiresAt       DateTime?
+  rejectionReason String?
+  verifiedAt      DateTime?
+  verifiedById    String?
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  provider        ProviderProfile          @relation(fields: [providerId], references: [id])
+  organization    Organization             @relation(fields: [organizationId], references: [id])
+  verifiedBy      User?                    @relation("CredentialDocumentVerifier", fields: [verifiedById], references: [id])
+  reviewTasks     ProviderCredentialReviewTask[]
+  notifications   ProviderCredentialNotification[]
+
+  @@index([organizationId, providerId])
+  @@index([type, status, expiresAt])
+}
+
+model ProviderCredentialReviewTask {
+  id             String                              @id @default(cuid())
+  organizationId String
+  providerId     String
+  documentId     String?
+  title          String
+  status         ProviderCredentialReviewTaskStatus  @default(OPEN)
+  priority       ProviderCredentialReviewPriority    @default(NORMAL)
+  dueAt          DateTime?
+  assignedToId   String?
+  createdById    String?
+  completedAt    DateTime?
+  cancelledAt    DateTime?
+  blockReason    String?
+  decisionNote   String?
+  metadata       Json?
+  createdAt      DateTime                            @default(now())
+  updatedAt      DateTime                            @updatedAt
+
+  organization   Organization                        @relation(fields: [organizationId], references: [id])
+  provider       ProviderProfile                     @relation(fields: [providerId], references: [id])
+  document       ProviderCredentialDocument?         @relation(fields: [documentId], references: [id])
+  assignedTo     User?                               @relation("CredentialReviewTaskAssignee", fields: [assignedToId], references: [id])
+  createdBy      User?                               @relation("CredentialReviewTaskCreator", fields: [createdById], references: [id])
+  notifications  ProviderCredentialNotification[]
+
+  @@index([organizationId, status, priority, dueAt])
+  @@index([providerId, status])
+  @@index([assignedToId, status])
+}
+
+model ProviderCredentialNotification {
+  id                        String                                @id @default(cuid())
+  organizationId            String
+  providerId                String
+  documentId                String?
+  taskId                    String?
+  channel                   ProviderCredentialNotificationChannel @default(IN_APP)
+  status                    ProviderCredentialNotificationStatus  @default(QUEUED)
+  subject                   String
+  message                   String
+  recipientEmail            String?
+  scheduledFor              DateTime?
+  sentAt                    DateTime?
+  failureReason             String?
+  createdById               String?
+  metadata                  Json?
+  deliveryProvider          String?
+  deliveryProviderMessageId String?
+  dispatchAttemptCount      Int                                   @default(0)
+  lastDispatchAt            DateTime?
+  createdAt                 DateTime                              @default(now())
+  updatedAt                 DateTime                              @updatedAt
+
+  organization              Organization                          @relation(fields: [organizationId], references: [id])
+  provider                  ProviderProfile                       @relation(fields: [providerId], references: [id])
+  document                  ProviderCredentialDocument?           @relation(fields: [documentId], references: [id])
+  task                      ProviderCredentialReviewTask?         @relation(fields: [taskId], references: [id])
+  createdBy                 User?                                 @relation("CredentialNotificationCreator", fields: [createdById], references: [id])
+
+  @@index([organizationId, status, scheduledFor])
+  @@index([providerId, status])
+  @@index([documentId])
+  @@index([taskId])
+  @@index([organizationId, status, lastDispatchAt])
+}
+
+model ServiceCatalogItem {
+  id             String        @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  status         String        @default("DRAFT")
+  version        Int           @default(1)
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model CoverageRule {
+  id             String        @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  status         String        @default("DRAFT")
+  version        Int           @default(1)
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model PricingRule {
+  id             String        @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  status         String        @default("DRAFT")
+  version        Int           @default(1)
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model PolicyTemplate {
+  id             String        @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  status         String        @default("DRAFT")
+  version        Int           @default(1)
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model SupportWorkItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("OPEN")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model SafetyCase {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("NEW")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+
+model ReportDefinition {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("DRAFT")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model Campaign {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("DRAFT")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model IntegrationConnection {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("ACTIVE")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+model ModerationCase {
+  id             String       @id @default(cuid())
+  organizationId String
+  code           String
+  title          String
+  status         String       @default("OPEN")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+}
+
+
+model ProviderScheduleTemplate {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("DRAFT")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model ClinicalOrder {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("DRAFT")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model PrescriptionDraft {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("DRAFT")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model LabWorkItem {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("PENDING_REVIEW")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model RpmEnrollment {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("ACTIVE")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model ProviderAlert {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("OPEN")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model FacilitySetting {
+  id             String        @id @default(cuid())
+  organizationId String
+  providerId     String?
+  name           String
+  status         String        @default("PUBLISHED")
+  data           Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model PatientFamilyProfile {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("ACTIVE")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model PatientNotificationItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("UNREAD")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model PatientSupportTicket {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("OPEN")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model PatientReminderPlan {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("ACTIVE")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model PatientCarePlanItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("OPEN")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model PatientRpmProgram {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("ACTIVE")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+
+model PatientConsentRecord {
+  id             String       @id @default(cuid())
+  organizationId String
+  patientId      String?
+  name           String
+  status         String       @default("PENDING")
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}

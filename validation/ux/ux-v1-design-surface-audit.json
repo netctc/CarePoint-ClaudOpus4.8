@@ -1,0 +1,280 @@
+{
+  "phase": "CarePoint Phase 2 - Design Refinement & UX Stabilization",
+  "delivery": "UX-V1",
+  "sourceBaseline": "CarePoint_option_B_python_progressive_v64",
+  "generatedAt": "2026-05-21T15:40:29.204Z",
+  "scope": {
+    "webRoots": [
+      "apps/admin",
+      "apps/provider"
+    ],
+    "cssFiles": [
+      "apps/admin/src/app/globals.css",
+      "apps/provider/app/globals.css"
+    ],
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false
+  },
+  "totals": {
+    "scannedFiles": 185,
+    "tsxFiles": 141,
+    "buttons": 321,
+    "inputs": 161,
+    "selects": 110,
+    "tables": 31,
+    "forms": 49,
+    "classNameCount": 4358,
+    "ariaReferences": 46
+  },
+  "cssSummaries": [
+    {
+      "file": "apps/admin/src/app/globals.css",
+      "lines": 2511,
+      "cssVariables": 63,
+      "classSelectors": 250,
+      "mediaQueries": 18,
+      "focusVisibleRules": 3,
+      "reducedMotionRules": 3,
+      "hardCodedHexValues": 82
+    },
+    {
+      "file": "apps/provider/app/globals.css",
+      "lines": 1858,
+      "cssVariables": 60,
+      "classSelectors": 292,
+      "mediaQueries": 17,
+      "focusVisibleRules": 3,
+      "reducedMotionRules": 3,
+      "hardCodedHexValues": 119
+    }
+  ],
+  "highPriorityFiles": [
+    {
+      "file": "apps/admin/src/app/portal/accounts/page.tsx",
+      "buttons": 28,
+      "inputs": 42,
+      "selects": 22,
+      "tables": 0,
+      "forms": 29,
+      "classNameCount": 331,
+      "ariaReferences": 9,
+      "uxWeight": 816
+    },
+    {
+      "file": "apps/provider/app/portal/queue/page.tsx",
+      "buttons": 9,
+      "inputs": 2,
+      "selects": 6,
+      "tables": 1,
+      "forms": 0,
+      "classNameCount": 101,
+      "ariaReferences": 0,
+      "uxWeight": 165
+    },
+    {
+      "file": "apps/provider/app/portal/calendar/page.tsx",
+      "buttons": 5,
+      "inputs": 7,
+      "selects": 3,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 99,
+      "ariaReferences": 0,
+      "uxWeight": 159
+    },
+    {
+      "file": "apps/provider/app/portal/prescriptions/new/page.tsx",
+      "buttons": 6,
+      "inputs": 5,
+      "selects": 0,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 72,
+      "ariaReferences": 0,
+      "uxWeight": 115
+    },
+    {
+      "file": "apps/admin/src/app/portal/audit/logs/page.tsx",
+      "buttons": 1,
+      "inputs": 7,
+      "selects": 3,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 65,
+      "ariaReferences": 2,
+      "uxWeight": 113
+    },
+    {
+      "file": "apps/admin/src/app/portal/reports/builder/page.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 99,
+      "ariaReferences": 0,
+      "uxWeight": 111
+    },
+    {
+      "file": "apps/admin/src/components/admin/booking-admin-actions.tsx",
+      "buttons": 7,
+      "inputs": 4,
+      "selects": 6,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 41,
+      "ariaReferences": 0,
+      "uxWeight": 102
+    },
+    {
+      "file": "apps/admin/src/app/portal/organizations/page.tsx",
+      "buttons": 4,
+      "inputs": 5,
+      "selects": 0,
+      "tables": 0,
+      "forms": 4,
+      "classNameCount": 46,
+      "ariaReferences": 0,
+      "uxWeight": 98
+    },
+    {
+      "file": "apps/provider/app/portal/dashboard/page.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 92,
+      "ariaReferences": 0,
+      "uxWeight": 95
+    },
+    {
+      "file": "apps/provider/app/portal/encounters/[encounterId]/note/page.tsx",
+      "buttons": 4,
+      "inputs": 2,
+      "selects": 0,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 67,
+      "ariaReferences": 0,
+      "uxWeight": 92
+    },
+    {
+      "file": "apps/provider/app/onboarding/page.tsx",
+      "buttons": 2,
+      "inputs": 8,
+      "selects": 2,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 39,
+      "ariaReferences": 0,
+      "uxWeight": 90
+    },
+    {
+      "file": "apps/admin/src/app/auth/sign-in/sign-in-client.tsx",
+      "buttons": 5,
+      "inputs": 5,
+      "selects": 0,
+      "tables": 0,
+      "forms": 2,
+      "classNameCount": 44,
+      "ariaReferences": 0,
+      "uxWeight": 89
+    },
+    {
+      "file": "apps/admin/src/app/portal/dashboard/page.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "selects": 0,
+      "tables": 1,
+      "forms": 0,
+      "classNameCount": 77,
+      "ariaReferences": 5,
+      "uxWeight": 88
+    },
+    {
+      "file": "apps/admin/src/app/portal/access/hsp-consents/page.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "selects": 4,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 58,
+      "ariaReferences": 0,
+      "uxWeight": 84
+    },
+    {
+      "file": "apps/provider/app/portal/calendar/templates/page.tsx",
+      "buttons": 3,
+      "inputs": 2,
+      "selects": 4,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 46,
+      "ariaReferences": 0,
+      "uxWeight": 84
+    },
+    {
+      "file": "apps/admin/src/components/admin/refill-audit-export-actions.tsx",
+      "buttons": 5,
+      "inputs": 7,
+      "selects": 2,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 32,
+      "ariaReferences": 0,
+      "uxWeight": 83
+    },
+    {
+      "file": "apps/admin/src/components/admin/provider-profile-panel.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "selects": 2,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 63,
+      "ariaReferences": 0,
+      "uxWeight": 80
+    },
+    {
+      "file": "apps/provider/app/sign-in/sign-in-form.tsx",
+      "buttons": 5,
+      "inputs": 5,
+      "selects": 0,
+      "tables": 0,
+      "forms": 2,
+      "classNameCount": 35,
+      "ariaReferences": 1,
+      "uxWeight": 80
+    },
+    {
+      "file": "apps/provider/app/portal/chart/[patientId]/page.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "selects": 0,
+      "tables": 0,
+      "forms": 1,
+      "classNameCount": 61,
+      "ariaReferences": 0,
+      "uxWeight": 76
+    },
+    {
+      "file": "apps/provider/app/portal/telehealth/live/[appointmentId]/page.tsx",
+      "buttons": 7,
+      "inputs": 1,
+      "selects": 0,
+      "tables": 0,
+      "forms": 0,
+      "classNameCount": 51,
+      "ariaReferences": 0,
+      "uxWeight": 76
+    }
+  ],
+  "recommendations": [
+    "Start with shared layout/navigation refinements in Admin and Provider portals.",
+    "Normalize buttons, fields, tables, empty states, and status badges against the UX-V1 token set.",
+    "Prioritize responsive behavior for dashboards, data tables, provider queue, calendar, billing, and admin account surfaces.",
+    "Increase aria coverage in interactive table, drawer, and form surfaces during UX-V2 and UX-V3.",
+    "Reduce hard-coded hex values progressively after visual QA confirms token mapping."
+  ]
+}

@@ -1,0 +1,30 @@
+export type AdminRole =
+  | 'super_admin'
+  | 'ops_admin'
+  | 'provider_reviewer'
+  | 'finance_admin'
+  | 'support_admin'
+  | 'safety_admin'
+  | 'readonly_auditor';
+
+export type AdminPermission =
+  | 'dashboard:view'
+  | 'providers:view'
+  | 'providers:review'
+  | 'providers:approve'
+  | 'bookings:control'
+  | 'catalog:manage'
+  | 'coverage:manage'
+  | 'telehealth:ops'
+  | 'finance:view'
+  | 'refunds:manage'
+  | 'pricing:manage'
+  | 'reviews:moderate'
+  | 'support:view'
+  | 'safety:view'
+  | 'policy:manage'
+  | 'audit:view'
+  | 'rbac:manage'
+  | 'reports:view'
+  | 'notifications:manage'
+  | 'integrations:manage';

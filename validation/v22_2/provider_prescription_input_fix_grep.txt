@@ -1,0 +1,10 @@
+36:  const [drug, setDrug] = useState<string>(fallback.medication ?? '');
+37:  const [dosage, setDosage] = useState<string>(fallback.dosage ?? '');
+38:  const [frequency, setFrequency] = useState<string>(fallback.frequency ?? '');
+39:  const [duration, setDuration] = useState<string>(fallback.duration ?? '');
+40:  const [pharmacyName, setPharmacyName] = useState<string>(fallback.pharmacyName ?? '');
+162:            <label className="field"><span>{base.medication}</span><input value={drug ?? ''} onChange={(event) => setDrug(event.target.value)} /></label>
+163:            <label className="field"><span>{base.dosage}</span><input value={dosage ?? ''} onChange={(event) => setDosage(event.target.value)} /></label>
+165:              <label className="field"><span>{base.frequency}</span><input value={frequency ?? ''} onChange={(event) => setFrequency(event.target.value)} /></label>
+166:              <label className="field"><span>Duration</span><input value={duration ?? ''} onChange={(event) => setDuration(event.target.value)} /></label>
+168:            <label className="field"><span>{copy.pharmacyRouting}</span><input value={pharmacyName ?? ''} onChange={(event) => setPharmacyName(event.target.value)} /></label>

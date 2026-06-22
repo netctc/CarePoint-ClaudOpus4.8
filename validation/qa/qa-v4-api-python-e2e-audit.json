@@ -1,0 +1,551 @@
+{
+  "phase": "CarePoint Phase 3 - End-to-End QA, UAT & Production Readiness",
+  "delivery": "QA-V4",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v3",
+  "generatedAt": "2026-05-21T17:15:52.415Z",
+  "scope": "Node/API/Python worker E2E validation readiness",
+  "technicalBoundary": {
+    "optionBPythonProgressive": "closed at V64",
+    "designRefinementUx": "closed at UX-V6",
+    "qaV1MasterPlan": "complete",
+    "qaV2AdminFunctionalQa": "complete",
+    "qaV3ProviderFunctionalQa": "complete",
+    "backendContractsChanged": false,
+    "pythonWorkerChanged": false,
+    "databaseChanged": false,
+    "applicationRuntimeCodeChanged": false,
+    "qaArtifactsOnly": true
+  },
+  "inventory": {
+    "apiSourceTsFiles": 117,
+    "apiDistJsFiles": 112,
+    "pythonWorkerPyFiles": 23,
+    "routerPostCount": 130,
+    "routeJobTypeCount": 119,
+    "helperExportCount": 106,
+    "contractSchemaCount": 156,
+    "contractJobTypeCount": 111,
+    "pythonContractJobTypeCount": 620,
+    "pythonContractTestFunctions": 193
+  },
+  "artifacts": [
+    {
+      "id": "API-PACKAGE",
+      "path": "services/api/package.json",
+      "priority": "P0",
+      "purpose": "API workspace package exists."
+    },
+    {
+      "id": "CONTRACTS-PACKAGE",
+      "path": "packages/contracts/package.json",
+      "priority": "P0",
+      "purpose": "Shared contracts workspace package exists."
+    },
+    {
+      "id": "CONTRACTS-SOURCE",
+      "path": "packages/contracts/src/index.ts",
+      "priority": "P0",
+      "purpose": "Shared contract schemas exist."
+    },
+    {
+      "id": "CONTRACTS-DIST",
+      "path": "packages/contracts/dist/index.js",
+      "priority": "P0",
+      "purpose": "Compiled contract bundle exists for API consumption."
+    },
+    {
+      "id": "API-HYBRID-HELPER-SOURCE",
+      "path": "services/api/src/lib/hybrid-python.ts",
+      "priority": "P0",
+      "purpose": "Node helper for Python worker preparation exists."
+    },
+    {
+      "id": "API-HYBRID-HELPER-DIST",
+      "path": "services/api/dist/lib/hybrid-python.js",
+      "priority": "P0",
+      "purpose": "Compiled Node helper exists for syntax smoke."
+    },
+    {
+      "id": "API-HYBRID-ROUTES-SOURCE",
+      "path": "services/api/src/modules/hybrid-python/hybrid-python.routes.ts",
+      "priority": "P0",
+      "purpose": "Hybrid Python prepare routes exist."
+    },
+    {
+      "id": "API-HYBRID-ROUTES-DIST",
+      "path": "services/api/dist/modules/hybrid-python/hybrid-python.routes.js",
+      "priority": "P0",
+      "purpose": "Compiled hybrid Python routes exist for syntax smoke."
+    },
+    {
+      "id": "PYTHON-WORKER-PACKAGE",
+      "path": "services/python-worker/pyproject.toml",
+      "priority": "P0",
+      "purpose": "Python worker project metadata exists."
+    },
+    {
+      "id": "PYTHON-WORKER-MAIN",
+      "path": "services/python-worker/carepoint_python_worker/main.py",
+      "priority": "P0",
+      "purpose": "Python worker ASGI entry exists."
+    },
+    {
+      "id": "PYTHON-WORKER-CONTRACTS",
+      "path": "services/python-worker/carepoint_python_worker/contracts.py",
+      "priority": "P0",
+      "purpose": "Python worker contract model exists."
+    },
+    {
+      "id": "PYTHON-WORKER-PROCESSORS",
+      "path": "services/python-worker/carepoint_python_worker/jobs/processors.py",
+      "priority": "P0",
+      "purpose": "Python worker processors exist."
+    },
+    {
+      "id": "PYTHON-WORKER-POLICIES",
+      "path": "services/python-worker/carepoint_python_worker/policies.py",
+      "priority": "P0",
+      "purpose": "Python worker dry-run/advisory policies exist."
+    },
+    {
+      "id": "PYTHON-WORKER-JOB-ROUTER",
+      "path": "services/python-worker/carepoint_python_worker/services/job_router.py",
+      "priority": "P0",
+      "purpose": "Python worker job router exists."
+    },
+    {
+      "id": "PYTHON-WORKER-CONTRACT-TESTS",
+      "path": "services/python-worker/tests/test_worker_contracts.py",
+      "priority": "P0",
+      "purpose": "Python worker contract test suite exists."
+    },
+    {
+      "id": "PYTHON-WORKER-VERIFY",
+      "path": "scripts/option_b/verify_python_worker.py",
+      "priority": "P0",
+      "purpose": "Worker verification script exists."
+    },
+    {
+      "id": "PYTHON-WORKER-CONTRACT-RUNNER",
+      "path": "scripts/option_b/run_python_worker_contract_tests.py",
+      "priority": "P0",
+      "purpose": "Contract test runner exists."
+    },
+    {
+      "id": "OPTION-B-V64-CLOSURE",
+      "path": "docs/option-b/FINAL_HANDOVER_AND_PHASE_CLOSURE_V64.md",
+      "priority": "P0",
+      "purpose": "Closed implementation phase evidence exists."
+    }
+  ],
+  "scenarios": {
+    "count": 22,
+    "priorityCounts": {
+      "P0": 18,
+      "P1": 4
+    }
+  },
+  "checks": [
+    {
+      "id": "artifact_api_package",
+      "artifactId": "API-PACKAGE",
+      "path": "services/api/package.json",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_contracts_package",
+      "artifactId": "CONTRACTS-PACKAGE",
+      "path": "packages/contracts/package.json",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_contracts_source",
+      "artifactId": "CONTRACTS-SOURCE",
+      "path": "packages/contracts/src/index.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_contracts_dist",
+      "artifactId": "CONTRACTS-DIST",
+      "path": "packages/contracts/dist/index.js",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_api_hybrid_helper_source",
+      "artifactId": "API-HYBRID-HELPER-SOURCE",
+      "path": "services/api/src/lib/hybrid-python.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_api_hybrid_helper_dist",
+      "artifactId": "API-HYBRID-HELPER-DIST",
+      "path": "services/api/dist/lib/hybrid-python.js",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_api_hybrid_routes_source",
+      "artifactId": "API-HYBRID-ROUTES-SOURCE",
+      "path": "services/api/src/modules/hybrid-python/hybrid-python.routes.ts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_api_hybrid_routes_dist",
+      "artifactId": "API-HYBRID-ROUTES-DIST",
+      "path": "services/api/dist/modules/hybrid-python/hybrid-python.routes.js",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_package",
+      "artifactId": "PYTHON-WORKER-PACKAGE",
+      "path": "services/python-worker/pyproject.toml",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_main",
+      "artifactId": "PYTHON-WORKER-MAIN",
+      "path": "services/python-worker/carepoint_python_worker/main.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_contracts",
+      "artifactId": "PYTHON-WORKER-CONTRACTS",
+      "path": "services/python-worker/carepoint_python_worker/contracts.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_processors",
+      "artifactId": "PYTHON-WORKER-PROCESSORS",
+      "path": "services/python-worker/carepoint_python_worker/jobs/processors.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_policies",
+      "artifactId": "PYTHON-WORKER-POLICIES",
+      "path": "services/python-worker/carepoint_python_worker/policies.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_job_router",
+      "artifactId": "PYTHON-WORKER-JOB-ROUTER",
+      "path": "services/python-worker/carepoint_python_worker/services/job_router.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_contract_tests",
+      "artifactId": "PYTHON-WORKER-CONTRACT-TESTS",
+      "path": "services/python-worker/tests/test_worker_contracts.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_verify",
+      "artifactId": "PYTHON-WORKER-VERIFY",
+      "path": "scripts/option_b/verify_python_worker.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_python_worker_contract_runner",
+      "artifactId": "PYTHON-WORKER-CONTRACT-RUNNER",
+      "path": "scripts/option_b/run_python_worker_contract_tests.py",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "artifact_option_b_v64_closure",
+      "artifactId": "OPTION-B-V64-CLOSURE",
+      "path": "docs/option-b/FINAL_HANDOVER_AND_PHASE_CLOSURE_V64.md",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_build_contracts",
+      "script": "build:contracts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_build_api",
+      "script": "build:api",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_build_backend",
+      "script": "build:backend",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_verify_python",
+      "script": "verify:python-worker",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_test_python_contracts",
+      "script": "test:python-worker:contracts",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_verify_option_b",
+      "script": "verify:option-b",
+      "priority": "P1",
+      "passed": true
+    },
+    {
+      "id": "script_audit_qa",
+      "script": "audit:qa",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "script_audit_qa_api_python",
+      "script": "audit:qa:api-python-e2e",
+      "priority": "P0",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_source_present",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_dist_present",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_post_count_at_least_100",
+      "passed": true,
+      "observed": 130
+    },
+    {
+      "id": "hybrid_route_job_type_count_at_least_100",
+      "passed": true,
+      "observed": 119
+    },
+    {
+      "id": "hybrid_route_uses_validate_body",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_uses_idempotency_keys",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_preserves_request_id",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_preserves_correlation_id",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_returns_accepted_or_200",
+      "passed": true
+    },
+    {
+      "id": "hybrid_route_covers_v64_handover",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_source_present",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_dist_present",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_exports_at_least_100_helpers",
+      "passed": true,
+      "observed": 106
+    },
+    {
+      "id": "hybrid_helper_has_prepare_job_client",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_tracks_idempotency_key",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_tracks_correlation_id",
+      "passed": true
+    },
+    {
+      "id": "hybrid_helper_uses_job_type",
+      "passed": true
+    },
+    {
+      "id": "contracts_source_present",
+      "passed": true
+    },
+    {
+      "id": "contracts_dist_present",
+      "passed": true
+    },
+    {
+      "id": "contracts_export_many_hybrid_schemas",
+      "passed": true,
+      "observed": 156
+    },
+    {
+      "id": "contracts_include_platform_job_types",
+      "passed": true,
+      "observed": 111
+    },
+    {
+      "id": "contracts_use_zod",
+      "passed": true
+    },
+    {
+      "id": "contracts_include_v64_job_types",
+      "passed": true
+    },
+    {
+      "id": "contracts_dist_exports_commonjs_or_module",
+      "passed": true
+    },
+    {
+      "id": "python_worker_contracts_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_processors_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_policies_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_job_router_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_tests_present",
+      "passed": true
+    },
+    {
+      "id": "python_contracts_include_platform_job_types",
+      "passed": true,
+      "observed": 620
+    },
+    {
+      "id": "python_processors_include_decision_logic",
+      "passed": true,
+      "observed": 3288
+    },
+    {
+      "id": "python_processors_include_pass_hold_rollback",
+      "passed": true
+    },
+    {
+      "id": "python_policies_include_dry_run_or_advisory",
+      "passed": true
+    },
+    {
+      "id": "python_router_routes_job_types",
+      "passed": true
+    },
+    {
+      "id": "python_contract_tests_define_many_tests",
+      "passed": true,
+      "observed": 193
+    },
+    {
+      "id": "python_verify_script_available",
+      "passed": true
+    },
+    {
+      "id": "python_contract_runner_available",
+      "passed": true
+    },
+    {
+      "id": "qa_v1_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v2_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_complete",
+      "passed": true
+    },
+    {
+      "id": "qa_v3_provider_plan_present",
+      "passed": true
+    },
+    {
+      "id": "v64_final_phase_closure_doc_present",
+      "passed": true
+    },
+    {
+      "id": "ux_v6_closure_doc_present",
+      "passed": true
+    },
+    {
+      "id": "api_ts_files_present",
+      "passed": true,
+      "observed": 117
+    },
+    {
+      "id": "api_dist_js_files_present",
+      "passed": true,
+      "observed": 112
+    },
+    {
+      "id": "python_worker_py_files_present",
+      "passed": true,
+      "observed": 23
+    },
+    {
+      "id": "contract_dist_types_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v4_has_at_least_22_scenarios",
+      "passed": true
+    },
+    {
+      "id": "qa_v4_has_p0_integration_coverage",
+      "passed": true
+    },
+    {
+      "id": "qa_v4_covers_build_route_contract_worker_error_evidence",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 76,
+    "total": 76,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "e2ePlanFile": "validation/qa/qa-v4-api-python-e2e-test-plan.json",
+    "docs": [
+      "docs/qa/QA_V4_NODE_API_PYTHON_E2E_VALIDATION.md",
+      "docs/qa/QA_V4_INTEGRATION_TEST_PLAN.md",
+      "docs/qa/QA_V4_VALIDATION.md",
+      "docs/qa/CHANGELOG_QA_V3_TO_QA_V4.md"
+    ],
+    "nextRecommendedDelivery": "QA-V5 - UAT package and acceptance by role"
+  },
+  "readinessPosition": "ready-for-uat-package"
+}

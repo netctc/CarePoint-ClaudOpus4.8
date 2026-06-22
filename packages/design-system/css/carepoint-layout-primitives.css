@@ -1,0 +1,90 @@
+/* CarePoint UX-V2 layout and navigation primitives.
+   Keep this file framework-agnostic so Admin and Provider can consume it progressively. */
+:root {
+  --cp-sidebar-width: 272px;
+  --cp-provider-sidebar-width: 260px;
+  --cp-sidebar-compact-width: 84px;
+  --cp-topbar-height: 72px;
+  --cp-content-max-width: 1440px;
+  --cp-content-pad-desktop: 28px;
+  --cp-content-pad-tablet: 22px;
+  --cp-content-pad-mobile: 16px;
+  --cp-nav-item-min-height: 48px;
+  --cp-nav-item-radius: 16px;
+  --cp-nav-icon-slot: 28px;
+}
+
+.cp-app-shell {
+  min-height: 100vh;
+}
+
+.cp-content-area {
+  min-width: 0;
+}
+
+.cp-main-content {
+  width: 100%;
+  max-width: var(--cp-content-max-width);
+}
+
+.cp-sidebar {
+  isolation: isolate;
+}
+
+.cp-sidebar-scroll {
+  min-height: 0;
+}
+
+.cp-nav-item {
+  min-height: var(--cp-nav-item-min-height);
+}
+
+.cp-topbar {
+  min-height: var(--cp-topbar-height);
+}
+
+.cp-search-surface {
+  min-width: 220px;
+}
+
+.cp-user-context {
+  min-width: 0;
+}
+
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: 12px;
+  z-index: 1000;
+  transform: translateY(-150%);
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--primary, #1e63d7);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(17, 39, 73, 0.18);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: none;
+}
+
+@media (max-width: 1100px) {
+  .cp-main-content {
+    max-width: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .cp-sidebar {
+    position: static;
+    height: auto;
+    min-height: auto;
+  }
+
+  .cp-topbar {
+    position: sticky;
+    top: 0;
+  }
+}

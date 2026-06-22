@@ -1,0 +1,468 @@
+{
+  "phase": "CarePoint Phase 4 - Controlled Pilot / Go-Live Execution",
+  "delivery": "PILOT-V2",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v7",
+  "generatedAt": "2026-05-21T19:42:21.390Z",
+  "purpose": "Define the staging deployment rehearsal and environment activation path before controlled pilot launch execution.",
+  "entryPosition": {
+    "pilotV1": "completed",
+    "qaV7": "closed",
+    "phaseBoundary": "pilot artifacts only; runtime code unchanged"
+  },
+  "deploymentDomains": [
+    {
+      "id": "STAGE-ENV-001",
+      "domain": "Environment identity",
+      "owner": "Release owner",
+      "objective": "Confirm staging environment name, URL, owner, region, and operating window are documented before rehearsal.",
+      "evidence": [
+        "environment URL",
+        "release owner",
+        "support window",
+        "staging data policy"
+      ],
+      "gate": "required-before-rehearsal"
+    },
+    {
+      "id": "STAGE-ENV-002",
+      "domain": "Configuration and secrets",
+      "owner": "Technical owner",
+      "objective": "Confirm required environment variables are present and no secret values are committed.",
+      "evidence": [
+        ".env.example reviewed",
+        "secret store owner identified",
+        "check:secrets result"
+      ],
+      "gate": "required-before-promotion"
+    },
+    {
+      "id": "STAGE-ENV-003",
+      "domain": "Build and artifact integrity",
+      "owner": "Release owner",
+      "objective": "Confirm contracts, API and web builds can be produced from the selected release package.",
+      "evidence": [
+        "npm install",
+        "npm run build:api",
+        "npm run build:web",
+        "artifact checksum"
+      ],
+      "gate": "required-before-pilot-launch"
+    },
+    {
+      "id": "STAGE-ENV-004",
+      "domain": "Database and migration rehearsal",
+      "owner": "Technical owner",
+      "objective": "Confirm migration path, seed policy, and rollback data handling are documented.",
+      "evidence": [
+        "migration command",
+        "database backup timestamp",
+        "schema owner",
+        "restore procedure"
+      ],
+      "gate": "required-before-pilot-launch"
+    },
+    {
+      "id": "STAGE-ENV-005",
+      "domain": "Node/API readiness",
+      "owner": "Technical owner",
+      "objective": "Confirm API package, hybrid Python helpers, and route syntax checks are available.",
+      "evidence": [
+        "build:api result",
+        "node --check API helper",
+        "node --check route module"
+      ],
+      "gate": "required-before-integration-smoke"
+    },
+    {
+      "id": "STAGE-ENV-006",
+      "domain": "Python worker readiness",
+      "owner": "Technical owner",
+      "objective": "Confirm Python worker verification and contract test scripts remain available for rehearsal.",
+      "evidence": [
+        "verify_python_worker.py",
+        "worker contract tests",
+        "compileall result"
+      ],
+      "gate": "required-before-integration-smoke"
+    },
+    {
+      "id": "STAGE-ENV-007",
+      "domain": "Smoke tests",
+      "owner": "QA/UAT owner",
+      "objective": "Confirm Admin, Provider, API, worker and auth/RBAC smoke path is defined for staging.",
+      "evidence": [
+        "QA-V1 matrix",
+        "QA-V4 test plan",
+        "smoke result",
+        "defect triage log"
+      ],
+      "gate": "required-before-go-no-go"
+    },
+    {
+      "id": "STAGE-ENV-008",
+      "domain": "Observability and support activation",
+      "owner": "Support owner",
+      "objective": "Confirm logs, support contacts, severity rules, and daily review window are active.",
+      "evidence": [
+        "support channel",
+        "incident owner",
+        "logs location",
+        "daily health review time"
+      ],
+      "gate": "required-before-pilot-launch"
+    },
+    {
+      "id": "STAGE-ENV-009",
+      "domain": "Backup and rollback rehearsal",
+      "owner": "Release owner",
+      "objective": "Confirm rollback triggers from PILOT-V1 are mapped to concrete actions and decision authority.",
+      "evidence": [
+        "rollback trigger map",
+        "rollback owner",
+        "backup proof",
+        "restore rehearsal notes"
+      ],
+      "gate": "required-before-pilot-launch"
+    },
+    {
+      "id": "STAGE-ENV-010",
+      "domain": "Go/no-go rehearsal decision",
+      "owner": "Pilot owner",
+      "objective": "Confirm final rehearsal outcome can be recorded as continue, hold, rollback or retry.",
+      "evidence": [
+        "go/no-go record",
+        "open issue list",
+        "approval timestamp",
+        "next action"
+      ],
+      "gate": "required-before-PILOT-V3"
+    }
+  ],
+  "rehearsalSteps": [
+    {
+      "order": 1,
+      "id": "REH-001",
+      "name": "Freeze release candidate",
+      "command": "Record selected ZIP/checksum and source baseline.",
+      "expected": "Single candidate identified for staging rehearsal."
+    },
+    {
+      "order": 2,
+      "id": "REH-002",
+      "name": "Install dependencies",
+      "command": "npm install",
+      "expected": "Dependency installation completes without errors."
+    },
+    {
+      "order": 3,
+      "id": "REH-003",
+      "name": "Build contracts and API",
+      "command": "npm run build:api",
+      "expected": "API build passes with shared contracts."
+    },
+    {
+      "order": 4,
+      "id": "REH-004",
+      "name": "Build web apps",
+      "command": "npm run build:web",
+      "expected": "Admin and Provider web builds pass."
+    },
+    {
+      "order": 5,
+      "id": "REH-005",
+      "name": "Run QA evidence audits",
+      "command": "npm run audit:qa && npm run audit:pilot",
+      "expected": "QA and pilot audits pass at 100%."
+    },
+    {
+      "order": 6,
+      "id": "REH-006",
+      "name": "Verify Python worker",
+      "command": "PYTHONPATH=services/python-worker python scripts/option_b/verify_python_worker.py",
+      "expected": "Worker verification passes."
+    },
+    {
+      "order": 7,
+      "id": "REH-007",
+      "name": "Run Python contract tests",
+      "command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=services/python-worker python -m pytest -q services/python-worker/tests/test_worker_contracts.py --disable-warnings",
+      "expected": "Worker contract suite passes."
+    },
+    {
+      "order": 8,
+      "id": "REH-008",
+      "name": "Activate staging environment",
+      "command": "Apply staging env vars through approved secret/config channel.",
+      "expected": "Staging starts without missing configuration."
+    },
+    {
+      "order": 9,
+      "id": "REH-009",
+      "name": "Run smoke checks",
+      "command": "Execute Admin, Provider, API and worker smoke path.",
+      "expected": "No P0 defects and all pilot-critical paths usable."
+    },
+    {
+      "order": 10,
+      "id": "REH-010",
+      "name": "Rehearse rollback decision",
+      "command": "Walk through rollback triggers and restoration steps.",
+      "expected": "Rollback owner can execute or approve action within expected window."
+    },
+    {
+      "order": 11,
+      "id": "REH-011",
+      "name": "Capture go/no-go decision",
+      "command": "Record continue, hold, retry or rollback decision.",
+      "expected": "PILOT-V3 launch runbook can be prepared or blockers are documented."
+    }
+  ],
+  "activationChecklist": [
+    {
+      "id": "ACT-001",
+      "item": "Staging URL and environment owner recorded",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-002",
+      "item": "Environment variables reviewed against .env.example",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-003",
+      "item": "Secret values stored outside repository",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-004",
+      "item": "Database backup and restore procedure documented",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-005",
+      "item": "Migration/seed policy documented for staging",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-006",
+      "item": "Admin build and Provider build are available",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-007",
+      "item": "API build is available",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-008",
+      "item": "Python worker verification path is available",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-009",
+      "item": "Hybrid Python prepare endpoints included in smoke coverage",
+      "severity": "P1"
+    },
+    {
+      "id": "ACT-010",
+      "item": "Support escalation channel and severity rules active",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-011",
+      "item": "Observability/log location identified",
+      "severity": "P1"
+    },
+    {
+      "id": "ACT-012",
+      "item": "Rollback owner and decision authority confirmed",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-013",
+      "item": "Pilot cohort account access smoke-tested",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-014",
+      "item": "Open P0/P1 defects reviewed before launch decision",
+      "severity": "P0"
+    },
+    {
+      "id": "ACT-015",
+      "item": "Go/no-go decision record ready for PILOT-V3",
+      "severity": "P0"
+    }
+  ],
+  "decisionStates": [
+    {
+      "state": "continue",
+      "meaning": "All P0 gates pass; proceed to PILOT-V3 launch runbook."
+    },
+    {
+      "state": "hold",
+      "meaning": "Non-critical gaps require owner/date before launch scheduling."
+    },
+    {
+      "state": "retry-rehearsal",
+      "meaning": "Re-run rehearsal after environment or build correction."
+    },
+    {
+      "state": "rollback",
+      "meaning": "Revert staging activation and preserve defect/evidence trail."
+    }
+  ],
+  "evidenceOutputs": {
+    "rehearsalAudit": "validation/pilot/pilot-v2-staging-rehearsal-audit.json",
+    "activationPlan": "validation/pilot/pilot-v2-staging-environment-activation-plan.json",
+    "goNoGoInputForNextDelivery": "PILOT-V3 launch runbook and day-0/day-1 execution package"
+  },
+  "checks": [
+    {
+      "id": "pilot_manifest_delivery_v2",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_current_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_present",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_audit_present",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "qa_v6_go_live_checklist_present",
+      "passed": true
+    },
+    {
+      "id": "staging_rehearsal_script_registered",
+      "passed": true
+    },
+    {
+      "id": "pilot_aggregate_runs_v1_and_v2",
+      "passed": true
+    },
+    {
+      "id": "required_pilot_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_entry_reports_present",
+      "passed": true
+    },
+    {
+      "id": "env_example_present",
+      "passed": true
+    },
+    {
+      "id": "api_package_present",
+      "passed": true
+    },
+    {
+      "id": "contracts_package_present",
+      "passed": true
+    },
+    {
+      "id": "admin_package_present",
+      "passed": true
+    },
+    {
+      "id": "provider_package_present",
+      "passed": true
+    },
+    {
+      "id": "api_dockerfile_present",
+      "passed": true
+    },
+    {
+      "id": "python_worker_dockerfile_present",
+      "passed": true
+    },
+    {
+      "id": "prisma_schema_present",
+      "passed": true
+    },
+    {
+      "id": "build_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "build_web_script_available",
+      "passed": true
+    },
+    {
+      "id": "check_secrets_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_workspace_script_available",
+      "passed": true
+    },
+    {
+      "id": "smoke_api_ci_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_python_worker_script_available",
+      "passed": true
+    },
+    {
+      "id": "python_worker_contract_tests_available",
+      "passed": true
+    },
+    {
+      "id": "deployment_domains_defined",
+      "passed": true
+    },
+    {
+      "id": "rehearsal_steps_defined",
+      "passed": true
+    },
+    {
+      "id": "activation_checklist_has_p0_coverage",
+      "passed": true
+    },
+    {
+      "id": "rollback_rehearsal_included",
+      "passed": true
+    },
+    {
+      "id": "go_no_go_rehearsal_included",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "next_delivery_declared",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 35,
+    "total": 35,
+    "completionPercent": 100
+  },
+  "nextRecommendedDelivery": "PILOT-V3 - Controlled pilot launch runbook and day-0/day-1 execution"
+}

@@ -1,0 +1,54 @@
+### Phase 17 — list organizations
+GET http://localhost:4000/api/admin/users/organizations
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Phase 17 — create organization
+POST http://localhost:4000/api/admin/users/organizations
+Authorization: Bearer {{ADMIN_TOKEN}}
+Content-Type: application/json
+
+{
+  "name": "North Clinic Group"
+}
+
+### Phase 17 — update organization
+PUT http://localhost:4000/api/admin/users/organizations/{{ORGANIZATION_ID}}
+Authorization: Bearer {{ADMIN_TOKEN}}
+Content-Type: application/json
+
+{
+  "name": "North Clinic Group Updated"
+}
+
+### Phase 17 — delete organization, blocked when dependencies exist
+DELETE http://localhost:4000/api/admin/users/organizations/{{ORGANIZATION_ID}}
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Phase 17 — create patient with organization omitted
+POST http://localhost:4000/api/admin/users/patients
+Authorization: Bearer {{ADMIN_TOKEN}}
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "Patient",
+  "email": "test.patient.phase17@example.com",
+  "password": "ChangeMe123!"
+}
+
+### Phase 17 — create provider with organization omitted
+POST http://localhost:4000/api/admin/users/providers
+Authorization: Bearer {{ADMIN_TOKEN}}
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "Provider",
+  "email": "test.provider.phase17@example.com",
+  "role": "PROVIDER",
+  "password": "ChangeMe123!"
+}
+
+### Phase 17 — organization audit logs
+GET http://localhost:4000/api/admin/users/audit?resource=organization&limit=50
+Authorization: Bearer {{ADMIN_TOKEN}}

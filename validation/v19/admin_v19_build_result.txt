@@ -1,0 +1,4 @@
+Command: cd apps/admin && npm run build
+Result: SUCCESS
+Scope: Admin app build validated after V19 payments + refunds redesign.
+Notes: Next.js generated all Admin routes, including reconciliation/refund list and detail routes.

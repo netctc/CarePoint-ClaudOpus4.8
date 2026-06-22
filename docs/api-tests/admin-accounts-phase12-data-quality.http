@@ -1,0 +1,21 @@
+### CarePoint Admin Accounts Phase 12 - Data Quality checks
+### Replace {{API_BASE_URL}} and {{ADMIN_TOKEN}} before running.
+
+@API_BASE_URL = http://localhost:4000
+@ADMIN_TOKEN = paste-admin-access-token-here
+
+### Get data-quality report
+GET {{API_BASE_URL}}/api/admin/users/data-quality
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Export data-quality issues as CSV
+GET {{API_BASE_URL}}/api/admin/users/data-quality/export
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Existing governance summary for comparison
+GET {{API_BASE_URL}}/api/admin/users/governance-summary
+Authorization: Bearer {{ADMIN_TOKEN}}
+
+### Existing credential review queue for comparison
+GET {{API_BASE_URL}}/api/admin/users/credential-review-tasks?limit=20
+Authorization: Bearer {{ADMIN_TOKEN}}

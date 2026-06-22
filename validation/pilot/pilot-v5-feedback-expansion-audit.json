@@ -1,0 +1,173 @@
+{
+  "phase": "CarePoint Phase 4 - Controlled Pilot / Go-Live Execution",
+  "delivery": "PILOT-V5",
+  "sourceBaseline": "CarePoint_qa_uat_production_readiness_v7",
+  "generatedAt": "2026-05-21T19:42:21.873Z",
+  "purpose": "Validate that pilot feedback channels, defect burn-down policy, adoption evidence, expansion gates, and decision meeting package are ready before final go-live closure.",
+  "checks": [
+    {
+      "id": "pilot_manifest_delivery_v5",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v3_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_completed_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v5_current_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v6_planned_in_manifest",
+      "passed": true
+    },
+    {
+      "id": "pilot_v1_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v2_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v3_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_audit_100_percent",
+      "passed": true
+    },
+    {
+      "id": "pilot_v4_health_plan_available",
+      "passed": true
+    },
+    {
+      "id": "qa_v7_closure_100_percent",
+      "passed": true
+    },
+    {
+      "id": "feedback_expansion_script_registered",
+      "passed": true
+    },
+    {
+      "id": "pilot_aggregate_runs_v1_to_v5",
+      "passed": true
+    },
+    {
+      "id": "required_docs_present",
+      "passed": true
+    },
+    {
+      "id": "required_reports_present",
+      "passed": true
+    },
+    {
+      "id": "feedback_channels_defined",
+      "passed": true
+    },
+    {
+      "id": "feedback_channels_have_evidence_schema",
+      "passed": true
+    },
+    {
+      "id": "defect_burndown_buckets_defined",
+      "passed": true
+    },
+    {
+      "id": "defect_burndown_has_p0_p1_policy",
+      "passed": true
+    },
+    {
+      "id": "adoption_evidence_metrics_defined",
+      "passed": true
+    },
+    {
+      "id": "adoption_evidence_covers_admin_provider_support_data",
+      "passed": true
+    },
+    {
+      "id": "expansion_decision_options_defined",
+      "passed": true
+    },
+    {
+      "id": "expansion_decision_includes_expand_hold_hotfix_rollback",
+      "passed": true
+    },
+    {
+      "id": "decision_meeting_agenda_defined",
+      "passed": true
+    },
+    {
+      "id": "decision_meeting_covers_prior_phase_evidence",
+      "passed": true
+    },
+    {
+      "id": "expansion_readiness_checklist_defined",
+      "passed": true
+    },
+    {
+      "id": "expansion_required_items_majority_required",
+      "passed": true
+    },
+    {
+      "id": "no_open_p0_gate_defined",
+      "passed": true
+    },
+    {
+      "id": "rollback_readiness_gate_defined",
+      "passed": true
+    },
+    {
+      "id": "technical_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "pilot_artifacts_only_boundary_preserved",
+      "passed": true
+    },
+    {
+      "id": "build_api_script_available",
+      "passed": true
+    },
+    {
+      "id": "audit_qa_script_available",
+      "passed": true
+    },
+    {
+      "id": "verify_python_worker_script_available",
+      "passed": true
+    },
+    {
+      "id": "next_delivery_declared",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "passed": 37,
+    "total": 37,
+    "completionPercent": 100
+  },
+  "outputs": {
+    "feedbackExpansionPlan": "validation/pilot/pilot-v5-feedback-defect-adoption-expansion-plan.json",
+    "feedbackDocs": [
+      "docs/pilot/PILOT_V5_FEEDBACK_DEFECT_BURNDOWN_AND_ADOPTION.md",
+      "docs/pilot/PILOT_V5_EXPANSION_DECISION_PACKAGE.md",
+      "docs/pilot/PILOT_V5_DEFECT_BURNDOWN_AND_FEEDBACK_TEMPLATES.md",
+      "docs/pilot/PILOT_V5_VALIDATION.md"
+    ],
+    "nextRecommendedDelivery": "PILOT-V6 - Final go-live execution certificate and phase closure"
+  },
+  "readinessPosition": "ready-for-final-go-live-execution-certificate-and-phase-closure"
+}

@@ -1,0 +1,7 @@
+npm run build:provider
+
+Result:
+- Next.js provider build started successfully.
+- Compilation completed successfully.
+- Output included: "Compiled successfully".
+- The execution wrapper timed out during static page generation after compilation, so no runtime TypeScript/Next compilation error was observed before timeout.
