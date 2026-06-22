@@ -104,6 +104,27 @@ produciendo las cargas documentadas de ~20s (`/portal/dashboard`,
 **Pendiente (requiere entorno con DB para medir):**
 - [ ] Revisar/optimizar las queries de los endpoints `dashboard`/organizations/catalog (posibles N+1) y medir el tiempo real con datos del piloto. Meta: < 2s.
 
+**Optimizaciones aplicadas (Opción B — análisis por inspección):**
+1. **`GET /api/admin-users/organizations` (causa de los ~20.9s):** `mapOrganization`
+   llamaba a `getOrganizationDependencySummary`, que ejecuta **35 `count`** por
+   organización, y se invocaba por cada org (hasta 500) con `Promise.all` →
+   **35 × N queries**, saturando el pool contra la BD remota. Se añadió
+   `getOrganizationDependencySummariesBatched`, que usa **un `groupBy` por
+   relación** (35 queries fijas) sin importar el número de orgs. La salida por
+   org es idéntica (mismo `dependencySummary`/`canDelete`/`accountCount`). El
+   `delete` sigue revalidando con el cálculo exacto por org.
+2. **`/api/dashboard/{patient,provider,admin}`:** los counts independientes se
+   ejecutaban en serie (`runSequential`). Se cambiaron a `Promise.all`
+   (paralelos), eliminando N round-trips por carga. Helper `runSequential` retirado.
+3. **Índices Prisma:** `organizationId` solo estaba indexado en 6 de 35 tablas.
+   Se añadieron `@@index` en tablas operacionales de alto volumen usadas por estos
+   endpoints: `AuditLog([organizationId, createdAt])`, `Appointment([organizationId])`,
+   `MessageThread([organizationId])`. (`AppointmentSubjectContext` ya tenía prefijo
+   `organizationId`.) Requiere `npm run prisma:generate` + `db push`/`db:reset:pilot`.
+4. **Catálogo (`/api/catalog/services`):** no tiene N+1 (un solo `findMany` en el
+   store); sus ~5.9s eran sobre todo el fetch sin timeout (mitigado en Fase 2) y la
+   contención del pool causada por organizations.
+
 ---
 
 ## Fase 3 — Calidad y pruebas  ◑ (CI ampliado)
