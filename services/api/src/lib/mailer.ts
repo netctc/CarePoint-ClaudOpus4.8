@@ -1,17 +1,41 @@
 import nodemailer, { type Transporter } from 'nodemailer';
 
-// SMTP mailer for transactional email (OTP verification codes).
-// Configured entirely from environment variables so credentials are never
-// committed. With Brevo: SMTP_HOST=smtp-relay.brevo.com, SMTP_PORT=587,
-// SMTP_USER=<your brevo SMTP login>, SMTP_PASS=<your brevo SMTP key>,
-// SMTP_FROM="CarePoint <verified-sender@your-domain>".
+// Transactional email (OTP verification codes).
+//
+// Two providers are supported, selected by environment variables:
+//   1. Resend HTTP API (preferred) — set RESEND_API_KEY. Uses https and avoids
+//      SMTP ports being blocked by the host/network. The sender defaults to
+//      Resend's shared testing address "onboarding@resend.dev" (which can only
+//      deliver to your own account email until you verify a domain).
+//   2. SMTP via nodemailer (fallback) — set SMTP_HOST/SMTP_USER/SMTP_PASS.
+//
+// All credentials come from env vars so nothing is committed. If neither
+// provider is configured, sending is a safe no-op (logs a warning).
+
+const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+
+function getResendApiKey(): string | null {
+  const key = process.env.RESEND_API_KEY?.trim();
+  return key ? key : null;
+}
+
+function getFromAddress(): string {
+  return (
+    process.env.EMAIL_FROM?.trim() ||
+    process.env.RESEND_FROM?.trim() ||
+    process.env.SMTP_FROM?.trim() ||
+    'CarePoint <onboarding@resend.dev>'
+  );
+}
+
+// --- SMTP (fallback) ---------------------------------------------------------
 
 let transporter: Transporter | null = null;
-let resolved = false;
+let smtpResolved = false;
 
 function getTransporter(): Transporter | null {
-  if (resolved) return transporter;
-  resolved = true;
+  if (smtpResolved) return transporter;
+  smtpResolved = true;
 
   const host = process.env.SMTP_HOST?.trim();
   const user = process.env.SMTP_USER?.trim();
@@ -27,7 +51,7 @@ function getTransporter(): Transporter | null {
   transporter = nodemailer.createTransport({
     host,
     port: securePort,
-    // Port 465 is implicit TLS; 587 (Brevo) uses STARTTLS, so secure=false.
+    // Port 465 is implicit TLS; 587 uses STARTTLS, so secure=false.
     secure: securePort === 465,
     auth: { user, pass },
   });
@@ -35,26 +59,66 @@ function getTransporter(): Transporter | null {
 }
 
 export function isEmailConfigured(): boolean {
-  return getTransporter() !== null;
+  return getResendApiKey() !== null || getTransporter() !== null;
 }
 
-type SendResult = { sent: true } | { sent: false; reason: 'smtp_not_configured' | 'send_failed' };
+type SendResult = { sent: true } | { sent: false; reason: 'not_configured' | 'send_failed' };
 
-export async function sendEmail(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
-  const tx = getTransporter();
-  if (!tx) {
-    console.warn(`[mailer] SMTP not configured (SMTP_HOST/SMTP_USER/SMTP_PASS); skipping email to ${opts.to}`);
-    return { sent: false, reason: 'smtp_not_configured' };
-  }
+async function sendViaResend(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
+  const apiKey = getResendApiKey();
+  if (!apiKey) return { sent: false, reason: 'not_configured' };
 
-  const from = process.env.SMTP_FROM?.trim() || process.env.SMTP_USER?.trim() || 'no-reply@carepoint.local';
   try {
-    await tx.sendMail({ from, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+    const res = await fetch(RESEND_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: getFromAddress(),
+        to: [opts.to],
+        subject: opts.subject,
+        text: opts.text,
+        html: opts.html,
+      }),
+    });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      console.error(`[mailer] Resend API error ${res.status} sending to ${opts.to}: ${detail.slice(0, 300)}`);
+      return { sent: false, reason: 'send_failed' };
+    }
     return { sent: true };
   } catch (error) {
-    console.error(`[mailer] Failed to send email to ${opts.to}:`, error instanceof Error ? error.message : error);
+    console.error(`[mailer] Resend request failed for ${opts.to}:`, error instanceof Error ? error.message : error);
     return { sent: false, reason: 'send_failed' };
   }
+}
+
+async function sendViaSmtp(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
+  const tx = getTransporter();
+  if (!tx) return { sent: false, reason: 'not_configured' };
+
+  try {
+    await tx.sendMail({ from: getFromAddress(), to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+    return { sent: true };
+  } catch (error) {
+    console.error(`[mailer] SMTP send failed for ${opts.to}:`, error instanceof Error ? error.message : error);
+    return { sent: false, reason: 'send_failed' };
+  }
+}
+
+export async function sendEmail(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
+  // Prefer Resend HTTP API; fall back to SMTP if configured.
+  if (getResendApiKey()) {
+    return sendViaResend(opts);
+  }
+  if (getTransporter()) {
+    return sendViaSmtp(opts);
+  }
+  console.warn(`[mailer] No email provider configured (RESEND_API_KEY or SMTP_*); skipping email to ${opts.to}`);
+  return { sent: false, reason: 'not_configured' };
 }
 
 export async function sendOtpEmail(params: {
