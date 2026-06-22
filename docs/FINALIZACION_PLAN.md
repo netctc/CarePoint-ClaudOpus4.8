@@ -176,10 +176,11 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 - **Lecturas autenticadas (token con org):** catalog/services, catalog/summary,
   coverage/rules, dashboard/admin y organizations (scoped) → 200 con forma
   correcta; ejercita las rutas de query reales contra Postgres.
-- **Escritura/persistencia (con BD):** siembra un admin real, crea una
-  organización y un **servicio de catálogo** vía API (201), verifica que
-  aparecen en el listado, y rechaza cuerpos inválidos (400). Limpieza completa
-  a nivel de Prisma en `afterAll`.
+- **Escritura/persistencia (con BD):** siembra un admin real y crea
+  **organización, servicio de catálogo, paciente y proveedor** vía API (201),
+  verifica que aparecen en sus listados, y rechaza cuerpos inválidos (400).
+  Limpieza completa a nivel de Prisma en `afterAll` (audit, onboarding state,
+  perfiles, usuarios, org).
 - ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **53/53
   tests pasan** (4 archivos), incluidos los de BD, lectura y escritura.
 
