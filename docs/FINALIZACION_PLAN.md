@@ -187,7 +187,17 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
         en Docker y un clon limpio. Patrones acotados a directorios de reportes.
         **Acción del usuario:** commitear el módulo fuente `coverage` (estaba
         solo en local por el ignore). Ver instrucciones del PR.
+     3. **Resuelto:** el usuario commiteó `services/api/src/modules/coverage/coverage.routes.ts`
+        y `apps/admin/src/app/portal/coverage/page.tsx` (las dos fuentes que el
+        patrón `coverage` ocultaba). Verificado: contracts exporta
+        `coverageRuleSchema`/`coverageRuleUpdateSchema` y `apiRoutePaths.coverage`,
+        y la página admin no tiene imports rotos → **un clon limpio ya compila**.
+        `git status --untracked-files=all` confirma que no quedaba más fuente oculta.
 - [ ] Ejecutar el runbook de pilot (`docs/pilot/`) en un staging real.
+- [x] Checklist de go-live accionable (`docs/GO_LIVE_CHECKLIST.md`): estado
+      técnico verificado, secuencia de deploy a staging (Docker/Dokploy),
+      verificación post-deploy y rollback. Los campos "TBD" del certificado
+      (dueños, fecha, entorno, riesgos) los rellena la organización.
 - [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
 - [ ] Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS en producción.
 
