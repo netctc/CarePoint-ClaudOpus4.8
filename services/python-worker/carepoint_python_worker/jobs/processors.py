@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 from statistics import mean
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from ..artifacts import artifact_store, redact_record
 from ..compat import model_dump, model_validate
@@ -23,7 +23,7 @@ class ExportFilters(BaseModel):
     action: str | None = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AuditExportPayload(BaseModel):
@@ -34,7 +34,7 @@ class AuditExportPayload(BaseModel):
     rows: list[dict[str, Any]] = Field(default_factory=list)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class BulkAccountRow(BaseModel):
@@ -44,16 +44,18 @@ class BulkAccountRow(BaseModel):
     display_name: str | None = Field(default=None, alias="displayName")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, value: str) -> str:
         normalized = value.strip().lower()
         if "@" not in normalized or normalized.startswith("@") or normalized.endswith("@"):
             raise ValueError("email is invalid")
         return normalized
 
-    @validator("role")
+    @field_validator("role")
+    @classmethod
     def validate_role(cls, value: str) -> str:
         normalized = value.strip().upper()
         if not normalized:
@@ -69,7 +71,7 @@ class BulkValidatePayload(BaseModel):
     require_organization: bool = Field(default=True, alias="requireOrganization")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AccountsReadModelPayload(BaseModel):
@@ -81,7 +83,7 @@ class AccountsReadModelPayload(BaseModel):
     include_totals: bool = Field(default=False, alias="includeTotals")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProviderRoleReconcilePayload(BaseModel):
@@ -94,7 +96,7 @@ class ProviderRoleReconcilePayload(BaseModel):
     expected_provider_role_field: str = Field(default="roleCatalogId", alias="expectedProviderRoleField")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AvailabilityWindow(BaseModel):
@@ -105,7 +107,7 @@ class AvailabilityWindow(BaseModel):
     status: Literal["available", "blocked", "booked", "tentative"] = "available"
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SchedulingAvailabilityPayload(BaseModel):
@@ -115,7 +117,7 @@ class SchedulingAvailabilityPayload(BaseModel):
     include_window_sample: bool = Field(default=True, alias="includeWindowSample")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ReminderPlanPayload(BaseModel):
@@ -128,7 +130,7 @@ class ReminderPlanPayload(BaseModel):
     batch_size: int = Field(default=100, alias="batchSize", ge=1, le=1000)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -146,7 +148,7 @@ class PaymentReconcileRow(BaseModel):
     organization_id: str | None = Field(default=None, alias="organizationId")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PaymentReconcilePayload(BaseModel):
@@ -157,7 +159,7 @@ class PaymentReconcilePayload(BaseModel):
     include_row_sample: bool = Field(default=True, alias="includeRowSample")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ClinicalAccessEvent(BaseModel):
@@ -172,7 +174,7 @@ class ClinicalAccessEvent(BaseModel):
     organization_id: str | None = Field(default=None, alias="organizationId")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ClinicalAccessAuditPayload(BaseModel):
@@ -182,7 +184,7 @@ class ClinicalAccessAuditPayload(BaseModel):
     include_event_sample: bool = Field(default=True, alias="includeEventSample")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DbModelStat(BaseModel):
@@ -192,7 +194,7 @@ class DbModelStat(BaseModel):
     unique_indexes: list[list[str]] = Field(default_factory=list, alias="uniqueIndexes")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DbQueryObservation(BaseModel):
@@ -208,7 +210,7 @@ class DbQueryObservation(BaseModel):
     include_depth: int = Field(default=0, alias="includeDepth", ge=0)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DbIndexAdvisoryPayload(BaseModel):
@@ -218,7 +220,7 @@ class DbIndexAdvisoryPayload(BaseModel):
     target_p95_ms: float = Field(default=500, alias="targetP95Ms", ge=1)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SloRegressionPayload(BaseModel):
@@ -233,7 +235,7 @@ class SloRegressionPayload(BaseModel):
     dimensions: dict[str, str] = Field(default_factory=dict)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ContractReplayPayload(BaseModel):
@@ -245,7 +247,7 @@ class ContractReplayPayload(BaseModel):
     max_vectors: int = Field(default=50, alias="maxVectors", ge=1, le=100)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PrivacyPreflightCandidate(BaseModel):
@@ -256,7 +258,7 @@ class PrivacyPreflightCandidate(BaseModel):
     payload_shape: dict[str, Any] = Field(default_factory=dict, alias="payloadShape")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PrivacyPreflightPayload(BaseModel):
@@ -264,7 +266,7 @@ class PrivacyPreflightPayload(BaseModel):
     fail_on_warnings: bool = Field(default=False, alias="failOnWarnings")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ReleaseEvidenceStatus(BaseModel):
@@ -281,7 +283,7 @@ class ReleaseEvidenceStatus(BaseModel):
     target_percent: int | None = Field(default=None, alias="targetPercent")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ReleaseDecisionPayload(BaseModel):
@@ -299,7 +301,7 @@ class ReleaseDecisionPayload(BaseModel):
     allow_warn: bool = Field(default=False, alias="allowWarn")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class RollbackDrillPayload(BaseModel):
@@ -312,7 +314,7 @@ class RollbackDrillPayload(BaseModel):
     include_commands: bool = Field(default=True, alias="includeCommands")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PostDeployVerifyPayload(BaseModel):
@@ -331,7 +333,7 @@ class PostDeployVerifyPayload(BaseModel):
     require_clean_privacy: bool = Field(default=True, alias="requireCleanPrivacy")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ChangeTicketBundlePayload(BaseModel):
@@ -350,7 +352,7 @@ class ChangeTicketBundlePayload(BaseModel):
     include_runbook: bool = Field(default=True, alias="includeRunbook")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class OperationalHandoffPayload(BaseModel):
@@ -367,7 +369,7 @@ class OperationalHandoffPayload(BaseModel):
     include_quickstart: bool = Field(default=True, alias="includeQuickstart")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class IncidentSimulationPayload(BaseModel):
@@ -383,7 +385,7 @@ class IncidentSimulationPayload(BaseModel):
     include_commands: bool = Field(default=True, alias="includeCommands")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class CapacityPlanPayload(BaseModel):
@@ -404,7 +406,7 @@ class CapacityPlanPayload(BaseModel):
     dependencies: list[dict[str, Any]] = Field(default_factory=list)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AlertPolicyReviewPayload(BaseModel):
@@ -418,7 +420,7 @@ class AlertPolicyReviewPayload(BaseModel):
     require_on_call: bool = Field(default=True, alias="requireOnCall")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -432,7 +434,7 @@ class DependencyReadinessPayload(BaseModel):
     fail_on_critical: bool = Field(default=True, alias="failOnCritical")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ProductionReadinessPayload(BaseModel):
@@ -457,7 +459,7 @@ class ProductionReadinessPayload(BaseModel):
     artifact_refs: list[dict[str, Any]] = Field(default_factory=list, alias="artifactRefs")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DataRetentionReviewPayload(BaseModel):
@@ -473,7 +475,7 @@ class DataRetentionReviewPayload(BaseModel):
     require_redaction: bool = Field(default=True, alias="requireRedaction")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AuditTrailReviewPayload(BaseModel):
@@ -489,7 +491,7 @@ class AuditTrailReviewPayload(BaseModel):
     require_mutation_dry_run: bool = Field(default=True, alias="requireMutationDryRun")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SecurityPostureReviewPayload(BaseModel):
@@ -514,7 +516,7 @@ class SecurityPostureReviewPayload(BaseModel):
     max_critical_findings: int = Field(default=0, alias="maxCriticalFindings", ge=0, le=1000)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SupplyChainReviewPayload(BaseModel):
@@ -531,7 +533,7 @@ class SupplyChainReviewPayload(BaseModel):
     require_image_scan: bool = Field(default=True, alias="requireImageScan")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SchemaMigrationRehearsalPayload(BaseModel):
@@ -550,7 +552,7 @@ class SchemaMigrationRehearsalPayload(BaseModel):
     max_destructive_steps: int = Field(default=0, alias="maxDestructiveSteps", ge=0, le=100)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class BackupRestoreDrillPayload(BaseModel):
@@ -566,7 +568,7 @@ class BackupRestoreDrillPayload(BaseModel):
     require_restore_integrity_check: bool = Field(default=True, alias="requireRestoreIntegrityCheck")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ObservabilityCoverageReviewPayload(BaseModel):
@@ -586,7 +588,7 @@ class ObservabilityCoverageReviewPayload(BaseModel):
     require_dashboard_links: bool = Field(default=True, alias="requireDashboardLinks")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class FeatureFlagReviewPayload(BaseModel):
@@ -610,7 +612,7 @@ class FeatureFlagReviewPayload(BaseModel):
     require_signed_bridge: bool = Field(default=True, alias="requireSignedBridge")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DomainMigrationReadinessPayload(BaseModel):
@@ -639,7 +641,7 @@ class DomainMigrationReadinessPayload(BaseModel):
     require_owner_approval: bool = Field(default=True, alias="requireOwnerApproval")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class CutoverPlanPayload(BaseModel):
@@ -657,7 +659,7 @@ class CutoverPlanPayload(BaseModel):
     dry_run_required: bool = Field(default=True, alias="dryRunRequired")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class OwnerRegistryReviewPayload(BaseModel):
@@ -676,7 +678,7 @@ class OwnerRegistryReviewPayload(BaseModel):
     require_incident_owner: bool = Field(default=True, alias="requireIncidentOwner")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PostCutoverMonitorPayload(BaseModel):
@@ -693,7 +695,7 @@ class PostCutoverMonitorPayload(BaseModel):
     require_node_fallback: bool = Field(default=True, alias="requireNodeFallback")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class LegacyPathDecommissionPayload(BaseModel):
@@ -713,7 +715,7 @@ class LegacyPathDecommissionPayload(BaseModel):
     require_operator_approval: bool = Field(default=True, alias="requireOperatorApproval")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SteadyStateOpsReviewPayload(BaseModel):
@@ -735,7 +737,7 @@ class SteadyStateOpsReviewPayload(BaseModel):
     require_on_call: bool = Field(default=True, alias="requireOnCall")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class QueueResilienceReviewPayload(BaseModel):
@@ -754,7 +756,7 @@ class QueueResilienceReviewPayload(BaseModel):
     require_idempotency: bool = Field(default=True, alias="requireIdempotency")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ArtifactIntegrityReviewPayload(BaseModel):
@@ -785,7 +787,7 @@ class ArtifactIntegrityReviewPayload(BaseModel):
     require_expiry: bool = Field(default=True, alias="requireExpiry")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class RunbookFreshnessReviewPayload(BaseModel):
@@ -802,7 +804,7 @@ class RunbookFreshnessReviewPayload(BaseModel):
     require_approval: bool = Field(default=True, alias="requireApproval")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SupportEscalationReviewPayload(BaseModel):
@@ -819,7 +821,7 @@ class SupportEscalationReviewPayload(BaseModel):
     require_customer_comms: bool = Field(default=True, alias="requireCustomerComms")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class CostGuardrailReviewPayload(BaseModel):
@@ -836,7 +838,7 @@ class CostGuardrailReviewPayload(BaseModel):
     require_worker_costs: bool = Field(default=True, alias="requireWorkerCosts")
     require_artifact_storage_costs: bool = Field(default=True, alias="requireArtifactStorageCosts")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class EnvironmentParityReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -852,7 +854,7 @@ class EnvironmentParityReviewPayload(BaseModel):
     require_hmac_parity: bool = Field(default=True, alias="requireHmacParity")
     require_secret_fingerprints: bool = Field(default=True, alias="requireSecretFingerprints")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -875,7 +877,7 @@ class AccessControlReviewPayload(BaseModel):
     require_cross_org_denies: bool = Field(default=True, alias="requireCrossOrgDenies")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DataQualityReviewPayload(BaseModel):
@@ -896,7 +898,7 @@ class DataQualityReviewPayload(BaseModel):
     require_redaction: bool = Field(default=True, alias="requireRedaction")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class CiStagingValidationReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -931,7 +933,7 @@ class CiStagingValidationReviewPayload(BaseModel):
     require_python_tests: bool = Field(default=True, alias="requirePythonTests")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ReleaseClosureReviewPayload(BaseModel):
@@ -960,7 +962,7 @@ class ReleaseClosureReviewPayload(BaseModel):
     allow_known_risks: bool = Field(default=False, alias="allowKnownRisks")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -988,7 +990,7 @@ class ProductionCanaryObservationReviewPayload(BaseModel):
     min_sample_size: int = Field(default=25, alias="minSampleSize", ge=0, le=1000000)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class IncidentResponseReadinessReviewPayload(BaseModel):
@@ -1009,7 +1011,7 @@ class IncidentResponseReadinessReviewPayload(BaseModel):
     max_escalation_minutes: int = Field(default=30, alias="maxEscalationMinutes", ge=1, le=1440)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class TrafficPromotionReadinessReviewPayload(BaseModel):
@@ -1033,7 +1035,7 @@ class TrafficPromotionReadinessReviewPayload(BaseModel):
     require_clean_observation: bool = Field(default=True, alias="requireCleanObservation")
     require_incident_readiness: bool = Field(default=True, alias="requireIncidentReadiness")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class EvidenceRetentionAuditReviewPayload(BaseModel):
@@ -1052,7 +1054,7 @@ class EvidenceRetentionAuditReviewPayload(BaseModel):
     min_retention_days: int = Field(default=30, alias="minRetentionDays", ge=1, le=3650)
     evidence: dict[str, Any] = Field(default_factory=dict)
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class SloErrorBudgetReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -1074,7 +1076,7 @@ class SloErrorBudgetReviewPayload(BaseModel):
     require_alert_coverage: bool = Field(default=True, alias="requireAlertCoverage")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AutoRollbackSafeguardReviewPayload(BaseModel):
@@ -1097,7 +1099,7 @@ class AutoRollbackSafeguardReviewPayload(BaseModel):
     require_kill_switch: bool = Field(default=True, alias="requireKillSwitch")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -1121,7 +1123,7 @@ class ThirdPartyDependencyReviewPayload(BaseModel):
     require_status_page_clear: bool = Field(default=True, alias="requireStatusPageClear")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class CapacityScalingReadinessReviewPayload(BaseModel):
@@ -1148,7 +1150,7 @@ class CapacityScalingReadinessReviewPayload(BaseModel):
     require_autoscaling: bool = Field(default=True, alias="requireAutoscaling")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -1172,7 +1174,7 @@ class CompliancePrivacyEvidenceReviewPayload(BaseModel):
     require_approvals: bool = Field(default=True, alias="requireApprovals")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class RunbookDrillVerificationReviewPayload(BaseModel):
@@ -1192,7 +1194,7 @@ class RunbookDrillVerificationReviewPayload(BaseModel):
     require_owner_ack: bool = Field(default=True, alias="requireOwnerAck")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DisasterRecoveryBackupReviewPayload(BaseModel):
@@ -1216,7 +1218,7 @@ class DisasterRecoveryBackupReviewPayload(BaseModel):
     require_offsite_copy: bool = Field(default=True, alias="requireOffsiteCopy")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ChangeMigrationReadinessReviewPayload(BaseModel):
@@ -1239,7 +1241,7 @@ class ChangeMigrationReadinessReviewPayload(BaseModel):
     require_dry_run_rehearsal: bool = Field(default=True, alias="requireDryRunRehearsal")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -1259,7 +1261,7 @@ class ConfigurationSecretRotationReviewPayload(BaseModel):
     require_external_secret_store: bool = Field(default=True, alias="requireExternalSecretStore")
     require_break_glass: bool = Field(default=True, alias="requireBreakGlass")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class MaintenanceWindowReadinessReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -1279,7 +1281,7 @@ class MaintenanceWindowReadinessReviewPayload(BaseModel):
     require_rollback_task: bool = Field(default=True, alias="requireRollbackTask")
     require_low_traffic_window: bool = Field(default=True, alias="requireLowTrafficWindow")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class NotificationDispatchPayload(BaseModel):
     channel: Literal["email", "sms", "in_app"] = "email"
@@ -1288,7 +1290,7 @@ class NotificationDispatchPayload(BaseModel):
     variables: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AnalyticsSnapshotPayload(BaseModel):
@@ -6143,7 +6145,7 @@ class AuditForensicsReadinessReviewPayload(BaseModel):
     require_chain_of_custody: bool = Field(default=True, alias="requireChainOfCustody")
     require_investigation_drill: bool = Field(default=True, alias="requireInvestigationDrill")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class BusinessContinuityReadinessReviewPayload(BaseModel):
@@ -6164,7 +6166,7 @@ class BusinessContinuityReadinessReviewPayload(BaseModel):
     require_fallback: bool = Field(default=True, alias="requireFallback")
     require_exercise: bool = Field(default=True, alias="requireExercise")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PostIncidentLearningReviewPayload(BaseModel):
@@ -6184,7 +6186,7 @@ class PostIncidentLearningReviewPayload(BaseModel):
     require_regression_test: bool = Field(default=True, alias="requireRegressionTest")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class TechDebtGovernanceReviewPayload(BaseModel):
@@ -6204,7 +6206,7 @@ class TechDebtGovernanceReviewPayload(BaseModel):
     require_remediation_plan: bool = Field(default=True, alias="requireRemediationPlan")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class VendorResilienceReviewPayload(BaseModel):
@@ -6225,7 +6227,7 @@ class VendorResilienceReviewPayload(BaseModel):
     require_owner_ack: bool = Field(default=True, alias="requireOwnerAck")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class KnowledgeTransferReadinessReviewPayload(BaseModel):
@@ -6245,7 +6247,7 @@ class KnowledgeTransferReadinessReviewPayload(BaseModel):
     require_handoff_checklist: bool = Field(default=True, alias="requireHandoffChecklist")
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ArchitectureOwnershipReviewPayload(BaseModel):
@@ -6264,7 +6266,7 @@ class ArchitectureOwnershipReviewPayload(BaseModel):
     require_adr: bool = Field(default=True, alias="requireAdr")
     require_boundary_doc: bool = Field(default=True, alias="requireBoundaryDoc")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ExecutiveMetricsGovernanceReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6282,7 +6284,7 @@ class ExecutiveMetricsGovernanceReviewPayload(BaseModel):
     require_dashboard: bool = Field(default=True, alias="requireDashboard")
     require_cadence: bool = Field(default=True, alias="requireCadence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6302,7 +6304,7 @@ class DomainAdoptionReadinessReviewPayload(BaseModel):
     require_owner_ack: bool = Field(default=True, alias="requireOwnerAck")
     require_rollback_plan: bool = Field(default=True, alias="requireRollbackPlan")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoRolloutGovernanceReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6323,7 +6325,7 @@ class PhaseTwoRolloutGovernanceReviewPayload(BaseModel):
     require_support_plan: bool = Field(default=True, alias="requireSupportPlan")
     require_guardrails: bool = Field(default=True, alias="requireGuardrails")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DomainPilotExecutionReviewPayload(BaseModel):
@@ -6346,7 +6348,7 @@ class DomainPilotExecutionReviewPayload(BaseModel):
     require_rollback_plan: bool = Field(default=True, alias="requireRollbackPlan")
     require_operator_approval: bool = Field(default=True, alias="requireOperatorApproval")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class DomainOutcomeMeasurementReviewPayload(BaseModel):
@@ -6368,7 +6370,7 @@ class DomainOutcomeMeasurementReviewPayload(BaseModel):
     require_baselines: bool = Field(default=True, alias="requireBaselines")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6391,7 +6393,7 @@ class DomainGraduationReadinessReviewPayload(BaseModel):
     require_criteria: bool = Field(default=True, alias="requireCriteria")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoLearningConsolidationReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6411,7 +6413,7 @@ class PhaseTwoLearningConsolidationReviewPayload(BaseModel):
     require_playbook_updates: bool = Field(default=True, alias="requirePlaybookUpdates")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DomainWideAdoptionReadinessReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6432,7 +6434,7 @@ class DomainWideAdoptionReadinessReviewPayload(BaseModel):
     require_rollback_plan: bool = Field(default=True, alias="requireRollbackPlan")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoSupportTransitionReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6453,7 +6455,7 @@ class PhaseTwoSupportTransitionReviewPayload(BaseModel):
     require_runbook_updates: bool = Field(default=True, alias="requireRunbookUpdates")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class DomainAdoptionStabilizationReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6475,7 +6477,7 @@ class DomainAdoptionStabilizationReviewPayload(BaseModel):
     require_regression_watch: bool = Field(default=True, alias="requireRegressionWatch")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoValueRealizationReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6496,7 +6498,7 @@ class PhaseTwoValueRealizationReviewPayload(BaseModel):
     require_executive_reviews: bool = Field(default=True, alias="requireExecutiveReviews")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6521,7 +6523,7 @@ class PhaseThreeDomainWaveReadinessReviewPayload(BaseModel):
     require_rollback_coverage: bool = Field(default=True, alias="requireRollbackCoverage")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseThreeOperatingModelAlignmentReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6546,7 +6548,7 @@ class PhaseThreeOperatingModelAlignmentReviewPayload(BaseModel):
     require_training: bool = Field(default=True, alias="requireTraining")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6570,7 +6572,7 @@ class PhaseThreeWaveExecutionReviewPayload(BaseModel):
     require_rollback_readiness: bool = Field(default=True, alias="requireRollbackReadiness")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PhaseThreeAdoptionValueTrackingReviewPayload(BaseModel):
@@ -6594,7 +6596,7 @@ class PhaseThreeAdoptionValueTrackingReviewPayload(BaseModel):
     require_feedback_review: bool = Field(default=True, alias="requireFeedbackReview")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseThreeGapRemediationReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6614,7 +6616,7 @@ class PhaseThreeGapRemediationReviewPayload(BaseModel):
     require_risk_acceptance: bool = Field(default=True, alias="requireRiskAcceptance")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class MigrationStageCompletionReadinessReviewPayload(BaseModel):
@@ -6636,7 +6638,7 @@ class MigrationStageCompletionReadinessReviewPayload(BaseModel):
     require_validation_results: bool = Field(default=True, alias="requireValidationResults")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6660,7 +6662,7 @@ class PhaseThreeRemediationClosureReviewPayload(BaseModel):
     require_acceptance_records: bool = Field(default=True, alias="requireAcceptanceRecords")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class ExecutiveOperationalHandoffReviewPayload(BaseModel):
@@ -6683,7 +6685,7 @@ class ExecutiveOperationalHandoffReviewPayload(BaseModel):
     require_support_model: bool = Field(default=True, alias="requireSupportModel")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6707,7 +6709,7 @@ class GlobalTaskStatusTrackingReviewPayload(BaseModel):
     max_open_critical_blockers: int = Field(default=0, alias="maxOpenCriticalBlockers", ge=0, le=1000)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ProjectStateHealthReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6729,7 +6731,7 @@ class ProjectStateHealthReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6752,7 +6754,7 @@ class StageClosureCertificationReviewPayload(BaseModel):
     require_release_artifacts: bool = Field(default=True, alias="requireReleaseArtifacts")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PostClosureOperationalTransitionReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6776,7 +6778,7 @@ class PostClosureOperationalTransitionReviewPayload(BaseModel):
     require_ownership_handoff: bool = Field(default=True, alias="requireOwnershipHandoff")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PostClosureMonitoringReviewPayload(BaseModel):
@@ -6802,7 +6804,7 @@ class PostClosureMonitoringReviewPayload(BaseModel):
     require_regression_checks: bool = Field(default=True, alias="requireRegressionChecks")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class SteadyStateTransferValidationReviewPayload(BaseModel):
@@ -6830,7 +6832,7 @@ class SteadyStateTransferValidationReviewPayload(BaseModel):
     require_support_model: bool = Field(default=True, alias="requireSupportModel")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -6860,7 +6862,7 @@ class SteadyStateOperationalAssuranceReviewPayload(BaseModel):
     min_approval_count: int = Field(default=2, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class ContinuousImprovementBacklogReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6886,7 +6888,7 @@ class ContinuousImprovementBacklogReviewPayload(BaseModel):
     require_value_hypotheses: bool = Field(default=False, alias="requireValueHypotheses")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StableOperationsOptimizationReviewPayload(BaseModel):
@@ -6911,7 +6913,7 @@ class StableOperationsOptimizationReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class RecurringMaintenanceCycleReadinessReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -6937,7 +6939,7 @@ class RecurringMaintenanceCycleReadinessReviewPayload(BaseModel):
     require_backup_validation: bool = Field(default=True, alias="requireBackupValidation")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class MaintenanceCycleExecutionReviewPayload(BaseModel):
@@ -6965,7 +6967,7 @@ class MaintenanceCycleExecutionReviewPayload(BaseModel):
     require_backup_results: bool = Field(default=True, alias="requireBackupResults")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class LongTermOperabilitySustainabilityReviewPayload(BaseModel):
@@ -6993,7 +6995,7 @@ class LongTermOperabilitySustainabilityReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -7021,7 +7023,7 @@ class RecurringOperationalMaturityAuditReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class StableStateContinuityControlReviewPayload(BaseModel):
@@ -7048,7 +7050,7 @@ class StableStateContinuityControlReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class OperationalResilienceGovernanceReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7075,7 +7077,7 @@ class OperationalResilienceGovernanceReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class RecoveryCapabilityValidationReviewPayload(BaseModel):
@@ -7103,7 +7105,7 @@ class RecoveryCapabilityValidationReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class OperationalResilienceOptimizationReviewPayload(BaseModel):
@@ -7130,7 +7132,7 @@ class OperationalResilienceOptimizationReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AutomatedContinuityPreparednessReviewPayload(BaseModel):
@@ -7158,7 +7160,7 @@ class AutomatedContinuityPreparednessReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class AutomatedContinuityExecutionValidationReviewPayload(BaseModel):
@@ -7186,7 +7188,7 @@ class AutomatedContinuityExecutionValidationReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class OperationalResilienceFeedbackLoopReviewPayload(BaseModel):
@@ -7213,7 +7215,7 @@ class OperationalResilienceFeedbackLoopReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class FinalClosureEvidencePackageReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7241,7 +7243,7 @@ class FinalClosureEvidencePackageReviewPayload(BaseModel):
     min_signoff_count: int = Field(default=2, alias="minSignoffCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class GlobalImplementationCompletionChecklistReviewPayload(BaseModel):
@@ -7268,7 +7270,7 @@ class GlobalImplementationCompletionChecklistReviewPayload(BaseModel):
     min_approval_count: int = Field(default=1, alias="minApprovalCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 
@@ -7299,7 +7301,7 @@ class FinalOperationalHandoverReviewPayload(BaseModel):
     min_signoff_count: int = Field(default=2, alias="minSignoffCount", ge=0, le=100)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 
 class PhaseClosureCertificationReviewPayload(BaseModel):
@@ -7328,7 +7330,7 @@ class PhaseClosureCertificationReviewPayload(BaseModel):
     require_next_phase_backlog_separation: bool = Field(default=True, alias="requireNextPhaseBacklogSeparation")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class FinalAcceptanceEvidenceReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7349,7 +7351,7 @@ class FinalAcceptanceEvidenceReviewPayload(BaseModel):
     max_open_high_risks: int = Field(default=0, alias="maxOpenHighRisks", ge=0, le=1000)
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class StageExitReadinessReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7373,7 +7375,7 @@ class StageExitReadinessReviewPayload(BaseModel):
     require_rollback_plan: bool = Field(default=True, alias="requireRollbackPlan")
     require_evidence_bundle: bool = Field(default=True, alias="requireEvidenceBundle")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoClosureAcceptanceReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7395,7 +7397,7 @@ class PhaseTwoClosureAcceptanceReviewPayload(BaseModel):
     require_support_transition: bool = Field(default=True, alias="requireSupportTransition")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseThreeTransitionReadinessReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7418,7 +7420,7 @@ class PhaseThreeTransitionReadinessReviewPayload(BaseModel):
     require_entry_criteria: bool = Field(default=True, alias="requireEntryCriteria")
     require_evidence: bool = Field(default=True, alias="requireEvidence")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoFeedbackAdoptionReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7436,7 +7438,7 @@ class PhaseTwoFeedbackAdoptionReviewPayload(BaseModel):
     require_adoption_decisions: bool = Field(default=True, alias="requireAdoptionDecisions")
     require_communications: bool = Field(default=True, alias="requireCommunications")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 class PhaseTwoExpansionControlReviewPayload(BaseModel):
     release_id: str = Field(default="option-b-release", alias="releaseId")
@@ -7456,7 +7458,7 @@ class PhaseTwoExpansionControlReviewPayload(BaseModel):
     require_rollback_triggers: bool = Field(default=True, alias="requireRollbackTriggers")
     require_traffic_limits: bool = Field(default=True, alias="requireTrafficLimits")
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
 def process_platform_configuration_secret_rotation_review(job: JobEnvelope) -> JobResult:
     payload = model_validate(ConfigurationSecretRotationReviewPayload, job.payload)
