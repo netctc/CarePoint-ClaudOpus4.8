@@ -161,8 +161,9 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
     `groupBy` batched de la Fase 2 contra Postgres real. Se salta si no hay BD.
 - Scripts: `npm run test:api` (raíz) / `npm run test` (en `services/api`).
 - CI: el job S1 ahora hace `prisma db push` + `test:api` (tiene Postgres+Redis).
-- **Requiere `npm install`** una vez para regenerar `package-lock.json` con
-  vitest/supertest antes de que `npm ci`/CI funcionen.
+- ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **7/7 tests
+  pasan**, incluido el de BD (organizations → 200 + array). `package-lock.json`
+  actualizado y commiteado con vitest/supertest.
 
 **Pendiente:**
 - [ ] Ampliar cobertura a más flujos (citas, prescripciones, labs, telehealth, RPM).
