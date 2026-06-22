@@ -202,7 +202,24 @@ Pipeline completo del backend verificado con build real en la máquina del usuar
 **Conclusión:** Fase 0 (verificación) y Fase 1 (estabilizar build) quedan
 CONFIRMADAS para backend, contracts y admin web. El proyecto compila y arranca.
 
-### Pendiente de confirmar (corridas rápidas)
-- [ ] `npm run build:provider` (sin comentario `#`) → confirmar provider web.
-- [ ] `npm run verify:python-worker && npm run test:python-worker` → confirmar Python verde.
-- [ ] `cd apps/provider_mobile && flutter pub get && flutter analyze`.
+### Pendiente de confirmar (corridas rápidas) — ✅ COMPLETADO
+- [x] `npm run build:provider` → ✅ provider web compila (25 rutas).
+- [x] `npm run verify:python-worker && npm run test:python-worker` → ✅ todo verde
+      (sin fallos; solo warnings de deprecación de Pydantic v2, no bloqueantes).
+- [x] `apps/provider_mobile`: `flutter analyze` → tenía 1 warning `unnecessary_cast`
+      en `provider_analytics_page.dart:107`; **corregido** (se quitó el `as Map`
+      redundante dentro de la rama `item is Map`).
+
+### Estado de build/verificación: TODO VERDE
+| Componente | Estado |
+|------------|--------|
+| Backend (contracts + api, tsc) | ✅ compila |
+| API smoke (health endpoints) | ✅ 5/5 |
+| Admin web (`next build`) | ✅ 37 rutas |
+| Provider web (`next build`) | ✅ 25 rutas |
+| App móvil paciente (`flutter analyze`) | ✅ sin issues |
+| App móvil médico (`flutter analyze`) | ✅ sin issues (tras fix) |
+| Python worker (pytest) | ✅ todos pasan |
+| Gates S0/S1 (secrets, workspace, config) | ✅ |
+
+**Fases 0 y 1 (verificación + estabilización del build) CERRADAS.**
