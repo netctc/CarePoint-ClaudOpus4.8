@@ -165,11 +165,7 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
   pasan**, incluido el de BD (organizations → 200 + array). `package-lock.json`
   actualizado y commiteado con vitest/supertest.
 
-**Pendiente:**
-- [ ] Ampliar cobertura a más flujos (citas, prescripciones, labs, telehealth, RPM).
-- [ ] Pruebas de widgets/smoke en las apps Flutter.
-
-**Ampliación de cobertura (`flows.integration.test.ts`):**
+**Ampliación de cobertura (`flows.integration.test.ts` + `org-write.integration.test.ts`):**
 - **Guardas de auth parametrizadas** sobre ~33 endpoints montados (dashboard,
   appointments, providers, catalog, coverage, pricing, payments, bookings,
   policies, campaigns, integrations, moderation, todos los `provider/*` y
@@ -180,6 +176,13 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 - **Lecturas autenticadas (token con org):** catalog/services, catalog/summary,
   coverage/rules, dashboard/admin y organizations (scoped) → 200 con forma
   correcta; ejercita las rutas de query reales contra Postgres.
+- **Escritura/persistencia (con BD):** siembra un admin real, crea una
+  organización vía API (201), verifica que aparece en el listado, y rechaza
+  nombre vacío (400). Limpieza completa a nivel de Prisma en `afterAll`.
+
+**Pendiente:**
+- [ ] Ampliar a flujos de escritura de citas/prescripciones/labs/telehealth/RPM.
+- [ ] Pruebas de widgets/smoke en las apps Flutter.
 
 ---
 
