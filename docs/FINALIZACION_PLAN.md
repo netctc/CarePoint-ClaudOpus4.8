@@ -184,6 +184,17 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 - ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **53/53
   tests pasan** (4 archivos), incluidos los de BD, lectura y escritura.
 
+**🔴 Bug real encontrado por los tests de escritura de cuentas:** el modelo
+`ProviderRoleCatalog` (y la relación `roleCatalog`/`roleCatalogId` en
+`ProviderProfile`) **faltaba en `schema.prisma`**, aunque la tabla/columna sí
+existen vía la migración `20260429120000_provider_role_catalog`. Como
+`lib/prisma.ts` exporta `prisma` tipado `any`, el compilador no lo detectaba,
+pero en runtime `prisma.providerRoleCatalog` era `undefined` → **crear y listar
+proveedores devolvía 500** (toda la gestión de proveedores del admin estaba
+rota). **Corregido:** se añadieron el modelo y las relaciones al schema,
+alineados con la migración. Requiere `npm run prisma:generate`. Esto además
+elimina un drift previo entre migraciones y schema.
+
 **Pendiente:**
 - [ ] Ampliar a flujos de escritura de citas/prescripciones/labs/telehealth/RPM.
 - [ ] Pruebas de widgets/smoke en las apps Flutter.
