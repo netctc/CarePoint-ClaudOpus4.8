@@ -37,7 +37,7 @@ class Settings(BaseSettings):
         env_prefix = ""
         env_file = (".env", ".env.local")
         extra = "ignore"
-        allow_population_by_field_name = True
+        populate_by_name = True
 
     @property
     def is_production(self) -> bool:
