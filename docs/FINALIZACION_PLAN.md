@@ -196,8 +196,18 @@ alineados con la migración. Requiere `npm run prisma:generate`. Esto además
 elimina un drift previo entre migraciones y schema.
 
 **Pendiente:**
-- [ ] Ampliar a flujos de escritura de citas/prescripciones/labs/telehealth/RPM.
+- [ ] Flujo de **citas** (booking): requiere hold→book-with-hold con slots
+      publicados; multi-paso, pendiente de un harness de seed dedicado.
 - [ ] Pruebas de widgets/smoke en las apps Flutter.
+
+**Transiciones de estado y prescripciones (con BD):**
+- `state-transitions.integration.test.ts`: suspende/reactiva una cuenta de
+  paciente (`PATCH .../status`) y publica/archiva un servicio de catálogo
+  (`/publish`, `/archive`) → 200 con el estado esperado.
+- `prescription-write.integration.test.ts`: crea una prescripción vía
+  `POST /api/provider/prescriptions/items` (contexto SUPER_ADMIN privilegiado,
+  paciente sembrado) → 201 + listado; rechaza cuerpo inválido (400). Persiste
+  en `PrescriptionDraft`. Cleanup completo.
 
 ---
 
