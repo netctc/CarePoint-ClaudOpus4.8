@@ -156,7 +156,10 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 ---
 
 ## Fase 4 — Preparación de producción / Go-live
-- [ ] Rotar y validar secretos por entorno (`JWT_*`, `MEDICAL_PROFILE_ENCRYPTION_KEY`, `PYTHON_SERVICES_SHARED_SECRET`). Nunca commitear `.env`.
+- [x] **Rotación de secretos:** generador `npm run gen:secrets`
+      (`scripts/security/generate-secrets.mjs`) + runbook completo
+      (`docs/SECRET_ROTATION_RUNBOOK.md`). Incluye aviso de que rotar
+      `MEDICAL_PROFILE_ENCRYPTION_KEY` con datos cifrados es destructivo.
 - [ ] Construir y probar imágenes Docker (`services/api/Dockerfile`, `compose.yml`, `deploy/`).
 - [ ] Ejecutar el runbook de pilot (`docs/pilot/`) en un staging real.
 - [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
