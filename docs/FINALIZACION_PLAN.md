@@ -160,7 +160,23 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
       (`scripts/security/generate-secrets.mjs`) + runbook completo
       (`docs/SECRET_ROTATION_RUNBOOK.md`). Incluye aviso de que rotar
       `MEDICAL_PROFILE_ENCRYPTION_KEY` con datos cifrados es destructivo.
-- [ ] Construir y probar imágenes Docker (`services/api/Dockerfile`, `compose.yml`, `deploy/`).
+- [x] **Docker (revisión por inspección):**
+   - El compose de producción `deploy/dokploy/docker-compose.dokploy.yml` es
+     completo (postgres, pgadmin, redis, api, python-worker-api,
+     python-worker-celery, admin, provider, patient_web, provider_mobile_web)
+     con healthchecks, `restart` y `depends_on` por condición. El `compose.yml`
+     raíz es solo para dev local (postgres + redis + worker; la API y las webs
+     se corren con `npm run dev:*`).
+   - 🔴 **Hueco corregido:** el deploy no aplicaba migraciones → una BD de
+     producción vacía arrancaba sin tablas. Se añadió `start:prod`
+     (`prisma migrate deploy` + `node dist/index.js`) y el Dockerfile de la API
+     ahora arranca con `start:prod`. Se añadió script `prisma:migrate:deploy`.
+   - Mis índices de Fase 2 se capturaron en una migración
+     (`20260622000000_org_dashboard_indexes`, `CREATE INDEX IF NOT EXISTS`) para
+     que `migrate deploy` los cree en producción (antes solo existían vía `db push`).
+   - Recomendación (no bloqueante): los Dockerfiles son single-stage (imágenes
+     grandes con devDeps). Multi-stage + salida `standalone` de Next reduciría
+     el tamaño. Producción no debe auto-sembrar; el seed de piloto es aparte.
 - [ ] Ejecutar el runbook de pilot (`docs/pilot/`) en un staging real.
 - [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
 - [ ] Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS en producción.
