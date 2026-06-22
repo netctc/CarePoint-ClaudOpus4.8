@@ -105,6 +105,14 @@ produciendo las cargas documentadas de ~20s (`/portal/dashboard`,
 - [ ] Revisar/optimizar las queries de los endpoints `dashboard`/organizations/catalog (posibles N+1) y medir el tiempo real con datos del piloto. Meta: < 2s.
 
 **Optimizaciones aplicadas (Opción B — análisis por inspección):**
+0. **🔴 BUG CRÍTICO encontrado al medir:** el router `adminUsersRouter`
+   (`/api/admin/users/*`: organizations, accounts, providers, patients,
+   provider-roles, credenciales, governance, import, data-quality) estaba
+   **definido pero NUNCA montado** en `app.ts` (probablemente se perdió en una
+   regeneración del workspace). Resultado: toda la gestión de cuentas y
+   organizaciones del Admin devolvía 404 y caía a datos mock. **Corregido:** se
+   importa y monta `app.use('/api/admin/users', adminUsersRouter)`. El Admin hace
+   14 tipos de llamadas a `/api/admin/users/*`, todas servidas por este router.
 1. **`GET /api/admin-users/organizations` (causa de los ~20.9s):** `mapOrganization`
    llamaba a `getOrganizationDependencySummary`, que ejecuta **35 `count`** por
    organización, y se invocaba por cada org (hasta 500) con `Promise.all` →
