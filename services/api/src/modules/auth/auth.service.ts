@@ -372,6 +372,11 @@ export async function requestPatientOtp(input: { identifier: string; channel?: O
   const identifier = input.identifier.trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email: identifier } });
   if (!user || user.role !== 'PATIENT') {
+    console.warn(
+      `[otp] requestPatientOtp: no se envia email — identifier "${identifier}" ${
+        user ? `existe pero su rol es ${user.role} (se requiere PATIENT)` : 'no existe como usuario'
+      }. Respuesta neutra para no filtrar cuentas.`,
+    );
     return {
       challengeId: identifier,
       channel: input.channel ?? 'email',
@@ -411,6 +416,14 @@ export async function requestPatientOtp(input: { identifier: string; channel?: O
       expiresInSeconds: issued.expiresInSeconds,
       purpose: 'patient sign-in',
     });
+  } else {
+    console.warn(
+      `[otp] requestPatientOtp: no se envia email para ${identifier} — ${
+        !issued.isNew
+          ? 'reutilizando challenge reciente (ventana de reenvio de 60s activa)'
+          : `canal=${issued.challenge.channel} (solo se envia email cuando canal=email)`
+      }`,
+    );
   }
 
   return {

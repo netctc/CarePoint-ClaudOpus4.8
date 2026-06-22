@@ -1,5 +1,3 @@
-import nodemailer, { type Transporter } from 'nodemailer';
-
 // Transactional email (OTP verification codes).
 //
 // Two providers are supported, selected by environment variables:
@@ -8,6 +6,8 @@ import nodemailer, { type Transporter } from 'nodemailer';
 //      Resend's shared testing address "onboarding@resend.dev" (which can only
 //      deliver to your own account email until you verify a domain).
 //   2. SMTP via nodemailer (fallback) — set SMTP_HOST/SMTP_USER/SMTP_PASS.
+//      nodemailer is imported lazily so the Resend path never depends on it
+//      being installed.
 //
 // All credentials come from env vars so nothing is committed. If neither
 // provider is configured, sending is a safe no-op (logs a warning).
@@ -19,6 +19,15 @@ function getResendApiKey(): string | null {
   return key ? key : null;
 }
 
+function getSmtpConfig(): { host: string; port: number; user: string; pass: string } | null {
+  const host = process.env.SMTP_HOST?.trim();
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.trim();
+  if (!host || !user || !pass) return null;
+  const parsedPort = Number.parseInt(process.env.SMTP_PORT ?? '587', 10);
+  return { host, user, pass, port: Number.isFinite(parsedPort) ? parsedPort : 587 };
+}
+
 function getFromAddress(): string {
   return (
     process.env.EMAIL_FROM?.trim() ||
@@ -28,46 +37,39 @@ function getFromAddress(): string {
   );
 }
 
-// --- SMTP (fallback) ---------------------------------------------------------
+export type EmailProviderStatus = {
+  provider: 'resend' | 'smtp' | 'none';
+  from: string;
+  resendConfigured: boolean;
+  smtpConfigured: boolean;
+  smtpHost?: string;
+};
 
-let transporter: Transporter | null = null;
-let smtpResolved = false;
-
-function getTransporter(): Transporter | null {
-  if (smtpResolved) return transporter;
-  smtpResolved = true;
-
-  const host = process.env.SMTP_HOST?.trim();
-  const user = process.env.SMTP_USER?.trim();
-  const pass = process.env.SMTP_PASS?.trim();
-  const port = Number.parseInt(process.env.SMTP_PORT ?? '587', 10);
-
-  if (!host || !user || !pass) {
-    transporter = null;
-    return null;
-  }
-
-  const securePort = Number.isFinite(port) ? port : 587;
-  transporter = nodemailer.createTransport({
-    host,
-    port: securePort,
-    // Port 465 is implicit TLS; 587 uses STARTTLS, so secure=false.
-    secure: securePort === 465,
-    auth: { user, pass },
-  });
-  return transporter;
+export function getEmailProviderStatus(): EmailProviderStatus {
+  const resendConfigured = getResendApiKey() !== null;
+  const smtp = getSmtpConfig();
+  return {
+    provider: resendConfigured ? 'resend' : smtp ? 'smtp' : 'none',
+    from: getFromAddress(),
+    resendConfigured,
+    smtpConfigured: smtp !== null,
+    smtpHost: smtp?.host,
+  };
 }
 
 export function isEmailConfigured(): boolean {
-  return getResendApiKey() !== null || getTransporter() !== null;
+  return getResendApiKey() !== null || getSmtpConfig() !== null;
 }
 
-type SendResult = { sent: true } | { sent: false; reason: 'not_configured' | 'send_failed' };
+type SendResult = { sent: true; provider: 'resend' | 'smtp'; id?: string } | { sent: false; reason: 'not_configured' | 'send_failed' };
+
+// --- Resend HTTP API (preferred) --------------------------------------------
 
 async function sendViaResend(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
   const apiKey = getResendApiKey();
   if (!apiKey) return { sent: false, reason: 'not_configured' };
 
+  const from = getFromAddress();
   try {
     const res = await fetch(RESEND_ENDPOINT, {
       method: 'POST',
@@ -76,7 +78,7 @@ async function sendViaResend(opts: { to: string; subject: string; text: string; 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: getFromAddress(),
+        from,
         to: [opts.to],
         subject: opts.subject,
         text: opts.text,
@@ -84,40 +86,93 @@ async function sendViaResend(opts: { to: string; subject: string; text: string; 
       }),
     });
 
+    const bodyText = await res.text().catch(() => '');
     if (!res.ok) {
-      const detail = await res.text().catch(() => '');
-      console.error(`[mailer] Resend API error ${res.status} sending to ${opts.to}: ${detail.slice(0, 300)}`);
+      console.error(
+        `[mailer] Resend API rejected email to ${opts.to} (from="${from}") — HTTP ${res.status}: ${bodyText.slice(0, 500)}`,
+      );
       return { sent: false, reason: 'send_failed' };
     }
-    return { sent: true };
+    let id: string | undefined;
+    try {
+      id = (JSON.parse(bodyText) as { id?: string }).id;
+    } catch {
+      /* ignore parse issues */
+    }
+    console.log(`[mailer] Resend accepted email to ${opts.to} (from="${from}") id=${id ?? 'n/a'}`);
+    return { sent: true, provider: 'resend', id };
   } catch (error) {
-    console.error(`[mailer] Resend request failed for ${opts.to}:`, error instanceof Error ? error.message : error);
+    console.error(
+      `[mailer] Resend request failed for ${opts.to} (network/DNS?):`,
+      error instanceof Error ? error.message : error,
+    );
     return { sent: false, reason: 'send_failed' };
+  }
+}
+
+// --- SMTP via nodemailer (fallback, lazily loaded) ---------------------------
+
+let smtpTransporter: unknown = null;
+let smtpInitTried = false;
+
+async function getSmtpTransporter(): Promise<any | null> {
+  if (smtpInitTried) return smtpTransporter as any;
+  smtpInitTried = true;
+
+  const config = getSmtpConfig();
+  if (!config) {
+    smtpTransporter = null;
+    return null;
+  }
+
+  try {
+    // Lazy import: the Resend path never requires nodemailer to be installed.
+    const nodemailer = (await import('nodemailer')).default;
+    smtpTransporter = nodemailer.createTransport({
+      host: config.host,
+      port: config.port,
+      // Port 465 is implicit TLS; 587 uses STARTTLS, so secure=false.
+      secure: config.port === 465,
+      auth: { user: config.user, pass: config.pass },
+    });
+    return smtpTransporter as any;
+  } catch (error) {
+    console.error(
+      '[mailer] SMTP requested but nodemailer is not available (run npm install). ' +
+        'Prefer Resend by setting RESEND_API_KEY. Error:',
+      error instanceof Error ? error.message : error,
+    );
+    smtpTransporter = null;
+    return null;
   }
 }
 
 async function sendViaSmtp(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
-  const tx = getTransporter();
+  const tx = await getSmtpTransporter();
   if (!tx) return { sent: false, reason: 'not_configured' };
 
+  const from = getFromAddress();
   try {
-    await tx.sendMail({ from: getFromAddress(), to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
-    return { sent: true };
+    const info = await tx.sendMail({ from, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
+    console.log(`[mailer] SMTP accepted email to ${opts.to} (from="${from}") id=${info?.messageId ?? 'n/a'}`);
+    return { sent: true, provider: 'smtp', id: info?.messageId };
   } catch (error) {
-    console.error(`[mailer] SMTP send failed for ${opts.to}:`, error instanceof Error ? error.message : error);
+    console.error(`[mailer] SMTP send failed for ${opts.to} (from="${from}"):`, error instanceof Error ? error.message : error);
     return { sent: false, reason: 'send_failed' };
   }
 }
+
+// --- Public API --------------------------------------------------------------
 
 export async function sendEmail(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
   // Prefer Resend HTTP API; fall back to SMTP if configured.
   if (getResendApiKey()) {
     return sendViaResend(opts);
   }
-  if (getTransporter()) {
+  if (getSmtpConfig()) {
     return sendViaSmtp(opts);
   }
-  console.warn(`[mailer] No email provider configured (RESEND_API_KEY or SMTP_*); skipping email to ${opts.to}`);
+  console.warn(`[mailer] No email provider configured (set RESEND_API_KEY or SMTP_*); skipping email to ${opts.to}`);
   return { sent: false, reason: 'not_configured' };
 }
 

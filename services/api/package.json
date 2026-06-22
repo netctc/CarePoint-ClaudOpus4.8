@@ -15,6 +15,7 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:reset:pilot": "tsx prisma/reset-pilot-seed.ts",
     "prisma:db:push": "prisma db push --schema prisma/schema.prisma",
+    "email:doctor": "tsx scripts/email-doctor.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -33,6 +33,7 @@
     "verify:python-worker": "python3 scripts/option_b/verify_python_worker.py",
     "test:python-worker": "cd services/python-worker && python -m pytest -q",
     "test:api": "npm run test --workspace @care-center/api",
+    "email:doctor": "npm run email:doctor --workspace @care-center/api --",
     "verify:option-b": "npm run verify:workspace && npm run verify:python-worker",
     "setup:python-worker": "python scripts/option_b/install_python_worker_deps.py",
     "test:python-worker:contracts": "python scripts/option_b/run_python_worker_contract_tests.py",
