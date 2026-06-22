@@ -19,6 +19,7 @@ import { telehealthRouter } from './modules/telehealth/telehealth.routes';
 import { paymentsRouter } from './modules/payments/payments.routes';
 import { providersRouter } from './modules/providers/providers.routes';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes';
+import { adminUsersRouter } from './modules/admin-users/admin-users.routes';
 import { auditRouter } from './modules/audit/audit.routes';
 import { rbacRouter } from './modules/access/rbac.routes';
 import { catalogRouter } from './modules/catalog/catalog.routes';
@@ -120,6 +121,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/payments', paymentsRouter);
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
+  app.use('/api/admin/users', adminUsersRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);
