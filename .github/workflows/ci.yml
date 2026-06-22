@@ -60,3 +60,40 @@ jobs:
       - run: npm run prisma:generate
       - run: npm run build:backend
       - run: npm run smoke:api:ci
+
+  web-build:
+    name: Web build (admin + provider)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Build-time only. The web apps degrade to mock data at runtime when the
+      # API is unreachable, so a placeholder base URL is sufficient to compile.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build:contracts
+      - run: npm run build:web
+
+  mobile-analyze:
+    name: Flutter analyze (patient + provider mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [apps/mobile, apps/provider_mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+        working-directory: ${{ matrix.app }}
+      - run: flutter analyze
+        working-directory: ${{ matrix.app }}

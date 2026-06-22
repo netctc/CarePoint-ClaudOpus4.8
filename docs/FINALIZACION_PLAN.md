@@ -1,0 +1,143 @@
+# Plan de Finalización — CarePoint / Care Center Platform
+
+> Documento vivo que consolida la ejecución de las Fases 0–5 para cerrar el
+> proyecto. Generado a partir de una auditoría estática del repositorio.
+
+## Resumen del proyecto
+
+Monorepo de telesalud con workspaces npm:
+
+| Área | Stack | Notas |
+|------|-------|-------|
+| `apps/admin` | Next.js (App Router) | Portal de administración (puerto 3001) |
+| `apps/provider` | Next.js (App Router) | Portal de médicos (puerto 3000) |
+| `apps/mobile` | Flutter | App de paciente |
+| `apps/provider_mobile` | Flutter | App de médico |
+| `services/api` | Express + Prisma + PostgreSQL + Redis | ~50 módulos, schema de 783 líneas |
+| `services/python-worker` | FastAPI + Celery | Adopción progresiva (Opción B) |
+| `packages/contracts` | TypeScript (tsc) | Contratos compartidos |
+| `packages/design-system` | TS/React | UI compartida |
+
+---
+
+## Limitación del entorno de ejecución (importante)
+
+La auditoría se realizó en un sandbox **sin acceso a red externa**:
+
+- `npm`/registry devuelve 403 y `curl` a registros externos devuelve `000`.
+- No es posible `npm ci`, `pip install`, ni descargar el SDK de Flutter.
+- No hay PostgreSQL/Redis levantados.
+
+Por lo tanto, los pasos que requieren **compilar o ejecutar** (build real, smoke,
+migraciones, análisis Flutter) **deben correrse en un entorno con red** siguiendo
+el runbook de la Fase 0. Los hallazgos de este documento provienen de análisis
+estático y de cambios de código de bajo riesgo verificables por inspección.
+
+---
+
+## Fase 0 — Verificar el estado real
+
+### Hallazgos confirmados (estáticos)
+- ✅ `dist/` **no** está commiteado (0 archivos en git, está en `.gitignore`). No
+  existe el riesgo de drift `src`/`dist` que se sospechaba inicialmente.
+- ✅ Existe `package-lock.json` en la raíz (lockfile válido para `npm ci`).
+- ✅ Cada loader del Admin (`admin-server.ts`) ya tiene `try/catch` con fallback a
+  datos mock; el problema de latencia provenía de la **falta de timeout** en
+  `fetch` (corregido en Fase 2).
+- ✅ El CI (`.github/workflows/ci.yml`) compila backend + python-worker + smoke,
+  pero **no** compilaba los frontends web ni Flutter (ampliado en Fase 3).
+
+### Runbook de verificación (ejecutar donde haya red)
+```bash
+# 1. Dependencias
+npm ci --no-audit --no-fund
+
+# 2. Backend: pipeline completo del CI
+npm run verify:s1          # secrets + workspace + config + prisma + build + smoke
+#    requiere PostgreSQL y Redis (ver compose.yml) y un .env.local
+
+# 3. Frontends web
+npm run build:contracts
+npm run build:web          # admin + provider (next build)
+
+# 4. Python worker
+python -m pip install -r services/python-worker/requirements.txt
+npm run verify:python-worker
+npm run test:python-worker
+
+# 5. Apps móviles (requiere Flutter SDK)
+( cd apps/mobile && flutter pub get && flutter analyze )
+( cd apps/provider_mobile && flutter pub get && flutter analyze )
+
+# 6. Base de datos de piloto
+npm run db:reset:pilot
+```
+**Entregable:** registrar aquí la lista exacta de errores de compilación/runtime
+que aparezcan, para alimentar la Fase 1.
+
+---
+
+## Fase 1 — Estabilizar el build
+Pendiente de los resultados de la Fase 0 (no verificable sin red en este entorno).
+Checklist:
+- [ ] Corregir errores de compilación TS en backend, `contracts`, `admin`, `provider`.
+- [ ] Confirmar que `prisma generate` y el `schema.prisma` casan con `reset-pilot-seed.ts` y `seed.ts`.
+- [ ] Resolver advertencias de Next.js y cualquier bucle de redirección de auth.
+- [ ] Asegurar que `npm run build` (todo el monorepo) pasa de extremo a extremo.
+
+---
+
+## Fase 2 — Rendimiento de Admin  ✅ (cambios aplicados)
+**Causa raíz:** `apiRequestWithInit` en `apps/admin/src/lib/api/admin-server.ts`
+hacía `fetch` **sin timeout**. Con la API lenta/inaccesible, los Server
+Components se colgaban hasta el límite por defecto antes de caer al fallback mock,
+produciendo las cargas documentadas de ~20s (`/portal/dashboard`,
+`/portal/organizations`, `/portal/catalog/services`).
+
+**Cambios:**
+- Admin: timeout con `AbortSignal.timeout` (`ADMIN_API_TIMEOUT_MS`, por defecto
+  6000ms). Al expirar, el `catch` existente cae a mock al instante.
+- Provider: timeout para lecturas GET en `services/api-client.ts`
+  (`NEXT_PUBLIC_PROVIDER_API_TIMEOUT_MS`, por defecto 10000ms). Las mutaciones se
+  dejan sin abort para no cancelar operaciones ya aplicadas en el servidor.
+
+**Pendiente (requiere entorno con DB para medir):**
+- [ ] Revisar/optimizar las queries de los endpoints `dashboard`/organizations/catalog (posibles N+1) y medir el tiempo real con datos del piloto. Meta: < 2s.
+
+---
+
+## Fase 3 — Calidad y pruebas  ◑ (CI ampliado)
+**Cambios:** se añadieron al CI dos jobs nuevos:
+- `web-build`: `npm ci` + `build:contracts` + `build:web` (verifica admin/provider).
+- `mobile-analyze`: matriz Flutter (`flutter pub get` + `flutter analyze`) para `apps/mobile` y `apps/provider_mobile`.
+
+**Pendiente:**
+- [ ] Añadir pruebas de integración del API para flujos críticos (auth/RBAC, citas, prescripciones, labs, telehealth, RPM). Hoy solo hay *smoke* y *audit scanners*.
+- [ ] Pruebas de widgets/smoke en las apps Flutter.
+
+---
+
+## Fase 4 — Preparación de producción / Go-live
+- [ ] Rotar y validar secretos por entorno (`JWT_*`, `MEDICAL_PROFILE_ENCRYPTION_KEY`, `PYTHON_SERVICES_SHARED_SECRET`). Nunca commitear `.env`.
+- [ ] Construir y probar imágenes Docker (`services/api/Dockerfile`, `compose.yml`, `deploy/`).
+- [ ] Ejecutar el runbook de pilot (`docs/pilot/`) en un staging real.
+- [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
+- [ ] Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS en producción.
+
+---
+
+## Fase 5 — Backlog post-cierre
+Catalogado en `docs/pilot/PILOT_V6_POST_CLOSE_OPERATIONS_BACKLOG.md`:
+- Hypercare y monitoreo.
+- Defectos P2/P3.
+- Pulido de UX y observabilidad.
+- Mejoras futuras.
+
+---
+
+## Cambios aplicados en esta iteración
+- `apps/admin/src/lib/api/admin-server.ts`: timeout de fetch en servidor.
+- `apps/provider/services/api-client.ts`: timeout de fetch para lecturas GET.
+- `.github/workflows/ci.yml`: jobs `web-build` y `mobile-analyze`.
+- `.env.example`: documentación de `ADMIN_API_TIMEOUT_MS` y `NEXT_PUBLIC_PROVIDER_API_TIMEOUT_MS`.
+- `docs/FINALIZACION_PLAN.md`: este documento.
