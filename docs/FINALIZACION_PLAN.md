@@ -169,6 +169,18 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 - [ ] Ampliar cobertura a más flujos (citas, prescripciones, labs, telehealth, RPM).
 - [ ] Pruebas de widgets/smoke en las apps Flutter.
 
+**Ampliación de cobertura (`flows.integration.test.ts`):**
+- **Guardas de auth parametrizadas** sobre ~33 endpoints montados (dashboard,
+  appointments, providers, catalog, coverage, pricing, payments, bookings,
+  policies, campaigns, integrations, moderation, todos los `provider/*` y
+  `patient/*`, y `admin/users/{organizations,providers,patients}`) → todos
+  401 sin token. Red de seguridad amplia contra routers sin montar.
+- **Validación de auth:** login con body vacío → 400; registro inválido → 400;
+  (con BD) login con credenciales desconocidas → 401.
+- **Lecturas autenticadas (token con org):** catalog/services, catalog/summary,
+  coverage/rules, dashboard/admin y organizations (scoped) → 200 con forma
+  correcta; ejercita las rutas de query reales contra Postgres.
+
 ---
 
 ## Fase 4 — Preparación de producción / Go-live
