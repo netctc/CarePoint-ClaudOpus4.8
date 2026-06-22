@@ -1,5 +1,7 @@
 import asyncio
 
+from datetime import datetime, timedelta, timezone
+
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -2984,7 +2986,11 @@ def test_v34_configuration_secret_rotation_review_passes_with_sanitized_secret_m
 
 
 def test_v34_maintenance_window_readiness_review_passes_with_approval_tasks_and_comms():
-    payload = {"jobType":"platform.maintenance_window_readiness_review","idempotencyKey":"maintenance-window-readiness-review-smoke-0001","dryRun":True,"payload":{"releaseId":"option-b-v34-smoke","domain":"platform","route":"/api/hybrid-python/jobs","jobTypes":["platform.configuration_secret_rotation_review"],"maintenanceWindows":[{"name":"low-traffic-window","decision":"pass","lowTraffic":True,"approvedAt":"2026-05-01T00:00:00Z"}],"tasks":[{"name":"preflight","decision":"pass","passed":True,"ownerAck":True},{"name":"backup","decision":"pass","passed":True,"ownerAck":True},{"name":"rollback","decision":"pass","passed":True,"ownerAck":True},{"name":"postVerify","decision":"pass","passed":True,"ownerAck":True}],"approvals":[{"name":"sre-lead","status":"approved"}],"comms":{"decision":"pass"},"evidence":{"changeCalendar":{"decision":"pass"}}}}
+    # Use a recent approval timestamp so the window stays within the default
+    # 30-day freshness threshold regardless of when the suite runs (previously
+    # a hardcoded date aged past the threshold and flipped the decision to hold).
+    recent_approved_at = (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    payload = {"jobType":"platform.maintenance_window_readiness_review","idempotencyKey":"maintenance-window-readiness-review-smoke-0001","dryRun":True,"payload":{"releaseId":"option-b-v34-smoke","domain":"platform","route":"/api/hybrid-python/jobs","jobTypes":["platform.configuration_secret_rotation_review"],"maintenanceWindows":[{"name":"low-traffic-window","decision":"pass","lowTraffic":True,"approvedAt":recent_approved_at}],"tasks":[{"name":"preflight","decision":"pass","passed":True,"ownerAck":True},{"name":"backup","decision":"pass","passed":True,"ownerAck":True},{"name":"rollback","decision":"pass","passed":True,"ownerAck":True},{"name":"postVerify","decision":"pass","passed":True,"ownerAck":True}],"approvals":[{"name":"sre-lead","status":"approved"}],"comms":{"decision":"pass"},"evidence":{"changeCalendar":{"decision":"pass"}}}}
     body = as_json(run(enqueue_job(envelope(payload))))
     assert body["routedTo"] == "python.platform.maintenance_window_readiness_review.v34"
     assert body["result"]["resultType"] == "platform.maintenance_window_readiness_review.completed"

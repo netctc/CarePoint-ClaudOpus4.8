@@ -104,7 +104,7 @@ class _ProviderAnalyticsPageState extends State<ProviderAnalyticsPage> {
                   const SectionTitle(title: 'Facility breakdown'),
                   const SizedBox(height: 12),
                   ...facilityBreakdown.map((dynamic item) {
-                    final Map<String, dynamic> facility = item is Map ? Map<String, dynamic>.from((item as Map).cast<dynamic, dynamic>()) : <String, dynamic>{};
+                    final Map<String, dynamic> facility = item is Map ? Map<String, dynamic>.from(item.cast<dynamic, dynamic>()) : <String, dynamic>{};
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: ProviderCard(

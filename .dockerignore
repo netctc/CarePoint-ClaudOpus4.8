@@ -11,7 +11,11 @@ node_modules
 **/.dart_tool
 **/.gradle
 **/Pods
-**/coverage
+**/coverage/lcov-report
+/coverage
+apps/*/coverage
+services/*/coverage
+packages/*/coverage
 **/.idea
 **/.vscode
 **/.turbo

@@ -147,6 +147,7 @@ model Organization {
   providerCredentialDocuments ProviderCredentialDocument[]
   providerCredentialReviewTasks ProviderCredentialReviewTask[]
   providerCredentialNotifications ProviderCredentialNotification[]
+  providerRoleCatalogs ProviderRoleCatalog[]
 }
 
 
@@ -201,8 +202,10 @@ model ProviderProfile {
   specialty      String?
   licenseNumber  String?
   services       Json?
+  roleCatalogId  String?
   user           User          @relation(fields: [userId], references: [id])
   organization   Organization  @relation(fields: [organizationId], references: [id])
+  roleCatalog    ProviderRoleCatalog? @relation(fields: [roleCatalogId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   appointments   Appointment[] @relation("ProviderAppointments")
   threads        MessageThread[]
   payments       Payment[]     @relation("ProviderPayments")
@@ -210,6 +213,30 @@ model ProviderProfile {
   credentialDocuments ProviderCredentialDocument[]
   credentialReviewTasks ProviderCredentialReviewTask[]
   credentialNotifications ProviderCredentialNotification[]
+}
+
+// Provider-facing role options. The security/RBAC role remains User.role
+// (UserRole enum); this catalog manages selectable provider role labels.
+// Table created by migration 20260429120000_provider_role_catalog; this model
+// was missing from the schema, which broke provider create/list at runtime
+// (prisma.providerRoleCatalog was undefined because prisma is typed as `any`).
+model ProviderRoleCatalog {
+  id               String            @id @default(cuid())
+  organizationId   String?
+  code             String            @unique
+  label            String
+  description      String?
+  systemRole       UserRole          @default(PROVIDER)
+  isActive         Boolean           @default(true)
+  isSystem         Boolean           @default(false)
+  sortOrder        Int               @default(100)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  organization     Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  providerProfiles ProviderProfile[]
+
+  @@index([systemRole])
+  @@index([isActive])
 }
 
 model RefreshToken {
@@ -242,6 +269,8 @@ model Appointment {
   records           MedicalRecord[]
   payments          Payment[]
   subjectContext    AppointmentSubjectContext?
+
+  @@index([organizationId])
 }
 
 model AppointmentSubjectContext {
@@ -287,6 +316,8 @@ model MessageThread {
   patient        PatientProfile?  @relation(fields: [patientId], references: [id])
   provider       ProviderProfile? @relation(fields: [providerId], references: [id])
   messages       Message[]
+
+  @@index([organizationId])
 }
 
 model Message {
@@ -345,6 +376,8 @@ model AuditLog {
   createdAt      DateTime      @default(now())
   actor          User?         @relation(fields: [actorId], references: [id])
   organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, createdAt])
 }
 
 

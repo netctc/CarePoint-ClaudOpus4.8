@@ -346,6 +346,12 @@ type ApiReportRunResponse = {
   storageMode?: string;
 };
 
+// Server-side fetch timeout (ms). Without this, a slow or unreachable API
+// makes server components hang for the platform default before the loader
+// can fall back to mock data, producing the documented ~20s page loads.
+// A short timeout lets the existing per-loader try/catch fall back fast.
+const API_TIMEOUT_MS = Number.parseInt(process.env.ADMIN_API_TIMEOUT_MS ?? '6000', 10);
+
 async function apiRequest<T>(path: string): Promise<T> {
   return apiRequestWithInit<T>(path);
 }
@@ -357,15 +363,31 @@ async function apiRequestWithInit<T>(path: string, init?: RequestInit): Promise<
     throw new Error('Missing admin access token');
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    cache: 'no-store',
-  });
+  const timeoutMs = Number.isFinite(API_TIMEOUT_MS) && API_TIMEOUT_MS > 0 ? API_TIMEOUT_MS : 6000;
+  // Combine an explicit timeout signal with any caller-provided signal.
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  const signal = init?.signal
+    ? (AbortSignal as unknown as { any?: (signals: AbortSignal[]) => AbortSignal }).any?.([init.signal, timeoutSignal]) ?? timeoutSignal
+    : timeoutSignal;
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
+      cache: 'no-store',
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      throw new Error(`API request timed out after ${timeoutMs}ms: ${path}`);
+    }
+    throw error;
+  }
 
   if (!response.ok) {
     const text = await response.text();

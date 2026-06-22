@@ -21,13 +21,24 @@ async function parseResponseBody(response: Response) {
   return text || undefined;
 }
 
+// Client-side fetch timeout (ms) applied only to safe (GET) reads so a slow
+// or unreachable API surfaces an error quickly instead of hanging the UI.
+// Mutations are intentionally left without an abort to avoid aborting a
+// request that may already have been applied server-side.
+const PROVIDER_API_TIMEOUT_MS = Number.parseInt(process.env.NEXT_PUBLIC_PROVIDER_API_TIMEOUT_MS ?? '10000', 10);
+
 async function request<T>(path: string, init?: RequestOptions): Promise<T> {
   const token = init?.token ?? getBrowserSession().accessToken;
   const locale = readCookie('cc_locale') ?? 'en';
+  const method = (init?.method ?? 'GET').toUpperCase();
+  const isReadOnly = method === 'GET' || method === 'HEAD';
+  const timeoutMs = Number.isFinite(PROVIDER_API_TIMEOUT_MS) && PROVIDER_API_TIMEOUT_MS > 0 ? PROVIDER_API_TIMEOUT_MS : 10000;
+  const signal = init?.signal ?? (isReadOnly ? AbortSignal.timeout(timeoutMs) : undefined);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     credentials: 'include',
     cache: 'no-store',
+    ...(signal ? { signal } : {}),
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
