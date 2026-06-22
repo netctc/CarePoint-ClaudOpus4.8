@@ -177,8 +177,11 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
   coverage/rules, dashboard/admin y organizations (scoped) → 200 con forma
   correcta; ejercita las rutas de query reales contra Postgres.
 - **Escritura/persistencia (con BD):** siembra un admin real, crea una
-  organización vía API (201), verifica que aparece en el listado, y rechaza
-  nombre vacío (400). Limpieza completa a nivel de Prisma en `afterAll`.
+  organización y un **servicio de catálogo** vía API (201), verifica que
+  aparecen en el listado, y rechaza cuerpos inválidos (400). Limpieza completa
+  a nivel de Prisma en `afterAll`.
+- ✅ **Verificado en el entorno del usuario:** `npm run test:api` → **51/51
+  tests pasan** (3 archivos), incluidos los de BD y escritura.
 
 **Pendiente:**
 - [ ] Ampliar a flujos de escritura de citas/prescripciones/labs/telehealth/RPM.
