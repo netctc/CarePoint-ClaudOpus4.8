@@ -186,14 +186,23 @@ en `.gitignore` y **no** está en el repositorio, pero si esas credenciales son
 de entornos reales, **rótalas** y guárdalas en un gestor de secretos/vault. El
 gate `check:secrets` impedirá que se versionen por error.
 
-### Pendiente para cerrar `verify:s1`
-- [ ] Levantar PostgreSQL + Redis y volver a correr `npm run verify:s1` completo
-      (faltó la parte de `prisma:generate` + `build:backend` + `smoke:api:ci`).
+### Actualización (3ª corrida) — ✅ `verify:s1` COMPLETO EN VERDE
+Pipeline completo del backend verificado con build real en la máquina del usuario:
 
-### Actualización (2ª corrida)
-- `npm run check:secrets` → ✅ pasa tras el fix.
-- `npm run verify:workspace` fallaba con "services/api/.env must not be committed":
-  el script `scripts/s0/verify-workspace.mjs` usaba `existsSync` (presencia en
-  disco) en vez de comprobar si el `.env` estaba versionado. Corregido para usar
-  `git ls-files`; un `.env` local gitignored ya no rompe el gate, pero uno
-  realmente versionado sigue fallando.
+| Paso | Resultado |
+|------|-----------|
+| `check:secrets` | ✅ |
+| `verify:workspace` | ✅ |
+| `verify:s1:config` | ✅ |
+| `prisma:generate` | ✅ Prisma Client v5.22.0 |
+| `build:contracts` (tsc) | ✅ |
+| `build:api` (tsc) | ✅ el backend TypeScript compila completo |
+| `smoke:api:ci` | ✅ API arranca; 5/5 health endpoints PASS |
+
+**Conclusión:** Fase 0 (verificación) y Fase 1 (estabilizar build) quedan
+CONFIRMADAS para backend, contracts y admin web. El proyecto compila y arranca.
+
+### Pendiente de confirmar (corridas rápidas)
+- [ ] `npm run build:provider` (sin comentario `#`) → confirmar provider web.
+- [ ] `npm run verify:python-worker && npm run test:python-worker` → confirmar Python verde.
+- [ ] `cd apps/provider_mobile && flutter pub get && flutter analyze`.
