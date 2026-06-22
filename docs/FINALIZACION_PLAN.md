@@ -144,13 +144,28 @@ Ambos muy por debajo de la meta de <2s. La combinación de montar el router +
 
 ---
 
-## Fase 3 — Calidad y pruebas  ◑ (CI ampliado)
+## Fase 3 — Calidad y pruebas  ◑ (CI ampliado + tests de integración)
 **Cambios:** se añadieron al CI dos jobs nuevos:
 - `web-build`: `npm ci` + `build:contracts` + `build:web` (verifica admin/provider).
 - `mobile-analyze`: matriz Flutter (`flutter pub get` + `flutter analyze`) para `apps/mobile` y `apps/provider_mobile`.
 
+**Tests de integración del API (vitest + supertest):**
+- `services/api/src/__tests__/api.integration.test.ts` ejercita la app Express
+  en proceso (sin servidor):
+  - Health (`/livez`, `/api/health/live`) → 200.
+  - Guards de auth: `/api/dashboard/admin` y `/api/admin/users/organizations`
+    sin token → **401** (este último es regresión del bug del router sin montar:
+    un 404 indicaría que `adminUsersRouter` no está montado).
+  - Token inválido → 401; ruta desconocida → 404.
+  - (Con BD) SUPER_ADMIN lista organizations → 200 + array; ejercita el
+    `groupBy` batched de la Fase 2 contra Postgres real. Se salta si no hay BD.
+- Scripts: `npm run test:api` (raíz) / `npm run test` (en `services/api`).
+- CI: el job S1 ahora hace `prisma db push` + `test:api` (tiene Postgres+Redis).
+- **Requiere `npm install`** una vez para regenerar `package-lock.json` con
+  vitest/supertest antes de que `npm ci`/CI funcionen.
+
 **Pendiente:**
-- [ ] Añadir pruebas de integración del API para flujos críticos (auth/RBAC, citas, prescripciones, labs, telehealth, RPM). Hoy solo hay *smoke* y *audit scanners*.
+- [ ] Ampliar cobertura a más flujos (citas, prescripciones, labs, telehealth, RPM).
 - [ ] Pruebas de widgets/smoke en las apps Flutter.
 
 ---

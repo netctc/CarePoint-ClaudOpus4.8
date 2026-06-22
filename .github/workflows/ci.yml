@@ -60,6 +60,8 @@ jobs:
       - run: npm run prisma:generate
       - run: npm run build:backend
       - run: npm run smoke:api:ci
+      - run: npm run prisma:db:push --workspace @care-center/api
+      - run: npm run test:api
 
   web-build:
     name: Web build (admin + provider)
