@@ -141,3 +141,52 @@ Catalogado en `docs/pilot/PILOT_V6_POST_CLOSE_OPERATIONS_BACKLOG.md`:
 - `.github/workflows/ci.yml`: jobs `web-build` y `mobile-analyze`.
 - `.env.example`: documentación de `ADMIN_API_TIMEOUT_MS` y `NEXT_PUBLIC_PROVIDER_API_TIMEOUT_MS`.
 - `docs/FINALIZACION_PLAN.md`: este documento.
+
+---
+
+## Resultados de ejecución real (2026-06-22, entorno del usuario, Windows)
+
+Se ejecutó el runbook en una máquina con red y dependencias. Resultados:
+
+| Paso | Resultado | Detalle / acción |
+|------|-----------|------------------|
+| `npm ci` | ✅ | 192 paquetes |
+| `build:admin` | ✅ | Next.js 16.2.4, 37 rutas compiladas |
+| `build:provider` | ⚠️ Falso positivo | Ver nota Windows `#` abajo. El script `build` es `next build` (correcto) |
+| `test:python-worker` | ✅ tras fix | 1 test fallaba (`test_v34_maintenance_window...`); corregido |
+| `flutter analyze` (apps/mobile) | ✅ | "No issues found!" |
+| `check:secrets` | ✅ tras fix | Marcaba artefactos locales; scanner corregido |
+
+### Correcciones derivadas de la ejecución
+1. **`scripts/s0/check-secrets.mjs`**: ahora enumera archivos con
+   `git ls-files --cached --others --exclude-standard`, respetando `.gitignore`.
+   Antes recorría todo el disco y marcaba `.env`, `.venv`, `.data/`, `.runtime/`
+   locales del desarrollador (falsos positivos que rompían `verify:s1`). Sigue
+   detectando secretos en archivos versionados/versionables.
+2. **`services/python-worker/tests/test_worker_contracts.py`**: el test
+   `test_v34_maintenance_window_readiness_review...` usaba `approvedAt`
+   con fecha fija (`2026-05-01`). Al superar los 30 días de antigüedad, el
+   processor (correctamente) generaba un warning y la decisión pasaba a `hold`,
+   rompiendo el assert `== "pass"`. Ahora el test usa una fecha dinámica
+   reciente (hace 2 días). El processor no se modificó (su lógica es correcta).
+
+### Nota Windows: `build:provider` no está roto
+El fallo `Invalid project directory ... \apps\provider\#` se debió a pegar el
+comando con un comentario `# ...` en **cmd.exe**, donde `#` no inicia comentario:
+`# admin + provider` se pasó como argumentos y `next build #` interpretó `#`
+como directorio. Ejecutar sin el comentario funciona:
+```bat
+npm run build:provider
+```
+
+### ⚠️ Seguridad: secretos en tu `.env` local
+El scanner detectó en tu `services/api/.env` local credenciales reales
+(PostgreSQL de Supabase y Hostinger, claves JWT y de cifrado). Ese archivo está
+en `.gitignore` y **no** está en el repositorio, pero si esas credenciales son
+de entornos reales, **rótalas** y guárdalas en un gestor de secretos/vault. El
+gate `check:secrets` impedirá que se versionen por error.
+
+### Pendiente para cerrar `verify:s1`
+- [ ] Levantar PostgreSQL + Redis y volver a correr `npm run verify:s1` completo
+      (faltó la parte de `prisma:generate` + `build:backend` + `smoke:api:ci`,
+      que no llegó a ejecutarse porque `check:secrets` cortaba antes).
