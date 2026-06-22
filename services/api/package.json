@@ -8,8 +8,10 @@
     "prebuild": "npm run build --workspace @care-center/contracts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
+    "start:prod": "npm run prisma:migrate:deploy && node dist/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:reset:pilot": "tsx prisma/reset-pilot-seed.ts",
     "prisma:db:push": "prisma db push --schema prisma/schema.prisma"
