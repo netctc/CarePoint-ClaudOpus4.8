@@ -5,7 +5,7 @@ import { validateBody } from '../../middleware/validate';
 import { requireAuth } from '../../middleware/auth';
 import { prisma } from '../../lib/prisma';
 import { buildHspAccessSummary } from '../../lib/hsp-access';
-import { getPrivilegedSsoConfig, loginUser, logoutUser, refreshUserToken, registerUser, requestPatientOtp, resendPrivilegedChallenge, startPrivilegedSignInChallenge, startSsoHandoff, verifyPatientOtp, verifyPrivilegedChallenge } from './auth.service';
+import { getPrivilegedSsoConfig, loginUser, logoutUser, refreshUserToken, registerPatientViaOtp, registerUser, requestPatientOtp, resendPrivilegedChallenge, startPrivilegedSignInChallenge, startSsoHandoff, verifyPatientOtp, verifyPrivilegedChallenge } from './auth.service';
 
 export const authRouter = Router();
 
@@ -161,6 +161,19 @@ authRouter.post('/otp/verify', async (req: any, res: any) => {
 authRouter.post('/otp/resend', async (req: any, res: any) => {
   const payload = otpRequestSchema.parse(req.body) as { identifier: string; channel?: 'email' | 'sms' };
   const result = await requestPatientOtp(payload);
+  res.status(202).json(result);
+});
+
+const otpRegisterSchema = z.object({
+  email: z.string().trim().email(),
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim().min(1),
+  channel: z.enum(['email', 'sms']).default('email'),
+});
+
+authRouter.post('/otp/register', async (req: any, res: any) => {
+  const payload = otpRegisterSchema.parse(req.body);
+  const result = await registerPatientViaOtp(payload);
   res.status(202).json(result);
 });
 

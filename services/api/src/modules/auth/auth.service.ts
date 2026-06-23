@@ -541,3 +541,105 @@ export async function logoutUser(rawRefreshToken: string | undefined) {
     resourceId: payload.sub,
   });
 }
+
+
+// --- Patient self-registration via OTP (passwordless) ---
+// The mobile patient app uses this to sign up AND sign in. If the email
+// already exists as PATIENT, it behaves like requestPatientOtp (just issues
+// the OTP). If it doesn't exist, it creates the PATIENT user first. The
+// verify step (/api/auth/otp/verify) remains the same for both flows.
+export async function registerPatientViaOtp(input: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  channel?: OtpChannel;
+}) {
+  const identifier = input.email.trim().toLowerCase();
+  let user = await prisma.user.findUnique({ where: { email: identifier } });
+  let isNewUser = false;
+
+  if (user && user.role !== 'PATIENT') {
+    // Email exists but belongs to a non-patient (provider, admin, etc.)
+    throw badRequest(
+      'This email is already associated with a non-patient account. Please use a different email or contact support.',
+    );
+  }
+
+  if (!user) {
+    // Auto-register as PATIENT with no password (OTP-only).
+    const defaultOrg = await prisma.organization.findFirst();
+    if (!defaultOrg) {
+      throw badRequest('System not initialized: no organization available. Contact support.');
+    }
+
+    user = await prisma.user.create({
+      data: {
+        email: identifier,
+        passwordHash: '', // Passwordless (OTP-only patient)
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        role: 'PATIENT',
+        organizationId: defaultOrg.id,
+      },
+    });
+
+    await createUserProfile(user.id, user.role, defaultOrg.id);
+    isNewUser = true;
+
+    await writeAuditLog({
+      actorId: user.id,
+      organizationId: defaultOrg.id,
+      action: 'auth.patient_self_registered',
+      resource: 'user',
+      resourceId: user.id,
+      details: { channel: input.channel ?? 'email' },
+    });
+
+    console.log(`[otp] registerPatientViaOtp: nuevo paciente creado — ${identifier} (${user.id})`);
+  }
+
+  // Now issue the OTP (exactly like requestPatientOtp for existing users).
+  const issued = await issueOtpChallenge({
+    identifier,
+    userId: user.id,
+    role: user.role,
+    organizationId: user.organizationId ?? undefined,
+    channel: input.channel ?? 'email',
+  });
+
+  const challengeStoreMode = await getAuthChallengeStoreMode();
+
+  await writeAuditLog({
+    actorId: user.id,
+    organizationId: user.organizationId ?? undefined,
+    action: issued.isNew ? 'auth.otp_requested' : 'auth.otp_resend_blocked',
+    resource: 'user',
+    resourceId: user.id,
+    details: {
+      channel: issued.challenge.channel,
+      resendAfterSeconds: issued.resendAfterSeconds,
+      expiresInSeconds: issued.expiresInSeconds,
+      challengeStoreMode,
+      isNewUser,
+    },
+  });
+
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({
+      to: issued.challenge.identifier,
+      code: issued.challenge.code,
+      expiresInSeconds: issued.expiresInSeconds,
+      purpose: isNewUser ? 'patient registration' : 'patient sign-in',
+    });
+  }
+
+  return {
+    challengeId: identifier,
+    channel: issued.challenge.channel,
+    expiresInSeconds: issued.expiresInSeconds,
+    resendAfterSeconds: issued.resendAfterSeconds,
+    challengeStoreMode,
+    isNewUser,
+    devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
+  };
+}
