@@ -111,7 +111,7 @@ const otpRequestSchema = z.object({
 });
 const otpVerifySchema = z.object({
   identifier: z.string().trim().min(3),
-  code: z.string().trim().min(4).max(8),
+  code: z.string().trim().min(1).max(20),
 });
 
 authRouter.get('/sso/config', async (req: any, res: any) => {
