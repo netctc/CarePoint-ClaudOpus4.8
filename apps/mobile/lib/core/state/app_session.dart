@@ -307,17 +307,26 @@ class AppSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> requestOtp({required String identifier}) async {
+  Future<void> requestOtp({
+    required String identifier,
+    String? firstName,
+    String? lastName,
+  }) async {
     _isCheckingApi = true;
     _lastError = null;
     notifyListeners();
 
     try {
-      final Map<String, dynamic> result = await api.postJson('/api/auth/otp/request', <String, dynamic>{
-        'identifier': identifier.trim().toLowerCase(),
+      // Use /otp/register which handles both new and existing patients:
+      // - New email: creates PATIENT user + sends OTP
+      // - Existing PATIENT: just sends OTP (same as login)
+      final Map<String, dynamic> body = <String, dynamic>{
+        'email': identifier.trim().toLowerCase(),
+        'firstName': (firstName ?? '').trim().isEmpty ? 'Patient' : firstName!.trim(),
+        'lastName': (lastName ?? '').trim().isEmpty ? 'User' : lastName!.trim(),
         'channel': 'email',
-        'locale': _languageCode,
-      });
+      };
+      final Map<String, dynamic> result = await api.postJson('/api/auth/otp/register', body);
       _pendingOtpIdentifier = identifier.trim().toLowerCase();
       _otpResendAvailableAtMs = DateTime.now().millisecondsSinceEpoch + ((result['resendAfterSeconds'] as num?)?.toInt() ?? 60) * 1000;
       _lastOtpDevCode = result['devCode']?.toString();
