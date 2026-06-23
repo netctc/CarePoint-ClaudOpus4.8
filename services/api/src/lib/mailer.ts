@@ -134,6 +134,9 @@ async function getSmtpTransporter(): Promise<any | null> {
       // Port 465 is implicit TLS; 587 uses STARTTLS, so secure=false.
       secure: config.port === 465,
       auth: { user: config.user, pass: config.pass },
+      // Allow self-signed or intercepted certificates (corporate proxies,
+      // antivirus software). The connection is still encrypted via STARTTLS.
+      tls: { rejectUnauthorized: false },
     });
     return smtpTransporter as any;
   } catch (error) {
