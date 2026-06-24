@@ -162,7 +162,25 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 ),
                 if (AppSession.instance.lastOtpDevCode != null) ...<Widget>[
                   const SizedBox(height: 14),
-                  Text('${l10n.t('otp.devCode')}: ${AppSession.instance.lastOtpDevCode}', style: Theme.of(context).textTheme.bodySmall),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.warningSoft,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text('DEV: your code', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary)),
+                        const SizedBox(height: 4),
+                        Text(
+                          AppSession.instance.lastOtpDevCode!,
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 6),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
                 if (_error != null) ...<Widget>[
                   const SizedBox(height: 14),

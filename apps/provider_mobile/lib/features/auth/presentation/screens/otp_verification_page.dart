@@ -55,12 +55,23 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     children: <Widget>[
                       if ((session.lastOtpDevCode ?? '').isNotEmpty)
                         Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text('Development code: ${session.lastOtpDevCode}', style: Theme.of(context).textTheme.titleMedium),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('DEV: your code', style: Theme.of(context).textTheme.titleSmall),
+                              const SizedBox(height: 4),
+                              Text(
+                                session.lastOtpDevCode!,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 6),
+                              ),
+                            ],
+                          ),
                         ),
                       if ((session.lastOtpDevCode ?? '').isNotEmpty) const SizedBox(height: 16),
                       AppTextField(
