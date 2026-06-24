@@ -262,7 +262,17 @@ elimina un drift previo entre migraciones y schema.
       verificación post-deploy y rollback. Los campos "TBD" del certificado
       (dueños, fecha, entorno, riesgos) los rellena la organización.
 - [ ] Cerrar los campos "TBD" del certificado de go-live (`docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md`).
-- [ ] Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS en producción.
+- [x] **Confirmar `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false` y revisar CORS — verificado por inspección:**
+  - **Audit fallback:** `admin-config-store.ts`, `patient-workspace-store.ts` y
+    `provider-workspace-store.ts` ejecutan *fail-fast* (`throw`) en producción si
+    falta un modelo Prisma y `ALLOW_AUDIT_FALLBACK_IN_PRODUCTION !== 'true'`. Los
+    `.env.example` lo fijan en `false` ("Emergency-only"). → seguro por defecto.
+  - **CORS** (`app.ts` + `env.ts`): solo se aceptan orígenes en
+    `frontendAllowedOrigins` (URLs validadas http(s)); el comodín localhost
+    (`allowLocalhostCorsWildcard`) por defecto es `!isProduction` → **desactivado
+    en producción**; orígenes no permitidos se rechazan con error. → seguro por defecto.
+  - Acción restante puramente **operativa** (cubierta en `GO_LIVE_CHECKLIST.md`):
+    definir `FRONTEND_ALLOWED_ORIGINS`/`FRONTEND_*_URL` reales y `NODE_ENV=production`.
 
 ---
 
