@@ -24,7 +24,7 @@ set -euo pipefail
 VPS_IP="167.86.92.207"
 REPO_URL="https://github.com/netctc/CarePoint-ClaudOpus4.8.git"
 INSTALL_DIR="/opt/carepoint"
-BRANCH="main"
+BRANCH="deploy/vps-script"
 
 # Ports exposed to the internet
 API_PORT=4000
@@ -91,6 +91,7 @@ echo "Secrets generated."
 
 # ---- Step 4: Create .env file ------------------------------------------------
 echo "[4/7] Creating .env file..."
+mkdir -p "${INSTALL_DIR}/deploy/vps"
 
 cat > "${INSTALL_DIR}/deploy/vps/.env" <<EOF
 # === CarePoint Production Environment ===
