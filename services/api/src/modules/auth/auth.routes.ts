@@ -173,7 +173,12 @@ const otpRegisterSchema = z.object({
 
 authRouter.post('/otp/register', async (req: any, res: any) => {
   const payload = otpRegisterSchema.parse(req.body);
-  const result = await registerPatientViaOtp(payload);
+  const result = await registerPatientViaOtp({
+    email: payload.email,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    channel: payload.channel,
+  });
   res.status(202).json(result);
 });
 

@@ -71,7 +71,7 @@ async function getSmtpTransporter(): Promise<any | null> {
   const config = getSmtpConfig();
   if (!config) { smtpTransporter = null; return null; }
   try {
-    const nodemailer = (await import('nodemailer')).default;
+    const nodemailer = (await import('nodemailer' as string)).default;
     smtpTransporter = nodemailer.createTransport({
       host: config.host, port: config.port, secure: config.port === 465,
       auth: { user: config.user, pass: config.pass },
