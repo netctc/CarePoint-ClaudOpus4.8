@@ -42,13 +42,13 @@ import '../../features/telehealth/presentation/screens/provider_telehealth_sessi
 const Set<String> _publicPaths = <String>{'/welcome', '/sign-in', '/otp'};
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/welcome',
+  initialLocation: '/sign-in',
   refreshListenable: ProviderSession.instance,
   redirect: (context, state) {
     final ProviderSession session = ProviderSession.instance;
     final String location = state.matchedLocation;
     if (!session.isAuthenticated && !_publicPaths.contains(location)) {
-      return '/welcome';
+      return '/sign-in';
     }
     if (session.isAuthenticated && _publicPaths.contains(location)) {
       return '/dashboard';
@@ -56,7 +56,7 @@ final GoRouter appRouter = GoRouter(
     return null;
   },
   routes: <RouteBase>[
-    GoRoute(path: '/welcome', builder: (context, state) => const WelcomePage()),
+    GoRoute(path: '/welcome', builder: (context, state) => const SignInPage()),
     GoRoute(path: '/sign-in', builder: (context, state) => const SignInPage()),
     GoRoute(path: '/otp', builder: (context, state) => const OtpVerificationPage()),
     ShellRoute(

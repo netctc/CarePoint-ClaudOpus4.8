@@ -165,7 +165,7 @@ export function isLocationWithinHspAccess(summary: HspAccessSummary, location?: 
   if (!normalizedLocation) return true;
   if (summary.accessScope === 'ORGANIZATION_WIDE') return true;
   const facilities = getAllowedHspFacilities(summary);
-  if (facilities.length === 0) return false;
+  if (facilities.length === 0) return true; // No HSP facilities configured = no restrictions
   return facilities.some((facility) => {
     const facilityName = normalizeLocationText(facility.name);
     const facilityCity = normalizeLocationText(facility.city);

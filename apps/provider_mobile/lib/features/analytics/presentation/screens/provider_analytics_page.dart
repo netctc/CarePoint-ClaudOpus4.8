@@ -92,7 +92,7 @@ class _ProviderAnalyticsPageState extends State<ProviderAnalyticsPage> {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 1.35,
+                      childAspectRatio: 2.2,
                     ),
                     itemBuilder: (context, index) {
                       final Map<String, dynamic> entry = metrics[index] is Map ? Map<String, dynamic>.from((metrics[index] as Map).cast<dynamic, dynamic>()) : <String, dynamic>{};

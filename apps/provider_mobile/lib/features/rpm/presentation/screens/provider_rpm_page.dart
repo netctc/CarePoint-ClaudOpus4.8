@@ -60,7 +60,7 @@ class _ProviderRpmPageState extends State<ProviderRpmPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  childAspectRatio: 2.2,
                   children: <Widget>[
                     MetricCard(label: 'Enrolled', value: '${readInt(summary, const <String>['enrolledCount', 'activeProgramCount'])}', variant: MetricVariant.success),
                     MetricCard(label: 'Alerting', value: '${readInt(summary, const <String>['alertingCount', 'patientsAlerting'])}', variant: MetricVariant.warning),

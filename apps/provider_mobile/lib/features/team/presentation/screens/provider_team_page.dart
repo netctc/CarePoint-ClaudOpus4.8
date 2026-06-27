@@ -183,7 +183,7 @@ class _ProviderTeamPageState extends State<ProviderTeamPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  childAspectRatio: 2.2,
                   children: <Widget>[
                     MetricCard(label: 'Members', value: '${members.length}'),
                     MetricCard(label: 'Open exceptions', value: '${readInt(summary, const <String>['chartAccessExceptions', 'exceptions'])}', variant: MetricVariant.warning),
@@ -233,7 +233,15 @@ class _ProviderTeamPageState extends State<ProviderTeamPage> {
                 if (members.isEmpty)
                   const EmptyStateCard(title: 'No team members found', subtitle: 'Provider team members will appear here when available.', icon: Icons.groups_outlined)
                 else
-                  ...members.map((member) => Padding(
+                  ...members.map((member) {
+                        final String specialty = readString(member, const <String>['specialty', 'specialization'], fallback: '');
+                        final String serviceMode = readString(member, const <String>['serviceMode', 'workMode'], fallback: '');
+                        final String role = readString(member, const <String>['role', 'title'], fallback: 'Team member');
+                        final String subtitle = <String>[
+                          if (specialty.isNotEmpty) specialty,
+                          if (serviceMode.isNotEmpty) serviceMode else role,
+                        ].join(' • ');
+                        return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ProviderCard(
                           child: Row(
@@ -246,7 +254,7 @@ class _ProviderTeamPageState extends State<ProviderTeamPage> {
                                   children: <Widget>[
                                     Text(readString(member, const <String>['name', 'fullName', 'email']), style: Theme.of(context).textTheme.titleMedium),
                                     const SizedBox(height: 4),
-                                    Text(readString(member, const <String>['role', 'title'], fallback: 'Team member')),
+                                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
                                   ],
                                 ),
                               ),
@@ -254,7 +262,7 @@ class _ProviderTeamPageState extends State<ProviderTeamPage> {
                             ],
                           ),
                         ),
-                      )),
+                      ); }),
               ],
             ),
           ),

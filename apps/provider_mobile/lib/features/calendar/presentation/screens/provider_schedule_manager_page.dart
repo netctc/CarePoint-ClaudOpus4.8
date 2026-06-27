@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/state/provider_session.dart';
 import '../../../../core/utils/json_utils.dart';
@@ -14,11 +15,52 @@ class ProviderScheduleManagerPage extends StatefulWidget {
 class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPage> {
   late Future<Map<String, dynamic>> _future;
   bool _busy = false;
+  // Form visibility
+  bool _showTemplateForm = false;
+  bool _showSlotForm = false;
+  Map<String, dynamic>? _editingTemplate;
+
+  // Template form controllers
+  final TextEditingController _tNameCtrl = TextEditingController();
+  final TextEditingController _tServiceCtrl = TextEditingController();
+  final TextEditingController _tLocationCtrl = TextEditingController();
+  final TextEditingController _tDurationCtrl = TextEditingController(text: '30');
+  final TextEditingController _tBufferCtrl = TextEditingController(text: '10');
+  final TextEditingController _tCapacityCtrl = TextEditingController(text: '1');
+  final TextEditingController _tPatternCtrl = TextEditingController();
+  bool _modeOnline = true;
+  bool _modeInPerson = true;
+  bool _modeHomeVisit = false;
+
+  // Slot form controllers
+  final TextEditingController _sServiceCtrl = TextEditingController(text: 'Follow-up consultation');
+  String _sLocation = 'Main Clinic';
+  DateTime _sStartDate = DateTime.now().add(const Duration(hours: 2));
+  TimeOfDay _sStartTime = TimeOfDay.now();
+  DateTime _sEndDate = DateTime.now().add(const Duration(hours: 2, minutes: 30));
+  TimeOfDay _sEndTime = TimeOfDay(hour: TimeOfDay.now().hour, minute: TimeOfDay.now().minute + 30);
+  final TextEditingController _sCapacityCtrl = TextEditingController(text: '1');
+
+  static const List<String> _locations = <String>['Main Clinic', 'Branch North', 'Branch South', 'Virtual', 'Home Visit'];
 
   @override
   void initState() {
     super.initState();
     _future = _load();
+  }
+
+  @override
+  void dispose() {
+    _tNameCtrl.dispose();
+    _tServiceCtrl.dispose();
+    _tLocationCtrl.dispose();
+    _tDurationCtrl.dispose();
+    _tBufferCtrl.dispose();
+    _tCapacityCtrl.dispose();
+    _tPatternCtrl.dispose();
+    _sServiceCtrl.dispose();
+    _sCapacityCtrl.dispose();
+    super.dispose();
   }
 
   Future<Map<String, dynamic>> _load() async {
@@ -30,18 +72,69 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
     };
   }
 
-  void _refresh() {
-    setState(() => _future = _load());
+  void _refresh() => setState(() => _future = _load());
+
+  void _openTemplateForm({Map<String, dynamic>? existing}) {
+    _editingTemplate = existing;
+    if (existing != null) {
+      _tNameCtrl.text = readString(existing, const <String>['templateName'], fallback: '');
+      _tServiceCtrl.text = readString(existing, const <String>['service'], fallback: '');
+      _tLocationCtrl.text = readString(existing, const <String>['location'], fallback: '');
+      _tDurationCtrl.text = '${readInt(existing, const <String>['durationMinutes'], fallback: 30)}';
+      _tBufferCtrl.text = '${readInt(existing, const <String>['bufferMinutes'], fallback: 10)}';
+      _tCapacityCtrl.text = '${readInt(existing, const <String>['capacity'], fallback: 1)}';
+      _tPatternCtrl.text = _patternLabel(existing['pattern']);
+      final List<String> modes = _serviceModes(existing['serviceModes']);
+      _modeOnline = modes.contains('TELEHEALTH') || modes.contains('ONLINE');
+      _modeInPerson = modes.contains('IN_PERSON');
+      _modeHomeVisit = modes.contains('HOME_VISIT');
+    } else {
+      _tNameCtrl.clear();
+      _tServiceCtrl.clear();
+      _tLocationCtrl.clear();
+      _tDurationCtrl.text = '30';
+      _tBufferCtrl.text = '10';
+      _tCapacityCtrl.text = '1';
+      _tPatternCtrl.clear();
+      _modeOnline = true;
+      _modeInPerson = true;
+      _modeHomeVisit = false;
+    }
+    setState(() {
+      _showTemplateForm = true;
+      _showSlotForm = false;
+    });
   }
 
-  Future<void> _createSlot() async {
-    final _SlotFormResult? form = await _showSlotDialog();
-    if (form == null) return;
+  void _openSlotForm() {
+    setState(() {
+      _showSlotForm = true;
+      _showTemplateForm = false;
+    });
+  }
+
+  Future<void> _submitTemplate() async {
     setState(() => _busy = true);
     try {
-      await ProviderSession.instance.api.createPublishedSlot(form.toPayload());
+      final Map<String, dynamic> payload = <String, dynamic>{
+        'templateName': _tNameCtrl.text.trim(),
+        'service': _tServiceCtrl.text.trim(),
+        'location': _tLocationCtrl.text.trim(),
+        'durationMinutes': int.tryParse(_tDurationCtrl.text.trim()) ?? 30,
+        'bufferMinutes': int.tryParse(_tBufferCtrl.text.trim()) ?? 10,
+        'capacity': int.tryParse(_tCapacityCtrl.text.trim()) ?? 1,
+        'serviceModes': <String>[if (_modeOnline) 'TELEHEALTH', if (_modeInPerson) 'IN_PERSON', if (_modeHomeVisit) 'HOME_VISIT'],
+        'pattern': _parsePattern(_tPatternCtrl.text.trim()),
+      };
+      final String existingId = readString(_editingTemplate, const <String>['id'], fallback: '');
+      if (existingId.isEmpty || existingId == '—') {
+        await ProviderSession.instance.api.createCalendarTemplate(payload);
+      } else {
+        await ProviderSession.instance.api.updateCalendarTemplate(existingId, payload);
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Published slot created.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template saved.')));
+      setState(() => _showTemplateForm = false);
       _refresh();
     } catch (error) {
       if (!mounted) return;
@@ -51,19 +144,21 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
     }
   }
 
-  Future<void> _editTemplate(Map<String, dynamic>? template) async {
-    final _TemplateFormResult? form = await _showTemplateDialog(existing: template);
-    if (form == null) return;
+  Future<void> _submitSlot() async {
+    final DateTime start = DateTime(_sStartDate.year, _sStartDate.month, _sStartDate.day, _sStartTime.hour, _sStartTime.minute);
+    final DateTime end = DateTime(_sEndDate.year, _sEndDate.month, _sEndDate.day, _sEndTime.hour, _sEndTime.minute);
     setState(() => _busy = true);
     try {
-      final String templateId = readString(template, const <String>['id'], fallback: '');
-      if (templateId.isEmpty || templateId == '—') {
-        await ProviderSession.instance.api.createCalendarTemplate(form.toPayload());
-      } else {
-        await ProviderSession.instance.api.updateCalendarTemplate(templateId, form.toPayload());
-      }
+      await ProviderSession.instance.api.createPublishedSlot(<String, dynamic>{
+        'service': _sServiceCtrl.text.trim(),
+        'location': _sLocation,
+        'startsAt': start.toIso8601String(),
+        'endsAt': end.toIso8601String(),
+        'capacity': int.tryParse(_sCapacityCtrl.text.trim()) ?? 1,
+      });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template saved.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Slot created.')));
+      setState(() => _showSlotForm = false);
       _refresh();
     } catch (error) {
       if (!mounted) return;
@@ -76,9 +171,9 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
   Future<void> _publishTemplate(String templateId) async {
     setState(() => _busy = true);
     try {
-      await ProviderSession.instance.api.publishCalendarTemplate(templateId, note: 'Published from provider mobile.');
+      await ProviderSession.instance.api.publishCalendarTemplate(templateId, note: 'Published from mobile.');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template published and slots generated.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template published.')));
       _refresh();
     } catch (error) {
       if (!mounted) return;
@@ -91,9 +186,9 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
   Future<void> _cancelSlot(String slotId) async {
     setState(() => _busy = true);
     try {
-      await ProviderSession.instance.api.cancelPublishedSlot(slotId, note: 'Cancelled from provider mobile.');
+      await ProviderSession.instance.api.cancelPublishedSlot(slotId, note: 'Cancelled from mobile.');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Published slot cancelled.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Slot cancelled.')));
       _refresh();
     } catch (error) {
       if (!mounted) return;
@@ -103,124 +198,24 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
     }
   }
 
-  Future<_SlotFormResult?> _showSlotDialog() async {
-    final TextEditingController serviceController = TextEditingController(text: 'Follow-up consultation');
-    final TextEditingController locationController = TextEditingController(text: 'Main Clinic');
-    final TextEditingController startsAtController = TextEditingController(text: DateTime.now().add(const Duration(hours: 2)).toIso8601String());
-    final TextEditingController endsAtController = TextEditingController(text: DateTime.now().add(const Duration(hours: 2, minutes: 30)).toIso8601String());
-    final TextEditingController capacityController = TextEditingController(text: '1');
-
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Create published slot'),
-        content: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setLocalState) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(controller: serviceController, decoration: const InputDecoration(labelText: 'Service')),
-                  const SizedBox(height: 12),
-                  TextField(controller: locationController, decoration: const InputDecoration(labelText: 'Location')),
-                  const SizedBox(height: 12),
-                  TextField(controller: startsAtController, decoration: const InputDecoration(labelText: 'Starts at (ISO datetime)')),
-                  const SizedBox(height: 12),
-                  TextField(controller: endsAtController, decoration: const InputDecoration(labelText: 'Ends at (ISO datetime)')),
-                  const SizedBox(height: 12),
-                  TextField(controller: capacityController, decoration: const InputDecoration(labelText: 'Capacity'), keyboardType: TextInputType.number),
-                ],
-              ),
-            );
-          },
-        ),
-        actions: <Widget>[
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Create')),
-        ],
-      ),
-    );
-    if (confirmed != true) return null;
-    return _SlotFormResult(
-      service: serviceController.text.trim(),
-      location: locationController.text.trim(),
-      startsAt: startsAtController.text.trim(),
-      endsAt: endsAtController.text.trim(),
-      capacity: int.tryParse(capacityController.text.trim()) ?? 1,
-    );
+  Future<void> _pickStartDate() async {
+    final DateTime? d = await showDatePicker(context: context, initialDate: _sStartDate, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)));
+    if (d != null) setState(() => _sStartDate = d);
   }
 
-  Future<_TemplateFormResult?> _showTemplateDialog({Map<String, dynamic>? existing}) async {
-    final Map<String, dynamic> template = existing ?? <String, dynamic>{};
-    final TextEditingController nameController = TextEditingController(text: readString(template, const <String>['templateName'], fallback: ''));
-    final TextEditingController serviceController = TextEditingController(text: readString(template, const <String>['service'], fallback: ''));
-    final TextEditingController locationController = TextEditingController(text: readString(template, const <String>['location'], fallback: ''));
-    final TextEditingController durationController = TextEditingController(text: '${readInt(template, const <String>['durationMinutes'], fallback: 30)}');
-    final TextEditingController bufferController = TextEditingController(text: '${readInt(template, const <String>['bufferMinutes'], fallback: 10)}');
-    final TextEditingController capacityController = TextEditingController(text: '${readInt(template, const <String>['capacity'], fallback: 1)}');
-    final TextEditingController patternController = TextEditingController(text: _patternLabel(template['pattern']));
-    final List<String> existingModes = _serviceModes(template['serviceModes']);
-    bool inPerson = existingModes.contains('IN_PERSON');
-    bool telehealth = existingModes.contains('TELEHEALTH');
+  Future<void> _pickStartTime() async {
+    final TimeOfDay? t = await showTimePicker(context: context, initialTime: _sStartTime);
+    if (t != null) setState(() => _sStartTime = t);
+  }
 
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(existing == null ? 'Create schedule template' : 'Edit schedule template'),
-        content: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setLocalState) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Template name')),
-                  const SizedBox(height: 12),
-                  TextField(controller: serviceController, decoration: const InputDecoration(labelText: 'Service')),
-                  const SizedBox(height: 12),
-                  TextField(controller: locationController, decoration: const InputDecoration(labelText: 'Location')),
-                  const SizedBox(height: 12),
-                  TextField(controller: durationController, decoration: const InputDecoration(labelText: 'Duration minutes'), keyboardType: TextInputType.number),
-                  const SizedBox(height: 12),
-                  TextField(controller: bufferController, decoration: const InputDecoration(labelText: 'Buffer minutes'), keyboardType: TextInputType.number),
-                  const SizedBox(height: 12),
-                  TextField(controller: capacityController, decoration: const InputDecoration(labelText: 'Capacity'), keyboardType: TextInputType.number),
-                  const SizedBox(height: 12),
-                  TextField(controller: patternController, decoration: const InputDecoration(labelText: 'Pattern (Mon 09:00-12:00; Wed 13:00-16:00)')),
-                  const SizedBox(height: 12),
-                  CheckboxListTile(
-                    value: inPerson,
-                    onChanged: (bool? value) => setLocalState(() => inPerson = value ?? false),
-                    title: const Text('In-person'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  CheckboxListTile(
-                    value: telehealth,
-                    onChanged: (bool? value) => setLocalState(() => telehealth = value ?? false),
-                    title: const Text('Telehealth'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        actions: <Widget>[
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Save')),
-        ],
-      ),
-    );
-    if (confirmed != true) return null;
-    return _TemplateFormResult(
-      templateName: nameController.text.trim(),
-      service: serviceController.text.trim(),
-      location: locationController.text.trim(),
-      durationMinutes: int.tryParse(durationController.text.trim()) ?? 30,
-      bufferMinutes: int.tryParse(bufferController.text.trim()) ?? 10,
-      capacity: int.tryParse(capacityController.text.trim()) ?? 1,
-      patternText: patternController.text.trim(),
-      serviceModes: <String>[if (inPerson) 'IN_PERSON', if (telehealth) 'TELEHEALTH'],
-    );
+  Future<void> _pickEndDate() async {
+    final DateTime? d = await showDatePicker(context: context, initialDate: _sEndDate, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 90)));
+    if (d != null) setState(() => _sEndDate = d);
+  }
+
+  Future<void> _pickEndTime() async {
+    final TimeOfDay? t = await showTimePicker(context: context, initialTime: _sEndTime);
+    if (t != null) setState(() => _sEndTime = t);
   }
 
   @override
@@ -240,124 +235,130 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
           child: RefreshIndicator(
             onRefresh: () async => _refresh(),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: <Widget>[
-                ProviderHeroCard(
-                  title: 'Schedule manager',
-                  subtitle: 'Create published capacity, edit recurring templates, and push new schedule inventory from mobile.',
-                  badge: 'Scheduling',
-                  trailing: Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: <Widget>[
-                      OutlinedButton.icon(
-                        onPressed: _busy ? null : () => _editTemplate(null),
-                        icon: const Icon(Icons.view_week_outlined),
-                        label: const Text('New template'),
-                      ),
-                      FilledButton.icon(
-                        onPressed: _busy ? null : _createSlot,
-                        icon: const Icon(Icons.add_circle_outline_rounded),
-                        label: const Text('New slot'),
-                      ),
-                    ],
-                  ),
+                // Compact header with actions
+                Row(
+                  children: <Widget>[
+                    Expanded(child: Text('Schedule Manager', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700))),
+                    IconButton.filledTonal(onPressed: _refresh, icon: const Icon(Icons.refresh_rounded, size: 20)),
+                  ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+
+                // Compact metric cards (4 in grid, smaller)
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.9,
                   children: <Widget>[
-                    MetricCard(label: 'Templates', value: '${templates.length}'),
-                    MetricCard(label: 'Published slots', value: '${slots.length}', variant: MetricVariant.success),
-                    MetricCard(label: 'Available slots', value: '${availability.length}'),
-                    MetricCard(label: 'Busy state', value: _busy ? 'Working' : 'Ready', variant: _busy ? MetricVariant.warning : MetricVariant.primary),
+                    _MiniMetric(label: 'Templates', value: '${templates.length}', icon: Icons.view_week_outlined),
+                    _MiniMetric(label: 'Published', value: '${slots.length}', icon: Icons.schedule_send_outlined, color: const Color(0xFF16A34A)),
+                    _MiniMetric(label: 'Available', value: '${availability.length}', icon: Icons.event_available_rounded, color: const Color(0xFF1565C0)),
+                    _MiniMetric(label: _busy ? 'Working' : 'Ready', value: '', icon: Icons.circle, color: _busy ? const Color(0xFFF59E0B) : const Color(0xFF16A34A)),
                   ],
                 ),
-                const SizedBox(height: 20),
-                const SectionTitle(title: 'Templates'),
                 const SizedBox(height: 12),
+
+                // Action buttons
+                Row(
+                  children: <Widget>[
+                    Expanded(child: OutlinedButton.icon(onPressed: _busy ? null : () => _openTemplateForm(), icon: const Icon(Icons.add, size: 18), label: const Text('New template'))),
+                    const SizedBox(width: 8),
+                    Expanded(child: FilledButton.icon(onPressed: _busy ? null : _openSlotForm, icon: const Icon(Icons.add, size: 18), label: const Text('New slot'))),
+                  ],
+                ),
+
+                // Template form (inline, shown below buttons)
+                if (_showTemplateForm) ...<Widget>[
+                  const SizedBox(height: 16),
+                  _buildTemplateForm(),
+                ],
+
+                // Slot form (inline)
+                if (_showSlotForm) ...<Widget>[
+                  const SizedBox(height: 16),
+                  _buildSlotForm(),
+                ],
+
+                // Templates list
+                const SizedBox(height: 16),
+                const SectionTitle(title: 'Templates'),
+                const SizedBox(height: 8),
                 if (templates.isEmpty)
-                  const EmptyStateCard(title: 'No templates found', subtitle: 'Recurring availability templates will appear here.', icon: Icons.view_week_outlined)
+                  const EmptyStateCard(title: 'No templates', subtitle: 'Create one above.', icon: Icons.view_week_outlined)
                 else
-                  ...templates.map((Map<String, dynamic> item) {
+                  ...templates.map((item) {
                     final String id = readString(item, const <String>['id'], fallback: '');
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ProviderCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Expanded(child: Text(readString(item, const <String>['templateName'], fallback: 'Template'), style: Theme.of(context).textTheme.titleMedium)),
-                                StatusBadge(readString(item, const <String>['status'], fallback: 'Draft')),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text('${readString(item, const <String>['service'], fallback: 'Service')} • ${readString(item, const <String>['location'], fallback: 'Location')}'),
-                            const SizedBox(height: 6),
-                            Text(_patternLabel(item['pattern'])),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: <Widget>[
-                                OutlinedButton(onPressed: _busy ? null : () => _editTemplate(item), child: const Text('Edit')),
-                                FilledButton(
-                                  onPressed: _busy || id.isEmpty || id == '—' ? null : () => _publishTemplate(id),
-                                  child: const Text('Publish'),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        onTap: () => _openTemplateForm(existing: item),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(readString(item, const <String>['templateName'], fallback: 'Template'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                    Text('${readString(item, const <String>['service'], fallback: '')} • ${readString(item, const <String>['location'], fallback: '')}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              StatusBadge(readString(item, const <String>['status'], fallback: 'Draft')),
+                              if (id.isNotEmpty && id != '—')
+                                IconButton(icon: const Icon(Icons.publish_rounded, size: 20), onPressed: _busy ? null : () => _publishTemplate(id), tooltip: 'Publish'),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   }),
-                const SizedBox(height: 8),
+
+                // Published slots
+                const SizedBox(height: 16),
                 const SectionTitle(title: 'Published slots'),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 if (slots.isEmpty)
-                  const EmptyStateCard(title: 'No published slots', subtitle: 'Manual and published schedule capacity will appear here.', icon: Icons.schedule_send_outlined)
+                  const EmptyStateCard(title: 'No slots', subtitle: 'Create or publish a template.', icon: Icons.schedule_send_outlined)
                 else
-                  ...slots.take(12).map((Map<String, dynamic> item) {
+                  ...slots.take(10).map((item) {
                     final String slotId = readString(item, const <String>['id'], fallback: '');
+                    final String startsAt = formatDateTimeLabel(item['startsAt']);
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: ProviderCard(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            const CircleAvatar(child: Icon(Icons.schedule_rounded)),
-                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(readString(item, const <String>['service'], fallback: 'Slot'), style: Theme.of(context).textTheme.titleMedium),
-                                  const SizedBox(height: 4),
-                                  Text(formatDateTimeLabel(item['startsAt'])),
-                                  const SizedBox(height: 4),
-                                  Text('${readString(item, const <String>['location'], fallback: 'Location')} • Capacity ${readInt(item, const <String>['capacity'], fallback: 1)}'),
+                                  Text(startsAt, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                                  Text('${readString(item, const <String>['service'], fallback: '')} • ${readString(item, const <String>['location'], fallback: '')}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
                                 ],
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: <Widget>[
-                                StatusBadge(readString(item, const <String>['statusLabel', 'status'], fallback: 'Published')),
-                                const SizedBox(height: 10),
-                                TextButton(
-                                  onPressed: _busy || slotId.isEmpty || slotId == '—' ? null : () => _cancelSlot(slotId),
-                                  child: const Text('Cancel'),
-                                ),
-                              ],
-                            ),
+                            StatusBadge(readString(item, const <String>['statusLabel', 'status'], fallback: 'Published')),
+                            if (slotId.isNotEmpty && slotId != '—')
+                              IconButton(icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red), onPressed: _busy ? null : () => _cancelSlot(slotId), tooltip: 'Cancel'),
                           ],
                         ),
                       ),
@@ -370,70 +371,159 @@ class _ProviderScheduleManagerPageState extends State<ProviderScheduleManagerPag
       },
     );
   }
+
+  Widget _buildTemplateForm() {
+    return ProviderCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(child: Text(_editingTemplate != null ? 'Edit template' : 'New template', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+              IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => setState(() => _showTemplateForm = false)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(controller: _tNameCtrl, decoration: const InputDecoration(labelText: 'Template name', border: OutlineInputBorder())),
+          const SizedBox(height: 10),
+          TextField(controller: _tServiceCtrl, decoration: const InputDecoration(labelText: 'Service', border: OutlineInputBorder())),
+          const SizedBox(height: 10),
+          TextField(controller: _tLocationCtrl, decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder())),
+          const SizedBox(height: 10),
+          Row(
+            children: <Widget>[
+              Expanded(child: TextField(controller: _tDurationCtrl, decoration: const InputDecoration(labelText: 'Duration (min)', border: OutlineInputBorder()), keyboardType: TextInputType.number)),
+              const SizedBox(width: 8),
+              Expanded(child: TextField(controller: _tBufferCtrl, decoration: const InputDecoration(labelText: 'Buffer (min)', border: OutlineInputBorder()), keyboardType: TextInputType.number)),
+              const SizedBox(width: 8),
+              Expanded(child: TextField(controller: _tCapacityCtrl, decoration: const InputDecoration(labelText: 'Capacity', border: OutlineInputBorder()), keyboardType: TextInputType.number)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(controller: _tPatternCtrl, decoration: const InputDecoration(labelText: 'Pattern (Mon 09:00-12:00; Wed 13:00-16:00)', border: OutlineInputBorder())),
+          const SizedBox(height: 10),
+          Text('Service mode', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+          Wrap(
+            spacing: 8,
+            children: <Widget>[
+              FilterChip(label: const Text('Online'), selected: _modeOnline, onSelected: (v) => setState(() => _modeOnline = v)),
+              FilterChip(label: const Text('In-Person'), selected: _modeInPerson, onSelected: (v) => setState(() => _modeInPerson = v)),
+              FilterChip(label: const Text('Home-Visit'), selected: _modeHomeVisit, onSelected: (v) => setState(() => _modeHomeVisit = v)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(width: double.infinity, child: FilledButton(onPressed: _busy ? null : _submitTemplate, child: Text(_busy ? 'Saving...' : 'Save template'))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSlotForm() {
+    return ProviderCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(child: Text('New slot', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+              IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => setState(() => _showSlotForm = false)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(controller: _sServiceCtrl, decoration: const InputDecoration(labelText: 'Service', border: OutlineInputBorder())),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String>(
+            value: _sLocation,
+            decoration: const InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+            items: _locations.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+            onChanged: (v) => setState(() => _sLocation = v ?? _sLocation),
+          ),
+          const SizedBox(height: 10),
+          // Start date + time
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _pickStartDate,
+                  icon: const Icon(Icons.calendar_today, size: 16),
+                  label: Text(DateFormat('dd/MM/yyyy').format(_sStartDate), style: const TextStyle(fontSize: 13)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _pickStartTime,
+                  icon: const Icon(Icons.access_time, size: 16),
+                  label: Text(_sStartTime.format(context), style: const TextStyle(fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // End date + time
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _pickEndDate,
+                  icon: const Icon(Icons.calendar_today, size: 16),
+                  label: Text(DateFormat('dd/MM/yyyy').format(_sEndDate), style: const TextStyle(fontSize: 13)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _pickEndTime,
+                  icon: const Icon(Icons.access_time, size: 16),
+                  label: Text(_sEndTime.format(context), style: const TextStyle(fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(controller: _sCapacityCtrl, decoration: const InputDecoration(labelText: 'Capacity', border: OutlineInputBorder()), keyboardType: TextInputType.number),
+          const SizedBox(height: 14),
+          SizedBox(width: double.infinity, child: FilledButton(onPressed: _busy ? null : _submitSlot, child: Text(_busy ? 'Creating...' : 'Create slot'))),
+        ],
+      ),
+    );
+  }
 }
 
-class _SlotFormResult {
-  const _SlotFormResult({
-    required this.service,
-    required this.location,
-    required this.startsAt,
-    required this.endsAt,
-    required this.capacity,
-  });
+class _MiniMetric extends StatelessWidget {
+  const _MiniMetric({required this.label, required this.value, required this.icon, this.color});
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? color;
 
-  final String service;
-  final String location;
-  final String startsAt;
-  final String endsAt;
-  final int capacity;
-
-  Map<String, dynamic> toPayload() => <String, dynamic>{
-        'service': service,
-        'location': location,
-        'startsAt': startsAt,
-        'endsAt': endsAt,
-        'capacity': capacity,
-      };
-}
-
-class _TemplateFormResult {
-  const _TemplateFormResult({
-    required this.templateName,
-    required this.service,
-    required this.location,
-    required this.durationMinutes,
-    required this.bufferMinutes,
-    required this.capacity,
-    required this.patternText,
-    required this.serviceModes,
-  });
-
-  final String templateName;
-  final String service;
-  final String location;
-  final int durationMinutes;
-  final int bufferMinutes;
-  final int capacity;
-  final String patternText;
-  final List<String> serviceModes;
-
-  Map<String, dynamic> toPayload() => <String, dynamic>{
-        'templateName': templateName,
-        'service': service,
-        'location': location,
-        'durationMinutes': durationMinutes,
-        'bufferMinutes': bufferMinutes,
-        'capacity': capacity,
-        'serviceModes': serviceModes,
-        'pattern': _parsePattern(patternText),
-      };
+  @override
+  Widget build(BuildContext context) {
+    final Color c = color ?? Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: c.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: c.withOpacity(0.15)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(icon, color: c, size: 20),
+          if (value.isNotEmpty) Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800, color: c)),
+          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ],
+      ),
+    );
+  }
 }
 
 String _patternLabel(dynamic value) {
-  if (value is! List || value.isEmpty) return 'No recurrence pattern configured';
+  if (value is! List || value.isEmpty) return '';
   return value.map((dynamic item) {
     final Map<String, dynamic> map = asMap(item);
-    return '${readString(map, const <String>['day'], fallback: 'Day')} ${readString(map, const <String>['hours'], fallback: '')}'.trim();
+    return '${readString(map, const <String>['day'], fallback: '')} ${readString(map, const <String>['hours'], fallback: '')}'.trim();
   }).join(' • ');
 }
 
@@ -441,12 +531,9 @@ List<Map<String, dynamic>> _parsePattern(String text) {
   if (text.trim().isEmpty) return <Map<String, dynamic>>[];
   final List<Map<String, dynamic>> items = <Map<String, dynamic>>[];
   for (final String segment in text.split(';')) {
-    final List<String> parts = segment.trim().split(RegExp(r'\s+', multiLine: false));
+    final List<String> parts = segment.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2) {
-      items.add(<String, dynamic>{
-        'day': parts.first,
-        'hours': parts.sublist(1).join(' '),
-      });
+      items.add(<String, dynamic>{'day': parts.first, 'hours': parts.sublist(1).join(' ')});
     }
   }
   return items;
@@ -454,5 +541,5 @@ List<Map<String, dynamic>> _parsePattern(String text) {
 
 List<String> _serviceModes(dynamic value) {
   if (value is! List) return <String>[];
-  return value.map((dynamic item) => item.toString()).where((String item) => item.trim().isNotEmpty).toList();
+  return value.map((dynamic item) => item.toString()).where((item) => item.trim().isNotEmpty).toList();
 }

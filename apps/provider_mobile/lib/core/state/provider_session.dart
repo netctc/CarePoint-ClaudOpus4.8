@@ -44,8 +44,32 @@ class ProviderSession extends ChangeNotifier {
   String? get pendingEmail => _pendingEmail;
   String? get lastOtpDevCode => _lastOtpDevCode;
   String get apiBaseUrl => apiClient.baseUrl;
-  String get displayName => me?['fullName']?.toString().trim().isNotEmpty == true ? me!['fullName'].toString().trim() : 'Provider';
+  String get displayName => me?['fullName']?.toString().trim().isNotEmpty == true ? me!['fullName'].toString().trim() : categoryLabel;
   String get roleLabel => me?['role']?.toString().replaceAll('_', ' ') ?? 'PROVIDER';
+
+  /// Human-readable category label based on the provider's role.
+  /// Used throughout the app instead of the generic "Provider" word.
+  String get categoryLabel {
+    final String role = (me?['role']?.toString() ?? '').toUpperCase();
+    switch (role) {
+      case 'PROVIDER':
+        // Check specialty for more specific label
+        final String specialty = me?['providerProfile']?['specialty']?.toString().toLowerCase() ?? '';
+        if (specialty.contains('nurs')) return 'Nurse';
+        if (specialty.contains('physio')) return 'Physiotherapist';
+        if (specialty.contains('psych')) return 'Psychologist';
+        if (specialty.contains('diet') || specialty.contains('nutri')) return 'Dietitian';
+        return 'Doctor';
+      case 'NURSE':
+        return 'Nurse';
+      case 'PHARMACIST':
+        return 'Pharmacist';
+      case 'LAB_TECH':
+        return 'Lab Technician';
+      default:
+        return 'Doctor';
+    }
+  }
 
   Future<void> init() async {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
