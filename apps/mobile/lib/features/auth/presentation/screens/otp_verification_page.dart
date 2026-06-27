@@ -160,7 +160,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     ],
                   ),
                 ),
-                if (AppSession.instance.lastOtpDevCode != null) ...<Widget>[
+                if (AppSession.instance.lastOtpDevCode != null && AppSession.instance.lastOtpDevCode!.isNotEmpty && AppSession.instance.lastOtpDevCode != 'null') ...<Widget>[
                   const SizedBox(height: 14),
                   Container(
                     width: double.infinity,
@@ -179,6 +179,20 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 6),
                         ),
                       ],
+                    ),
+                  ),
+                ] else ...<Widget>[
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      'devCode not available (value: ${AppSession.instance.lastOtpDevCode}). Check that API NODE_ENV=development.',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ],
