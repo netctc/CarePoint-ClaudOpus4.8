@@ -17,12 +17,16 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage> {
   final TextEditingController _identifierController = TextEditingController(text: 'patient@carecenter.local');
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   bool _loading = false;
   String? _error;
 
   @override
   void dispose() {
     _identifierController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -33,7 +37,11 @@ class _SignInPageState extends State<SignInPage> {
       _error = null;
     });
     try {
-      await AppSession.instance.requestOtp(identifier: _identifierController.text.trim());
+      await AppSession.instance.requestOtp(
+        identifier: _identifierController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+      );
       if (!mounted) return;
       final String identifier = _identifierController.text.trim();
       context.go('/otp?identifier=${Uri.encodeComponent(identifier)}');
@@ -87,6 +95,22 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 8),
                 Text(l10n.t('signin.formBody'), style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(height: 18),
+                AppTextField(
+                  label: 'First name',
+                  hintText: 'Ali',
+                  controller: _firstNameController,
+                  keyboardType: TextInputType.name,
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  label: 'Last name',
+                  hintText: 'Rida',
+                  controller: _lastNameController,
+                  keyboardType: TextInputType.name,
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 12),
                 AppTextField(
                   label: l10n.t('signin.identifierLabel'),
                   hintText: 'patient@carecenter.local',

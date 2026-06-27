@@ -7,6 +7,7 @@ import { writeAuditLog } from '../../lib/audit';
 import { OtpChannel, getAuthChallengeStoreMode, issueOtpChallenge, issuePrivilegedSignInChallenge, resendPrivilegedSignInChallenge, verifyOtpChallenge, verifyPrivilegedSignInChallenge } from '../../lib/auth-otp-store';
 import { buildPrivilegedRiskAssessment, enforceApprovedPrivilegedDomain } from '../../lib/auth-risk';
 import { buildSsoAuthorizeUrl, getSsoConfiguration, type SsoRoleHint } from '../../lib/auth-sso';
+import { sendOtpEmail } from '../../lib/mailer';
 
 const PRIVILEGED_SIGN_IN_ROLES = new Set(['SUPER_ADMIN', 'COMPANY_ADMIN', 'COMPANY_SUPPORT', 'PROVIDER', 'NURSE', 'PHARMACIST', 'LAB_TECH', 'FINANCE']);
 
@@ -353,6 +354,7 @@ export async function requestPatientOtp(input: { identifier: string; channel?: O
   const identifier = input.identifier.trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email: identifier } });
   if (!user || user.role !== 'PATIENT') {
+    console.warn(`[otp] requestPatientOtp: identifier "${identifier}" ${user ? `role=${user.role}` : 'not found'}. Neutral response.`);
     return {
       challengeId: identifier,
       channel: input.channel ?? 'email',
@@ -384,6 +386,10 @@ export async function requestPatientOtp(input: { identifier: string; channel?: O
       challengeStoreMode,
     },
   });
+
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({ to: issued.challenge.identifier, code: issued.challenge.code, expiresInSeconds: issued.expiresInSeconds, purpose: 'patient sign-in' });
+  }
 
   return {
     challengeId: identifier,
@@ -499,4 +505,65 @@ export async function logoutUser(rawRefreshToken: string | undefined) {
     resource: 'user',
     resourceId: payload.sub,
   });
+}
+
+
+export async function registerPatientViaOtp(input: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  channel?: OtpChannel;
+}) {
+  const identifier = input.email.trim().toLowerCase();
+  let user = await prisma.user.findUnique({ where: { email: identifier } });
+  let isNewUser = false;
+
+  if (user && user.role !== 'PATIENT') {
+    throw badRequest('This email is already associated with a non-patient account.');
+  }
+
+  if (!user) {
+    const defaultOrg = await prisma.organization.findFirst();
+    if (!defaultOrg) {
+      throw badRequest('System not initialized: no organization available.');
+    }
+    user = await prisma.user.create({
+      data: {
+        email: identifier,
+        passwordHash: '',
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        role: 'PATIENT',
+        organizationId: defaultOrg.id,
+      },
+    });
+    await createUserProfile(user.id, user.role, defaultOrg.id);
+    isNewUser = true;
+    await writeAuditLog({ actorId: user.id, organizationId: defaultOrg.id, action: 'auth.patient_self_registered', resource: 'user', resourceId: user.id, details: { channel: input.channel ?? 'email' } });
+    console.log(`[otp] registerPatientViaOtp: new patient created — ${identifier} (${user.id})`);
+  }
+
+  const issued = await issueOtpChallenge({
+    identifier,
+    userId: user.id,
+    role: user.role,
+    organizationId: user.organizationId ?? undefined,
+    channel: input.channel ?? 'email',
+  });
+
+  const challengeStoreMode = await getAuthChallengeStoreMode();
+
+  if (issued.isNew && issued.challenge.channel === 'email') {
+    await sendOtpEmail({ to: issued.challenge.identifier, code: issued.challenge.code, expiresInSeconds: issued.expiresInSeconds, purpose: isNewUser ? 'patient registration' : 'patient sign-in' });
+  }
+
+  return {
+    challengeId: identifier,
+    channel: issued.challenge.channel,
+    expiresInSeconds: issued.expiresInSeconds,
+    resendAfterSeconds: issued.resendAfterSeconds,
+    challengeStoreMode,
+    isNewUser,
+    devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
+  };
 }

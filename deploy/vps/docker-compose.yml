@@ -1,0 +1,246 @@
+# CarePoint Production Docker Compose
+# All-in-one deployment for VPS (no external dependencies).
+# Usage: docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d
+
+services:
+  # ============ Infrastructure ============
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ============ Backend ============
+
+  api:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        DIRECT_URL: ${DIRECT_URL}
+        REDIS_URL: ${REDIS_URL}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+      API_PORT: "4000"
+      HEALTH_CHECK_TIMEOUT_MS: ${HEALTH_CHECK_TIMEOUT_MS}
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL}
+      MEDICAL_PROFILE_ENCRYPTION_KEY: ${MEDICAL_PROFILE_ENCRYPTION_KEY}
+      FRONTEND_PROVIDER_URL: ${FRONTEND_PROVIDER_URL}
+      FRONTEND_ADMIN_URL: ${FRONTEND_ADMIN_URL}
+      FRONTEND_PATIENT_URL: ${FRONTEND_PATIENT_URL}
+      FRONTEND_PROVIDER_MOBILE_URL: ${FRONTEND_PROVIDER_MOBILE_URL}
+      FRONTEND_ALLOWED_ORIGINS: ${FRONTEND_ALLOWED_ORIGINS}
+      ALLOW_LOCALHOST_CORS_WILDCARD: ${ALLOW_LOCALHOST_CORS_WILDCARD:-false}
+      AUTH_CHALLENGE_REDIS_ENABLED: ${AUTH_CHALLENGE_REDIS_ENABLED:-true}
+      AUTH_CHALLENGE_REDIS_PREFIX: ${AUTH_CHALLENGE_REDIS_PREFIX:-carepoint:auth:challenge}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      TELEHEALTH_VENDOR: ${TELEHEALTH_VENDOR:-daily}
+      DAILY_API_KEY: ${DAILY_API_KEY:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      PRIVILEGED_ALLOWED_EMAIL_DOMAINS: ${PRIVILEGED_ALLOWED_EMAIL_DOMAINS:-}
+      SSO_ENABLED: ${SSO_ENABLED:-false}
+      SSO_PROVIDER_NAME: ${SSO_PROVIDER_NAME:-}
+      SSO_AUTHORIZE_URL: ${SSO_AUTHORIZE_URL:-}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
+      SSO_CALLBACK_URL: ${SSO_CALLBACK_URL:-}
+      SSO_SCOPE: ${SSO_SCOPE:-openid profile email}
+      PYTHON_SERVICES_BASE_URL: ${PYTHON_SERVICES_BASE_URL}
+      PYTHON_SERVICES_SHARED_SECRET: ${PYTHON_SERVICES_SHARED_SECRET}
+      PYTHON_SERVICES_TIMEOUT_MS: ${PYTHON_SERVICES_TIMEOUT_MS:-2500}
+      PYTHON_SERVICES_SIGN_REQUESTS: ${PYTHON_SERVICES_SIGN_REQUESTS:-true}
+      HYBRID_PYTHON_ENABLED: ${HYBRID_PYTHON_ENABLED:-false}
+      HYBRID_PYTHON_CANARY_PERCENT: ${HYBRID_PYTHON_CANARY_PERCENT:-0}
+      HYBRID_PYTHON_SHADOW_MODE: ${HYBRID_PYTHON_SHADOW_MODE:-true}
+      HYBRID_PYTHON_USE_CONTROL_PLANE_ASSIGNMENT: ${HYBRID_PYTHON_USE_CONTROL_PLANE_ASSIGNMENT:-false}
+      HYBRID_PYTHON_CONTROL_PLANE_FAIL_OPEN: ${HYBRID_PYTHON_CONTROL_PLANE_FAIL_OPEN:-false}
+      HYBRID_PYTHON_DEFAULT_ROUTE: ${HYBRID_PYTHON_DEFAULT_ROUTE:-/api/hybrid-python/jobs}
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4000/livez').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============ Web Portals ============
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_ALLOW_DEMO_SIGNIN: ${NEXT_PUBLIC_ALLOW_DEMO_SIGNIN:-false}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+
+  provider:
+    build:
+      context: ../..
+      dockerfile: apps/provider/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3002:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+
+  patient-web:
+    build:
+      context: ../..
+      dockerfile: apps/mobile/Dockerfile
+      args:
+        API_BASE_URL: ${PATIENT_API_BASE_URL}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+  provider-mobile-web:
+    build:
+      context: ../..
+      dockerfile: apps/provider_mobile/Dockerfile
+      args:
+        API_BASE_URL: ${PROVIDER_MOBILE_API_BASE_URL}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+
+  # ============ Python Worker ============
+
+  python-worker-api:
+    build:
+      context: ../..
+      dockerfile: services/python-worker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PYTHON_WORKER_API_PORT: ${PYTHON_WORKER_API_PORT:-8010}
+      PYTHON_WORKER_QUEUE_ENABLED: ${PYTHON_WORKER_QUEUE_ENABLED:-true}
+      PYTHON_WORKER_JOB_STATUS_REDIS_ENABLED: ${PYTHON_WORKER_JOB_STATUS_REDIS_ENABLED:-true}
+      PYTHON_WORKER_JOB_STATUS_TTL_SECONDS: ${PYTHON_WORKER_JOB_STATUS_TTL_SECONDS:-86400}
+      PYTHON_WORKER_REQUIRE_SHARED_SECRET: ${PYTHON_WORKER_REQUIRE_SHARED_SECRET:-true}
+      PYTHON_WORKER_REQUIRE_SIGNATURE: ${PYTHON_WORKER_REQUIRE_SIGNATURE:-true}
+      PYTHON_WORKER_SIGNATURE_TOLERANCE_SECONDS: ${PYTHON_WORKER_SIGNATURE_TOLERANCE_SECONDS:-300}
+      PYTHON_WORKER_ALLOW_LEGACY_SECRET_HEADER: ${PYTHON_WORKER_ALLOW_LEGACY_SECRET_HEADER:-false}
+      PYTHON_WORKER_OTEL_ENABLED: ${PYTHON_WORKER_OTEL_ENABLED:-false}
+      PYTHON_WORKER_ARTIFACT_STORAGE_DIR: /artifacts
+      PYTHON_WORKER_ROLLOUT_STATE_PATH: /state/rollout-state.json
+      PYTHON_SERVICES_SHARED_SECRET: ${PYTHON_SERVICES_SHARED_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    volumes:
+      - python-worker-artifacts:/artifacts
+      - python-worker-state:/state
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request; p=os.environ.get('PYTHON_WORKER_API_PORT','8010'); urllib.request.urlopen(f'http://127.0.0.1:{p}/livez', timeout=3).read()\""]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  python-worker-celery:
+    build:
+      context: ../..
+      dockerfile: services/python-worker/Dockerfile
+    restart: unless-stopped
+    command: ["celery", "-A", "carepoint_python_worker.celery_app:celery_app", "worker", "--loglevel=INFO"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PYTHON_WORKER_QUEUE_ENABLED: "true"
+      PYTHON_WORKER_JOB_STATUS_REDIS_ENABLED: "true"
+      PYTHON_WORKER_JOB_STATUS_TTL_SECONDS: ${PYTHON_WORKER_JOB_STATUS_TTL_SECONDS:-86400}
+      PYTHON_WORKER_REQUIRE_SHARED_SECRET: ${PYTHON_WORKER_REQUIRE_SHARED_SECRET:-true}
+      PYTHON_WORKER_REQUIRE_SIGNATURE: ${PYTHON_WORKER_REQUIRE_SIGNATURE:-true}
+      PYTHON_WORKER_SIGNATURE_TOLERANCE_SECONDS: ${PYTHON_WORKER_SIGNATURE_TOLERANCE_SECONDS:-300}
+      PYTHON_WORKER_ALLOW_LEGACY_SECRET_HEADER: ${PYTHON_WORKER_ALLOW_LEGACY_SECRET_HEADER:-false}
+      PYTHON_WORKER_ARTIFACT_STORAGE_DIR: /artifacts
+      PYTHON_WORKER_ROLLOUT_STATE_PATH: /state/rollout-state.json
+      PYTHON_SERVICES_SHARED_SECRET: ${PYTHON_SERVICES_SHARED_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+    volumes:
+      - python-worker-artifacts:/artifacts
+      - python-worker-state:/state
+
+volumes:
+  postgres-data:
+  redis-data:
+  python-worker-artifacts:
+  python-worker-state:
