@@ -52,7 +52,7 @@ services:
     ports:
       - "${API_PORT:-4000}:4000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV:-development}
       API_PORT: "4000"
       HEALTH_CHECK_TIMEOUT_MS: ${HEALTH_CHECK_TIMEOUT_MS}
       DATABASE_URL: ${DATABASE_URL}
