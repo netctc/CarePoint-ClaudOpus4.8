@@ -13,7 +13,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:reset:pilot": "tsx prisma/reset-pilot-seed.ts",
+    "prisma:reset:pilot": "tsx prisma/reset-pilot-seed-v2.ts",
+    "prisma:reset:pilot:v1": "tsx prisma/reset-pilot-seed-v1.ts",
+    "prisma:reset:pilot:v2": "tsx prisma/reset-pilot-seed-v2.ts",
     "prisma:db:push": "prisma db push --schema prisma/schema.prisma",
     "test": "vitest run",
     "test:watch": "vitest"
