@@ -261,6 +261,9 @@ export function requireDomainScopedHspLocationAccess(summary: HspAccessSummary, 
 
 export function hasExternalHspDomainAccess(summary: HspAccessSummary, domain: HspDataDomain) {
   if (summary.accessScope === 'ORGANIZATION_WIDE') return true;
+  // No facilities configured = no HSP restrictions apply
+  const facilities = getAllowedHspFacilities(summary);
+  if (facilities.length === 0) return true;
   if (!summary.linkedOrganization || summary.accountModel !== 'ORGANIZATION_BASED') return false;
   const domains = getGrantedHspDomains(summary);
   return domains.includes('ALL') || domains.includes(domain);
