@@ -152,8 +152,9 @@ class ProviderShell extends StatelessWidget {
   }
 
   String _titleForLocation(String location) {
-    if (location.startsWith('/dashboard')) return 'Provider Dashboard';
-    if (location.startsWith('/queue')) return 'Provider Queue';
+    final String category = ProviderSession.instance.categoryLabel;
+    if (location.startsWith('/dashboard')) return '$category Dashboard';
+    if (location.startsWith('/queue')) return '$category Queue';
     if (location.startsWith('/appointments/')) return 'Appointment Detail';
     if (location.startsWith('/chart/')) return 'Patient Chart';
     if (location.startsWith('/encounters/')) return 'Encounter Note';
@@ -180,12 +181,12 @@ class ProviderShell extends StatelessWidget {
     if (location.startsWith('/analytics')) return 'Analytics';
     if (location.startsWith('/team')) return 'Team';
     if (location.startsWith('/settings/offline-queue')) return 'Offline Queue';
-    if (location.startsWith('/settings/onboarding')) return 'Provider Onboarding';
+    if (location.startsWith('/settings/onboarding')) return '${ProviderSession.instance.categoryLabel} Onboarding';
     if (location.startsWith('/settings/hsp-access')) return 'HSP Access';
     if (location.startsWith('/settings/notifications')) return 'Notification Preferences';
     if (location.startsWith('/settings/facilities/')) return 'Facility Settings';
     if (location.startsWith('/settings')) return 'Settings';
-    return 'CarePoint Provider';
+    return 'CarePoint ${ProviderSession.instance.categoryLabel}';
   }
 }
 

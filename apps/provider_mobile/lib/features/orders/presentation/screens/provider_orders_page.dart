@@ -65,7 +65,7 @@ class _ProviderOrdersPageState extends State<ProviderOrdersPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  childAspectRatio: 2.2,
                   children: <Widget>[
                     MetricCard(label: 'Active orders', value: '${readInt(summary, const <String>['activeOrders', 'openOrders', 'count'])}'),
                     MetricCard(label: 'Pending review', value: '${readInt(summary, const <String>['pendingReview', 'reviewCount'])}', variant: MetricVariant.warning),

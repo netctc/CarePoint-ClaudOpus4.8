@@ -21,6 +21,7 @@ class _SelectSlotPageState extends State<SelectSlotPage> {
   String? _error;
   bool _submitting = false;
   bool _extendingHold = false;
+  DateTime? _filterDate;
 
   @override
   void initState() {
@@ -142,9 +143,9 @@ class _SelectSlotPageState extends State<SelectSlotPage> {
       bottomAction: SafeArea(
         minimum: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         child: AppPrimaryButton(
-          label: _submitting ? 'Placing hold…' : 'Continue to intake',
+          label: _submitting ? 'Placing hold…' : 'Continue',
           icon: Icons.arrow_forward,
-          onPressed: _submitting ? null : _continue,
+          onPressed: (_submitting || _selectedSlot == null) ? null : _continue,
         ),
       ),
       child: FutureBuilder<Map<String, dynamic>>(
@@ -159,7 +160,13 @@ class _SelectSlotPageState extends State<SelectSlotPage> {
                 final DateTime? startsAt = DateTime.tryParse(item['startsAt']?.toString() ?? '');
                 final int availableCount = (item['availableCount'] as num? ?? 0).toInt();
                 final String status = item['status']?.toString().toUpperCase() ?? item['statusLabel']?.toString().toUpperCase() ?? '';
-                return startsAt != null && startsAt.isAfter(now) && availableCount > 0 && status != 'CANCELLED';
+                if (startsAt == null || !startsAt.isAfter(now) || availableCount <= 0 || status == 'CANCELLED') return false;
+                // Apply date filter
+                if (_filterDate != null) {
+                  final bool sameDay = startsAt.year == _filterDate!.year && startsAt.month == _filterDate!.month && startsAt.day == _filterDate!.day;
+                  if (!sameDay) return false;
+                }
+                return true;
               })
               .toList()
             ..sort((Map<String, dynamic> a, Map<String, dynamic> b) => (DateTime.tryParse(a['startsAt']?.toString() ?? '') ?? now).compareTo(DateTime.tryParse(b['startsAt']?.toString() ?? '') ?? now));
@@ -181,6 +188,41 @@ class _SelectSlotPageState extends State<SelectSlotPage> {
                     child: Text('Online appointments do not require a city or facility filter. All published virtual slots are shown here.'),
                   ),
                 ),
+              // Date filter
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: PatientCard(
+                  child: Row(
+                    children: <Widget>[
+                      const Icon(Icons.calendar_month_outlined, color: AppColors.primaryDark),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _filterDate != null ? 'Showing: ${DateFormat('EEE, d MMM yyyy').format(_filterDate!)}' : 'All upcoming dates',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      if (_filterDate != null)
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () => setState(() => _filterDate = null),
+                        ),
+                      TextButton(
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _filterDate ?? DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 60)),
+                          );
+                          if (picked != null) setState(() => _filterDate = picked);
+                        },
+                        child: Text(_filterDate != null ? 'Change' : 'Pick date'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               if (draft.slotHoldExpiresAt != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 14),

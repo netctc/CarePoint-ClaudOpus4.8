@@ -22,7 +22,7 @@ COPY . .
 
 RUN npm run build --workspace @care-center/contracts  && npm run prisma:generate --workspace @care-center/api  && npm run build --workspace @care-center/api
 
-ENV NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV:-development}
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "fetch('http://127.0.0.1:'+(process.env.API_PORT||4000)+'/livez').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 # start:prod applies pending Prisma migrations (prisma migrate deploy) before

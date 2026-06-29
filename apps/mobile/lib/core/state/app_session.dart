@@ -327,6 +327,9 @@ class AppSession extends ChangeNotifier {
       _pendingOtpIdentifier = identifier.trim().toLowerCase();
       _otpResendAvailableAtMs = DateTime.now().millisecondsSinceEpoch + ((result['resendAfterSeconds'] as num?)?.toInt() ?? 60) * 1000;
       _lastOtpDevCode = result['devCode']?.toString();
+      // DEBUG: log the full response to diagnose devCode visibility
+      debugPrint('[OTP] /api/auth/otp/register response: $result');
+      debugPrint('[OTP] devCode value: ${result['devCode']} | _lastOtpDevCode: $_lastOtpDevCode');
     } on ApiClientException catch (error) {
       _lastError = error.message;
       rethrow;

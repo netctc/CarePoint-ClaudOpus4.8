@@ -82,7 +82,7 @@ class _ProviderPrescriptionsPageState extends State<ProviderPrescriptionsPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  childAspectRatio: 2.2,
                   children: <Widget>[
                     MetricCard(label: 'Active prescriptions', value: '${readInt(summary, const <String>['activePrescriptions', 'count'])}'),
                     MetricCard(label: 'Refill requests', value: '${refills.length}', variant: MetricVariant.warning),

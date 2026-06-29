@@ -34,7 +34,7 @@ class _ProviderOrderComposerPageState extends State<ProviderOrderComposerPage> {
   late Future<Map<String, dynamic>> _future;
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  String _requestedBy = 'Provider';
+  String _requestedBy = ProviderSession.instance.categoryLabel;
   String _patientId = '';
   String _patientName = '';
   String? _subjectProfileId;

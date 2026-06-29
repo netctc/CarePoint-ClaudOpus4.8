@@ -12,6 +12,9 @@ class ProviderResultCard extends StatelessWidget {
     required this.onViewProfile,
     this.nextSlot,
     this.providerType,
+    this.rating,
+    this.reviewCount,
+    this.onViewReviews,
     super.key,
   });
 
@@ -21,6 +24,9 @@ class ProviderResultCard extends StatelessWidget {
   final List<String> locations;
   final String? nextSlot;
   final String? providerType;
+  final double? rating;
+  final int? reviewCount;
+  final VoidCallback? onViewReviews;
   final VoidCallback onViewProfile;
 
   @override
@@ -65,7 +71,51 @@ class ProviderResultCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          // Rating & Reviews section
+          if (rating != null) ...<Widget>[
+            const SizedBox(height: 14),
+            InkWell(
+              onTap: onViewReviews,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    // Star rating
+                    ...List<Widget>.generate(5, (int index) {
+                      final double starValue = index + 1.0;
+                      return Icon(
+                        starValue <= rating! ? Icons.star_rounded : (starValue - 0.5 <= rating! ? Icons.star_half_rounded : Icons.star_outline_rounded),
+                        color: const Color(0xFFF59E0B),
+                        size: 20,
+                      );
+                    }),
+                    const SizedBox(width: 8),
+                    Text(
+                      rating!.toStringAsFixed(1),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    if (reviewCount != null) ...<Widget>[
+                      const SizedBox(width: 6),
+                      Text(
+                        '($reviewCount reviews)',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                      ),
+                    ],
+                    const Spacer(),
+                    if (onViewReviews != null)
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(

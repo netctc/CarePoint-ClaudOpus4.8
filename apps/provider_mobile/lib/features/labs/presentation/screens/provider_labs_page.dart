@@ -59,7 +59,7 @@ class _ProviderLabsPageState extends State<ProviderLabsPage> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
+                  childAspectRatio: 2.2,
                   children: <Widget>[
                     MetricCard(label: 'Pending items', value: '${readInt(summary, const <String>['pendingCount', 'pending'])}', variant: MetricVariant.warning),
                     MetricCard(label: 'Released results', value: '${readInt(summary, const <String>['releasedCount', 'released'])}', variant: MetricVariant.success),

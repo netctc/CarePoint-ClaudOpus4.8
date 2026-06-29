@@ -17,9 +17,7 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _managedDevice = true;
-  bool _riskAcknowledged = true;
-  String _channel = 'totp';
+  String _channel = 'email';
 
   @override
   void initState() {
@@ -28,11 +26,6 @@ class _SignInPageState extends State<SignInPage> {
       _emailController.text = 'provider@carecenter.local';
       _passwordController.text = 'ChangeMe123!';
     }
-  }
-
-  bool _looksLikeEmail(String value) {
-    final RegExp emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-    return emailPattern.hasMatch(value.trim());
   }
 
   @override
@@ -47,11 +40,11 @@ class _SignInPageState extends State<SignInPage> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text;
 
-    if (!_looksLikeEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid work email address.')));
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid email address.')));
       return;
     }
-    if (password.trim().length < 8) {
+    if (password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password must be at least 8 characters.')));
       return;
     }
@@ -60,8 +53,8 @@ class _SignInPageState extends State<SignInPage> {
       await session.startChallenge(
         email: email,
         password: password,
-        managedDevice: _managedDevice,
-        riskAcknowledged: _riskAcknowledged,
+        managedDevice: true,
+        riskAcknowledged: true,
         channel: _channel,
       );
       if (!mounted) return;
@@ -81,18 +74,14 @@ class _SignInPageState extends State<SignInPage> {
           animation: session,
           builder: (context, _) {
             return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 40, 20, 24),
               children: <Widget>[
-                Text('Provider sign in', style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 8),
-                Text('Use your provider work email and password. This flow uses the existing privileged challenge endpoints in the service API.', style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(height: 24),
-                const ProviderHeroCard(
-                  title: 'Secure privileged access',
-                  subtitle: 'Managed device checks, second-factor challenge, and role-aware access are preserved for mobile.',
-                  badge: 'Healthcare security',
-                ),
-                const SizedBox(height: 20),
+                const Icon(Icons.health_and_safety_rounded, size: 56, color: Color(0xFF1565C0)),
+                const SizedBox(height: 16),
+                Text('CarePoint', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                const SizedBox(height: 4),
+                Text('Provider sign in', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]), textAlign: TextAlign.center),
+                const SizedBox(height: 32),
                 ProviderCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,40 +102,25 @@ class _SignInPageState extends State<SignInPage> {
                         prefixIcon: Icons.lock_outline_rounded,
                       ),
                       const SizedBox(height: 16),
-                      Text('Challenge channel', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+                      Text('Verification method', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       SegmentedButton<String>(
                         segments: const <ButtonSegment<String>>[
-                          ButtonSegment<String>(value: 'totp', label: Text('TOTP')),
                           ButtonSegment<String>(value: 'email', label: Text('Email')),
+                          ButtonSegment<String>(value: 'totp', label: Text('TOTP')),
                           ButtonSegment<String>(value: 'sms', label: Text('SMS')),
                         ],
                         selected: <String>{_channel},
                         onSelectionChanged: (selection) => setState(() => _channel = selection.first),
                       ),
-                      const SizedBox(height: 16),
-                      SwitchListTile.adaptive(
-                        value: _managedDevice,
-                        onChanged: (value) => setState(() => _managedDevice = value),
-                        title: const Text('Managed device'),
-                        subtitle: const Text('Mark this phone as a managed work device.'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      SwitchListTile.adaptive(
-                        value: _riskAcknowledged,
-                        onChanged: (value) => setState(() => _riskAcknowledged = value),
-                        title: const Text('Risk acknowledged'),
-                        subtitle: const Text('Required when additional challenge signals are triggered.'),
-                        contentPadding: EdgeInsets.zero,
-                      ),
                       if ((session.lastError ?? '').isNotEmpty) ...<Widget>[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Text(session.lastError!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       AppPrimaryButton(
-                        label: session.isBusy ? 'Starting challenge...' : 'Start sign in challenge',
-                        icon: Icons.shield_moon_rounded,
+                        label: session.isBusy ? 'Signing in...' : 'Sign in',
+                        icon: Icons.arrow_forward_rounded,
                         onPressed: session.isBusy ? null : _submit,
                       ),
                     ],
