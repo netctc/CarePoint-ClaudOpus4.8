@@ -111,23 +111,27 @@ async function createSlots() {
   let slotCount = 0;
   for (const p of providerDefs) {
     // Create schedule template
-    await prisma.providerScheduleTemplate.create({ data: { id: `${p.id}-template`, organizationId: ORG_ID, providerId: p.id, name: `${p.specialty} schedule`, status: 'PUBLISHED', data: { templateName: `${p.specialty} schedule`, service: `${p.specialty} Consultation`, location: p.location, durationMinutes: 30, serviceModes: p.mode === 'Online' ? ['TELEHEALTH'] : p.mode === 'In-Person' ? ['IN_PERSON'] : ['TELEHEALTH', 'IN_PERSON', 'HOME_VISIT'] } as any } });
-    // Create published slots for next 60 days (3 per weekday)
-    for (let day = 1; day <= 60; day++) {
-      const date = daysFromNow(day);
-      if (date.getDay() === 0 || date.getDay() === 6) continue; // Skip weekends
-      const hours = [9, 11, 14];
-      for (const h of hours) {
-        const startsAt = setTime(date, h, 0);
-        const endsAt = setTime(date, h, 30);
-        const mode = h === 9 ? 'TELEHEALTH' : h === 11 ? 'IN_PERSON' : 'HOME_VISIT';
-        const loc = mode === 'TELEHEALTH' ? 'Virtual Care' : mode === 'HOME_VISIT' ? 'Home Visit' : p.location;
-        await prisma.$executeRawUnsafe(`INSERT INTO "PublishedSlot" (id, "organizationId", "providerId", service, location, "startsAt", "endsAt", capacity, "availableCount", status, "statusLabel", "serviceModes", data, "createdAt", "updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,1,1,'PUBLISHED','Published',$8::jsonb,'{}'::jsonb,NOW(),NOW()) ON CONFLICT DO NOTHING`, `slot-${p.id}-d${day}-h${h}`, ORG_ID, p.id, `${p.specialty} Consultation`, loc, startsAt, endsAt, JSON.stringify([mode]));
-        slotCount++;
-      }
+    await prisma.providerScheduleTemplate.create({ data: { id: `${p.id}-template`, organizationId: ORG_ID, providerId: p.id, name: `${p.specialty} schedule`, status: 'PUBLISHED', data: { templateName: `${p.specialty} schedule`, service: `${p.specialty} Consultation`, location: p.location, durationMinutes: 30, serviceModes: p.mode === 'Online' ? ['TELEHEALTH'] : p.mode === 'In-Person' ? ['IN_PERSON'] : ['TELEHEALTH', 'IN_PERSON', 'HOME_VISIT'], slots: generateSlotData(p) } as any } });
+    slotCount += 120; // ~3 slots/day * 40 weekdays
+  }
+  console.log(`  Created ${providerDefs.length} templates with ~${slotCount} slot entries.`);
+}
+
+function generateSlotData(provider: typeof providerDefs[0]) {
+  const slots: any[] = [];
+  for (let day = 1; day <= 60; day++) {
+    const date = daysFromNow(day);
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+    const hours = [9, 11, 14];
+    for (const h of hours) {
+      const startsAt = setTime(date, h, 0);
+      const endsAt = setTime(date, h, 30);
+      const mode = h === 9 ? 'TELEHEALTH' : h === 11 ? 'IN_PERSON' : 'HOME_VISIT';
+      const loc = mode === 'TELEHEALTH' ? 'Virtual Care' : mode === 'HOME_VISIT' ? 'Home Visit' : provider.location;
+      slots.push({ startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(), service: `${provider.specialty} Consultation`, location: loc, capacity: 1, availableCount: 1, status: 'PUBLISHED', statusLabel: 'Published', serviceModes: [mode] });
     }
   }
-  console.log(`  Created ${slotCount} published slots.`);
+  return slots;
 }
 
 
