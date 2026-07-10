@@ -57,6 +57,7 @@
     "audit:pilot:monitoring-support": "node scripts/pilot/scan-pilot-monitoring-support.mjs",
     "audit:pilot:feedback-expansion": "node scripts/pilot/scan-pilot-feedback-expansion.mjs",
     "audit:pilot:final-closure": "node scripts/pilot/scan-final-go-live-closure.mjs",
+    "db:initadmin": "npm run db:initadmin --workspace @care-center/api",
     "db:push": "npm run prisma:db:push --workspace @care-center/api",
     "db:reset:pilot": "npm run prisma:db:push --workspace @care-center/api -- --force-reset --accept-data-loss && npm run prisma:generate && npm run prisma:reset:pilot --workspace @care-center/api"
   },

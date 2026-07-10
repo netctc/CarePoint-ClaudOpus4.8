@@ -1,0 +1,105 @@
+============================================
+  DEPLOYMENT COMPLETE
+============================================
+
+  Access your services at:
+
+    API:             http://167.86.92.207:4000
+    API Health:      http://167.86.92.207:4000/livez
+    Admin Portal:    http://167.86.92.207:3001
+    Provider Portal: http://167.86.92.207:3002
+    Patient App:     http://167.86.92.207:8080
+    Provider Mobile: http://167.86.92.207:8081
+
+  Useful commands:
+    cd /opt/carepoint
+    docker compose -f deploy/vps/docker-compose.yml logs -f api    # API logs
+    docker compose -f deploy/vps/docker-compose.yml ps             # Service status
+    docker compose -f deploy/vps/docker-compose.yml restart api    # Restart API
+    docker compose -f deploy/vps/docker-compose.yml down           # Stop everything
+
+  Note: First time build takes 10-15 min. If a service shows
+  'unhealthy', wait a minute and check again with 'docker compose ps'
+
+  JWT secrets saved in: /opt/carepoint/deploy/vps/.env
+  KEEP THIS FILE SAFE - it contains all production secrets.
+  
+  ✓ Base de datos lista y seedeada
+Todo funciona:
+
+DB sincronizada con el schema Prisma
+Seed del piloto ejecutado correctamente: 1 organización, 5 proveedores, 20 pacientes, 10 templates de servicio
+Ahora puedes probar el login:
+Admin Portal → http://167.86.92.207:3001
+
+Email: cualquier admin del seed (prueba admin@carecenter.local)
+Password: ChangeMe123!
+Provider Portal → http://167.86.92.207:3002
+
+Email: cualquier provider del seed (prueba provider@carecenter.local)
+Password: ChangeMe123!
+Patient App → http://167.86.92.207:8080
+
+Email: patient@carecenter.local
+El OTP aparecerá en pantalla (devCode) ya que es modo desarrollo
+Nota: Si el login del admin/provider no funciona (usan challenge privilegiado con TOTP), puede que necesiten NODE_ENV=development para ver el devCode. Actualmente está en production y no envía el código de desarrollo. Si quieres habilitarlo temporalmente:
+
+docker compose -f deploy/vps/docker-compose.yml exec api sed -i 's/NODE_ENV=production/NODE_ENV=development/' /proc/1/environ 2>/dev/null || true
+docker compose -f deploy/vps/docker-compose.yml restart api
+O más simple, edita el .env:
+
+sed -i 's/NODE_ENV=production/NODE_ENV=development/' /opt/carepoint/deploy/vps/.env
+docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d api
+Prueba primero con la app de pacientes (http://167.86.92.207:8080) — ese flujo es el que acabamos de arreglar con /otp/register. ¿Funciona?
+
+
+Credenciales del V2:
+Rol	Email	Password
+Super Admin	superadmin@carepoint.local	ChangeMe123!
+Company Admin	companyadmin@carepoint.local	ChangeMe123!
+Support	support@carepoint.local	ChangeMe123!
+Finance	finance@carepoint.local	ChangeMe123!
+Nurse	nurse@carepoint.local	ChangeMe123!
+Pharmacist	pharmacist@carepoint.local	ChangeMe123!
+Lab Tech	labtech@carepoint.local	ChangeMe123!
+Providers (30)	test01@carepoint.local ... test30@carepoint.local	ChangeMe123!
+Patients (10)	patient01@carepoint.local ... patient10@carepoint.local	ChangeMe123!
+
+
+#Opción 1 — Seed original (si quieres volver al anterior):
+cd /opt/carepoint
+git pull origin feat/find-care-enhancements
+docker compose -f deploy/vps/docker-compose.yml exec api /app/services/api/node_modules/.bin/tsx /app/services/api/prisma/reset-pilot-seed-v1.ts
+
+
+#Opción 2 — Nuevo seed completo (recomendado):
+cd /opt/carepoint
+git pull origin feat/find-care-enhancements
+#Importante: Como el API necesita rebuild para tener el archivo v2, haz también:
+docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env build --no-cache api
+docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d --force-recreate api
+docker compose -f deploy/vps/docker-compose.yml exec api /app/services/api/node_modules/.bin/tsx /app/services/api/prisma/reset-pilot-seed-v2.ts
+
+
+#Y después el seed:
+docker compose -f deploy/vps/docker-compose.yml exec api /app/services/api/node_modules/.bin/tsx /app/services/api/prisma/reset-pilot-seed-v2.ts
+
+Plan del nuevo seed (v2)
+Estructura de archivos:
+
+services/api/prisma/reset-pilot-seed-v1.ts — seed actual (backup, ya creado)
+services/api/prisma/reset-pilot-seed-v2.ts — nuevo seed completo
+services/api/prisma/reset-pilot-seed.ts — apunta al v2 (por defecto)
+Datos que incluirá:
+
+Entidad	Cantidad	Detalles
+Admin users	5	superadmin, company_admin, company_support, finance @carepoint.local
+Providers	30	test01-test30@carepoint.local, todas las especialidades
+Patients	10	patient01-patient10@carepoint.local
+Slots futuros	~200	2 meses, online/in-person/home-visit
+Citas pasadas	~150	Completadas con diversas fechas
+Reviews	~100	Ratings 3-5, communication/wait/care/follow-up
+Prescriptions	~60	Activas y completadas
+Message threads	~30	Conversaciones proveedor-paciente
+Alerts	~15	Open + resolved
+Instrucciones para actualizar la base de datos (en tu VPS):
