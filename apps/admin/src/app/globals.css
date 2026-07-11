@@ -4405,6 +4405,70 @@ button,
 
 
 /* ============================================================
+   Confirm Dialog (shared reusable)
+   ============================================================ */
+
+.confirm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-dialog {
+  width: min(440px, 90vw);
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 28px 28px 24px;
+  animation: confirm-dialog-enter 180ms ease;
+}
+
+@keyframes confirm-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.confirm-dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.confirm-dialog-description {
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+  color: var(--muted-strong);
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-dialog-warning-btn {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.confirm-dialog-warning-btn:hover {
+  background: linear-gradient(180deg, #d97706, #b45309);
+}
+
+/* ============================================================
    IAM Schedule / Calendar View
    ============================================================ */
 
@@ -4726,4 +4790,273 @@ button,
 .schedule-month-more {
   font-size: 0.68rem;
   padding-top: 2px;
+}
+
+
+/* LoadingButton spinner */
+.loading-button-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: loading-button-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes loading-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ─── Toast Notification System ─────────────────────────────────── */
+
+.toast-container {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  display: grid;
+  gap: 10px;
+  max-width: 400px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+  animation: toast-slide-in 200ms ease;
+}
+
+.toast-item--success {
+  border-color: rgba(29, 143, 79, 0.24);
+  background: var(--success-soft);
+}
+
+.toast-item--success .toast-item-icon {
+  color: var(--success);
+}
+
+.toast-item--error {
+  border-color: rgba(196, 72, 28, 0.24);
+  background: var(--danger-soft);
+}
+
+.toast-item--error .toast-item-icon {
+  color: var(--danger);
+}
+
+.toast-item--info {
+  border-color: rgba(30, 99, 215, 0.18);
+  background: var(--primary-soft);
+}
+
+.toast-item--info .toast-item-icon {
+  color: var(--primary);
+}
+
+.toast-item-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toast-item-body {
+  flex: 1 1 auto;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toast-item-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.toast-item-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.toast-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.toast-retry-btn {
+  border: 1px solid rgba(196, 72, 28, 0.28);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--danger);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  min-height: 28px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.toast-retry-btn:hover {
+  background: rgba(196, 72, 28, 0.08);
+}
+
+.toast-dismiss-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.88rem;
+  padding: 4px;
+  min-height: 28px;
+  min-width: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.toast-dismiss-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 540px) {
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+}
+
+
+/* ─── StatsGrid Component ──────────────────────────────────────── */
+
+.stats-grid-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+
+.stats-grid-card--clickable {
+  cursor: pointer;
+}
+
+.stats-grid-card--clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: rgba(30, 99, 215, 0.22);
+}
+
+.stats-grid-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-grid-card__icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.stats-grid-card__value {
+  margin-top: 4px;
+}
+
+.stats-grid-card__trend {
+  margin-top: auto;
+}
+
+.stats-grid-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.stats-grid-card--skeleton {
+  pointer-events: none;
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, rgba(217, 227, 242, 0.5) 25%, rgba(233, 241, 255, 0.8) 50%, rgba(217, 227, 242, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
+/* EmptyState component */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  min-height: 240px;
+}
+
+.empty-state-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.empty-state-description {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 36ch;
+}
+
+.empty-state .button {
+  margin-top: 20px;
 }
