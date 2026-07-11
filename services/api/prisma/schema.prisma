@@ -62,6 +62,19 @@ enum ProviderOnboardingStatus {
   REJECTED
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum SlotStatus {
+  AVAILABLE
+  HELD
+  BOOKED
+}
+
 enum CredentialDocumentType {
   LICENSE
   ID_DOCUMENT
@@ -148,6 +161,9 @@ model Organization {
   providerCredentialReviewTasks ProviderCredentialReviewTask[]
   providerCredentialNotifications ProviderCredentialNotification[]
   providerRoleCatalogs ProviderRoleCatalog[]
+  invitations    Invitation[]
+  publishedSlots PublishedSlot[]
+  timeOffBlocks  TimeOffBlock[]
 }
 
 
@@ -175,6 +191,9 @@ model User {
   assignedCredentialReviewTasks ProviderCredentialReviewTask[] @relation("CredentialReviewTaskAssignee")
   createdCredentialReviewTasks ProviderCredentialReviewTask[] @relation("CredentialReviewTaskCreator")
   createdCredentialNotifications ProviderCredentialNotification[] @relation("CredentialNotificationCreator")
+  createdInvitations  Invitation[] @relation("InvitationCreator")
+  consumedInvitations Invitation[] @relation("InvitationConsumer")
+  createdTimeOffBlocks TimeOffBlock[]
 
   @@index([status])
   @@index([organizationId, status])
@@ -213,6 +232,8 @@ model ProviderProfile {
   credentialDocuments ProviderCredentialDocument[]
   credentialReviewTasks ProviderCredentialReviewTask[]
   credentialNotifications ProviderCredentialNotification[]
+  publishedSlots  PublishedSlot[]
+  timeOffBlocks   TimeOffBlock[]
 }
 
 // Provider-facing role options. The security/RBAC role remains User.role
@@ -656,6 +677,7 @@ model ProviderScheduleTemplate {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   organization   Organization  @relation(fields: [organizationId], references: [id])
+  publishedSlots PublishedSlot[]
 }
 
 model ClinicalOrder {
@@ -813,4 +835,68 @@ model PatientConsentRecord {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+
+// ─── IAM Module Models ───────────────────────────────────────────────────────
+
+model Invitation {
+  id             String           @id @default(cuid())
+  organizationId String
+  email          String
+  role           UserRole
+  tokenHash      String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdById    String
+  consumedById   String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  createdBy      User             @relation("InvitationCreator", fields: [createdById], references: [id])
+  consumedBy     User?            @relation("InvitationConsumer", fields: [consumedById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([email])
+}
+
+model PublishedSlot {
+  id             String                    @id @default(cuid())
+  organizationId String
+  providerId     String
+  templateId     String?
+  startsAt       DateTime
+  endsAt         DateTime
+  service        String
+  location       String
+  capacity       Int                       @default(1)
+  bookedCount    Int                       @default(0)
+  status         SlotStatus                @default(AVAILABLE)
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  organization   Organization              @relation(fields: [organizationId], references: [id])
+  provider       ProviderProfile           @relation(fields: [providerId], references: [id])
+  template       ProviderScheduleTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([organizationId, providerId, startsAt])
+  @@index([templateId])
+}
+
+model TimeOffBlock {
+  id             String          @id @default(cuid())
+  organizationId String
+  providerId     String
+  startsAt       DateTime
+  endsAt         DateTime
+  reason         String?
+  createdById    String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  provider       ProviderProfile @relation(fields: [providerId], references: [id])
+  createdBy      User            @relation(fields: [createdById], references: [id])
+
+  @@index([organizationId, providerId, startsAt])
 }

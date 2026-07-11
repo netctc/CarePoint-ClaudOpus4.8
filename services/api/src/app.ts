@@ -21,7 +21,9 @@ import { providersRouter } from './modules/providers/providers.routes';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes';
 import { adminUsersRouter } from './modules/admin-users/admin-users.routes';
 import { auditRouter } from './modules/audit/audit.routes';
+import { iamAuditRouter } from './modules/audit/iam-audit.routes';
 import { rbacRouter } from './modules/access/rbac.routes';
+import { userRoleRouter } from './modules/access/user-role.routes';
 import { catalogRouter } from './modules/catalog/catalog.routes';
 import { pricingRouter } from './modules/pricing/pricing.routes';
 import { policyRouter } from './modules/policy/policy.routes';
@@ -59,6 +61,7 @@ import { hspRouter } from './modules/hsp/hsp.routes';
 import { coverageRouter } from './modules/coverage/coverage.routes';
 import { releaseRouter } from './modules/release/release.routes';
 import { hybridPythonRouter } from './modules/hybrid-python/hybrid-python.routes';
+import { iamRouter } from './modules/iam/iam.routes';
 
 
 function isAllowedCorsOrigin(origin?: string) {
@@ -122,10 +125,12 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
   app.use('/api/admin/users', adminUsersRouter);
+  app.use('/api/admin/audit', iamAuditRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);
   app.use('/api/access/hsp', hspRouter);
+  app.use('/api/access', userRoleRouter);
   app.use('/api/catalog', catalogRouter);
   app.use(apiRoutePaths.coverage, coverageRouter);
   app.use('/api/pricing', pricingRouter);
@@ -157,6 +162,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/patient/care-plan', patientCarePlanRouter);
   app.use('/api/patient/rpm', patientRpmRouter);
   app.use('/api/patient/questionnaires', patientQuestionnairesRouter);
+  app.use('/api/iam', iamRouter);
 
   app.use((req, _res, next) => {
     next(notFound(`Route not found: ${req.method} ${req.originalUrl}`));

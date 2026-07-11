@@ -8,6 +8,7 @@ import { prisma } from '../../lib/prisma';
 import { writeAuditLog } from '../../lib/audit';
 import { dispatchProviderCredentialNotifications, getProviderCredentialNotificationDispatchConfig } from '../../lib/provider-credential-notification-dispatcher';
 import { runProviderCredentialGovernanceSweep } from '../../lib/provider-credential-governance-sweeper';
+import { providerIamRouter } from './provider-iam.routes';
 
 // Local mirrors of Prisma enum string values. This keeps the API build stable even
 // when @prisma/client has not been regenerated yet; `npm run build:api` now also
@@ -42,6 +43,11 @@ const ProviderOnboardingStatus = {
 type ProviderOnboardingStatus = (typeof ProviderOnboardingStatus)[keyof typeof ProviderOnboardingStatus];
 
 export const adminUsersRouter = Router();
+
+// Mount IAM-enhanced provider sub-routes with full middleware chain (auth + RBAC + org-scope)
+// This is mounted BEFORE the generic adminRoles middleware to use its own enforcement.
+adminUsersRouter.use('/providers/iam', providerIamRouter);
+
 /* test 
 import { ProviderOnboardingStatus } from "@prisma/client";*/
 
@@ -376,7 +382,7 @@ function statusPatch(body: any, currentStatus: AccountStatus = AccountStatus.ACT
   };
 }
 
-function statusAuditAction(resourcePrefix: 'admin.patient' | 'admin.provider', from: AccountStatus, to: AccountStatus) {
+function statusAuditAction(resourcePrefix: 'admin.patient' | 'admin.provider' | 'admin.user', from: AccountStatus, to: AccountStatus) {
   if (to === AccountStatus.ACTIVE && from !== AccountStatus.ACTIVE) return `${resourcePrefix}.restored`;
   if (to === AccountStatus.SUSPENDED) return `${resourcePrefix}.suspended`;
   if (to === AccountStatus.ARCHIVED) return `${resourcePrefix}.archived`;
@@ -2958,4 +2964,312 @@ adminUsersRouter.delete('/providers/:providerId', async (req, res) => {
 
   await safeWriteAccountAuditLog({ actorId: req.user?.userId, organizationId: current.organizationId, action: 'admin.provider.deleted', resource: 'provider_profile', resourceId: current.id, details: { email: current.user.email, role: current.user.role } });
   res.status(204).send();
+});
+
+// ---------------------------------------------------------------------------
+// IAM User Management (Task 5.1)
+// Unified user list with pagination, search, creation, and status management.
+// Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /api/admin/users/iam-users
+ *
+ * Paginated user list (default 20/page, sorted by createdAt DESC).
+ * - Super_Admin: all users across all organizations
+ * - Company_Admin: only users in own organization
+ * - Search: case-insensitive partial match on firstName+lastName, email, or role
+ */
+adminUsersRouter.get('/iam-users', async (req, res) => {
+  const page = Math.max(1, parseInt(clean(req.query.page) || '1', 10) || 1);
+  const pageSize = Math.max(1, Math.min(100, parseInt(clean(req.query.pageSize) || '20', 10) || 20));
+  const search = clean(req.query.search).toLowerCase();
+  const skip = (page - 1) * pageSize;
+
+  // Organization scoping: Company_Admin sees only own org
+  const orgWhere: any = req.user?.organizationId && !isSuperAdmin(req)
+    ? { organizationId: req.user.organizationId }
+    : {};
+
+  // Build search filter for Prisma
+  const searchWhere: any = search
+    ? {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { role: { contains: search, mode: 'insensitive' } },
+          // Match on full name (firstName + lastName combined)
+          ...(search.includes(' ')
+            ? [
+                {
+                  AND: search.split(/\s+/).map((part) => ({
+                    OR: [
+                      { firstName: { contains: part, mode: 'insensitive' } },
+                      { lastName: { contains: part, mode: 'insensitive' } },
+                    ],
+                  })),
+                },
+              ]
+            : []),
+        ],
+      }
+    : {};
+
+  const where = { ...orgWhere, ...searchWhere };
+
+  const [items, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      include: { organization: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: pageSize,
+    }),
+    prisma.user.count({ where }),
+  ]);
+
+  const mapped = items.map((user) => ({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    name: `${user.firstName} ${user.lastName}`.trim(),
+    email: user.email,
+    role: user.role,
+    status: user.status ?? AccountStatus.ACTIVE,
+    organizationId: user.organizationId ?? null,
+    organizationName: user.organization?.name ?? null,
+    deactivatedAt: user.deactivatedAt ?? null,
+    createdAt: user.createdAt,
+  }));
+
+  res.json({
+    items: mapped,
+    page,
+    pageSize,
+    totalCount,
+    totalPages: Math.ceil(totalCount / pageSize),
+  });
+});
+
+/**
+ * POST /api/admin/users/iam-users
+ *
+ * Create a new user account with validation.
+ * - Validates unique email platform-wide
+ * - Hashes a temporary password with bcrypt
+ * - Company_Admin can only create users within their own organization
+ * - Super_Admin can assign any organization
+ * Requirements: 1.4, 1.5, 1.9
+ */
+adminUsersRouter.post('/iam-users', async (req, res) => {
+  const firstName = clean(req.body?.firstName);
+  const lastName = clean(req.body?.lastName);
+  const email = normalizeEmail(req.body?.email);
+  const role = clean(req.body?.role).toUpperCase();
+
+  // Validate required fields
+  if (!firstName) throw badRequest('firstName is required');
+  if (!lastName) throw badRequest('lastName is required');
+  if (!email) throw badRequest('email is required');
+  if (!role) throw badRequest('role is required');
+
+  // Validate email format (basic check)
+  if (!email.includes('@') || !email.includes('.')) {
+    throw badRequest('email must be a valid email address');
+  }
+
+  // Validate role
+  const validRoles = Object.values(UserRole);
+  if (!validRoles.includes(role as UserRole)) {
+    throw badRequest(`role must be one of: ${validRoles.join(', ')}`);
+  }
+
+  // Check email uniqueness platform-wide
+  await assertEmailAvailable(email);
+
+  // Determine organization
+  let organizationId: string;
+  if (isSuperAdmin(req)) {
+    // Super_Admin can assign to any org or use the provided one
+    organizationId = await getOrganizationId(req, req.body?.organizationId);
+  } else {
+    // Company_Admin creates users within own org only
+    if (!req.user?.organizationId) {
+      throw badRequest('Organization context is required');
+    }
+    organizationId = req.user.organizationId;
+  }
+
+  // Hash a temporary password
+  const temporaryPassword = clean(req.body?.password) || 'ChangeMe123!';
+  const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      firstName,
+      lastName,
+      role: role as any,
+      organizationId,
+      passwordHash,
+      status: AccountStatus.ACTIVE,
+    },
+    include: { organization: { select: { id: true, name: true } } },
+  });
+
+  await safeWriteAccountAuditLog({
+    actorId: req.user?.userId,
+    organizationId,
+    action: 'admin.user.created',
+    resource: 'user',
+    resourceId: user.id,
+    details: { email, role, firstName, lastName },
+  });
+
+  res.status(201).json({
+    item: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: `${user.firstName} ${user.lastName}`.trim(),
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      organizationId: user.organizationId ?? null,
+      organizationName: user.organization?.name ?? null,
+      deactivatedAt: user.deactivatedAt ?? null,
+      createdAt: user.createdAt,
+    },
+  });
+});
+
+/**
+ * GET /api/admin/users/iam-users/:userId
+ *
+ * Get a single user by ID. Returns 403 if Company_Admin tries to access
+ * a user in a different organization.
+ * Requirements: 1.3, 1.8
+ */
+adminUsersRouter.get('/iam-users/:userId', async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.userId },
+    include: { organization: { select: { id: true, name: true } } },
+  });
+
+  if (!user) throw notFound('User not found');
+
+  // Org boundary enforcement for non-Super_Admin
+  if (!isSuperAdmin(req) && req.user?.organizationId && user.organizationId !== req.user.organizationId) {
+    throw forbidden('Requested account is outside the current organization scope');
+  }
+
+  res.json({
+    item: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: `${user.firstName} ${user.lastName}`.trim(),
+      email: user.email,
+      role: user.role,
+      status: user.status ?? AccountStatus.ACTIVE,
+      organizationId: user.organizationId ?? null,
+      organizationName: user.organization?.name ?? null,
+      deactivatedAt: user.deactivatedAt ?? null,
+      createdAt: user.createdAt,
+    },
+  });
+});
+
+/**
+ * PATCH /api/admin/users/iam-users/:userId/status
+ *
+ * Update a user's account status (ACTIVE, SUSPENDED, ARCHIVED).
+ * - On SUSPENDED: revoke all refresh tokens and set deactivatedAt
+ * - Company_Admin: can only change status of users within own org
+ * - Super_Admin: can change status of any user
+ * Requirements: 1.6, 1.8
+ */
+adminUsersRouter.patch('/iam-users/:userId/status', async (req, res) => {
+  const newStatus = clean(req.body?.status).toUpperCase();
+  if (!newStatus || !accountStatuses.includes(newStatus as AccountStatus)) {
+    throw badRequest(`status must be one of: ${accountStatuses.join(', ')}`);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.userId },
+    include: { organization: { select: { id: true, name: true } } },
+  });
+
+  if (!user) throw notFound('User not found');
+
+  // Org boundary enforcement for non-Super_Admin
+  if (!isSuperAdmin(req) && req.user?.organizationId && user.organizationId !== req.user.organizationId) {
+    throw forbidden('Requested account is outside the current organization scope');
+  }
+
+  const previousStatus = user.status ?? AccountStatus.ACTIVE;
+
+  // Build update payload
+  const updateData: any = {
+    status: newStatus as AccountStatus,
+  };
+
+  // On SUSPENDED: set deactivatedAt
+  if (newStatus === AccountStatus.SUSPENDED || newStatus === AccountStatus.ARCHIVED) {
+    updateData.deactivatedAt = new Date();
+    updateData.deactivationReason = clean(req.body?.reason) || null;
+  } else if (newStatus === AccountStatus.ACTIVE) {
+    // Reactivation: clear deactivation fields
+    updateData.deactivatedAt = null;
+    updateData.deactivationReason = null;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    // Update user status
+    await tx.user.update({ where: { id: user.id }, data: updateData });
+
+    // On SUSPENDED: revoke all active refresh tokens
+    if (newStatus === AccountStatus.SUSPENDED) {
+      await tx.refreshToken.updateMany({
+        where: { userId: user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+  });
+
+  await safeWriteAccountAuditLog({
+    actorId: req.user?.userId,
+    organizationId: user.organizationId ?? undefined,
+    action: statusAuditAction('admin.user', previousStatus, newStatus as AccountStatus),
+    resource: 'user',
+    resourceId: user.id,
+    details: {
+      previousStatus,
+      newStatus,
+      reason: clean(req.body?.reason) || null,
+    },
+  });
+
+  // Fetch the updated user
+  const updated = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { organization: { select: { id: true, name: true } } },
+  });
+
+  res.json({
+    item: {
+      id: updated!.id,
+      firstName: updated!.firstName,
+      lastName: updated!.lastName,
+      name: `${updated!.firstName} ${updated!.lastName}`.trim(),
+      email: updated!.email,
+      role: updated!.role,
+      status: updated!.status,
+      organizationId: updated!.organizationId ?? null,
+      organizationName: updated!.organization?.name ?? null,
+      deactivatedAt: updated!.deactivatedAt ?? null,
+      createdAt: updated!.createdAt,
+    },
+  });
 });

@@ -413,6 +413,50 @@ export const adminApi = {
     }),
 
   moderationSummary: () => request('/api/moderation/summary'),
+  iamUsers: (query: string) => request(`/api/admin/users/iam-users?${query}`),
+  iamCreateUser: (payload: Record<string, string>) =>
+    request('/api/admin/users/iam-users', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  iamUpdateUserStatus: (userId: string, payload: Record<string, string>) =>
+    request(`/api/admin/users/iam-users/${userId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  iamInvitations: (query: string) => request(`/api/iam/invitations?${query}`),
+  iamCreateInvitation: (payload: { email: string; role: string; expiresInHours: number }) =>
+    request('/api/iam/invitations', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  iamRevokeInvitation: (id: string) =>
+    request(`/api/iam/invitations/${id}/revoke`, {
+      method: 'PATCH',
+    }),
+  iamAccessReview: () => request('/api/iam/access-review'),
+  iamCreateAppointment: (providerId: string, payload: { patientId: string; service: string; location: string; startsAt: string; endsAt: string }) =>
+    request(`/api/iam/schedules/${providerId}/appointments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  iamRescheduleAppointment: (appointmentId: string, payload: { startsAt: string; endsAt: string }) =>
+    request(`/api/iam/schedules/appointments/${appointmentId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  iamCancelAppointment: (appointmentId: string, payload: { reason: string }) =>
+    request(`/api/iam/schedules/appointments/${appointmentId}/cancel`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  iamAuditLogs: (query: string) => request(`/api/admin/audit?${query}`),
+  iamAuditDetail: (id: string) => request(`/api/admin/audit/${id}`),
+  iamAuditExport: (query: string) =>
+    request<string>(`/api/admin/audit/export?${query}`, { method: 'POST' }, 'text').then((content) => ({
+      content,
+      filename: `audit-export.${new URLSearchParams(query).get('format') || 'json'}`,
+    })),
   moderationReviews: () => request('/api/moderation/reviews'),
   moderationReviewDetail: (reviewId: string) => request(`/api/moderation/reviews/${reviewId}`),
   assignModerationReview: (reviewId: string, payload: { reviewerUserId: string; ownerName: string; note?: string }) =>
