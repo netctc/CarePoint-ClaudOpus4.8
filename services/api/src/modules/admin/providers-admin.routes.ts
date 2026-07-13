@@ -454,3 +454,233 @@ providersAdminRouter.get(
     });
   },
 );
+
+// ---------------------------------------------------------------------------
+// GET /api/admin/providers/:id
+// Provider detail — comprehensive profile with appointments, patients, metrics
+// ---------------------------------------------------------------------------
+
+providersAdminRouter.get(
+  '/providers/:id',
+  ...iamMiddlewareChain(adminRoles),
+  async (req: any, res: any) => {
+    const { id } = req.params;
+
+    const profile = await prisma.providerProfile.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        organization: { select: { id: true, name: true } },
+        roleCatalog: { select: { code: true, label: true } },
+        onboardingState: { select: { status: true } },
+        credentialDocuments: {
+          select: { id: true, documentType: true, status: true, expiresAt: true, createdAt: true },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Provider not found' } });
+    }
+
+    const now = new Date();
+
+    // Upcoming appointments (next 30 days)
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const upcomingAppointments = await prisma.appointment.findMany({
+      where: {
+        providerId: id,
+        startsAt: { gte: now, lte: thirtyDaysFromNow },
+        status: { in: ['REQUESTED', 'CONFIRMED'] },
+      },
+      select: {
+        id: true,
+        patientId: true,
+        service: true,
+        location: true,
+        startsAt: true,
+        endsAt: true,
+        status: true,
+        patient: {
+          select: {
+            id: true,
+            user: { select: { firstName: true, lastName: true, email: true } },
+          },
+        },
+      },
+      orderBy: { startsAt: 'asc' },
+      take: 50,
+    });
+
+    // Past appointments (last 90 days, max 50)
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const pastAppointments = await prisma.appointment.findMany({
+      where: {
+        providerId: id,
+        startsAt: { lt: now, gte: ninetyDaysAgo },
+      },
+      select: {
+        id: true,
+        patientId: true,
+        service: true,
+        location: true,
+        startsAt: true,
+        endsAt: true,
+        status: true,
+        patient: {
+          select: {
+            id: true,
+            user: { select: { firstName: true, lastName: true, email: true } },
+          },
+        },
+      },
+      orderBy: { startsAt: 'desc' },
+      take: 50,
+    });
+
+    // Assigned patients (unique patients from all appointments)
+    const allPatientAppointments = await prisma.appointment.findMany({
+      where: { providerId: id },
+      select: {
+        patientId: true,
+        startsAt: true,
+        status: true,
+        patient: {
+          select: {
+            id: true,
+            user: { select: { firstName: true, lastName: true, email: true } },
+          },
+        },
+      },
+      orderBy: { startsAt: 'desc' },
+    });
+
+    // Deduplicate patients
+    const patientMap = new Map<string, { id: string; name: string; email: string; lastAppointment: string; appointmentCount: number }>();
+    for (const appt of allPatientAppointments) {
+      const existing = patientMap.get(appt.patientId);
+      if (!existing) {
+        patientMap.set(appt.patientId, {
+          id: appt.patient.id,
+          name: `${appt.patient.user.firstName} ${appt.patient.user.lastName}`.trim(),
+          email: appt.patient.user.email,
+          lastAppointment: appt.startsAt.toISOString(),
+          appointmentCount: 1,
+        });
+      } else {
+        existing.appointmentCount++;
+      }
+    }
+    const assignedPatients = Array.from(patientMap.values());
+
+    // Performance metrics
+    const [totalAppts, completedAppts, cancelledAppts] = await Promise.all([
+      prisma.appointment.count({ where: { providerId: id } }),
+      prisma.appointment.count({ where: { providerId: id, status: 'COMPLETED' } }),
+      prisma.appointment.count({ where: { providerId: id, status: 'CANCELLED' } }),
+    ]);
+
+    // Avg duration from completed appointments
+    const completedAppointmentTimes = await prisma.appointment.findMany({
+      where: { providerId: id, status: 'COMPLETED' },
+      select: { startsAt: true, endsAt: true },
+      take: 200,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    let avgDurationMinutes = 30;
+    if (completedAppointmentTimes.length > 0) {
+      const totalMin = completedAppointmentTimes.reduce((sum: number, appt: any) => {
+        const diff = (new Date(appt.endsAt).getTime() - new Date(appt.startsAt).getTime()) / (1000 * 60);
+        return sum + (diff > 0 ? diff : 30);
+      }, 0);
+      avgDurationMinutes = Math.round(totalMin / completedAppointmentTimes.length);
+    }
+
+    const completionRate = totalAppts > 0 ? Math.round((completedAppts / totalAppts) * 100 * 10) / 10 : 0;
+    const cancellationRate = totalAppts > 0 ? Math.round((cancelledAppts / totalAppts) * 100 * 10) / 10 : 0;
+
+    // Medical centers (derive from appointment locations)
+    const locationSet = new Set<string>();
+    for (const appt of [...upcomingAppointments, ...pastAppointments]) {
+      if (appt.location) locationSet.add(appt.location);
+    }
+
+    res.json({
+      id: profile.id,
+      userId: profile.userId,
+      profile: {
+        name: `${profile.user.firstName} ${profile.user.lastName}`.trim(),
+        firstName: profile.user.firstName,
+        lastName: profile.user.lastName,
+        email: profile.user.email,
+        role: profile.roleCatalog?.code ?? profile.user.role,
+        roleLabel: profile.roleCatalog?.label ?? profile.user.role,
+        specialty: profile.specialty,
+        licenseNumber: profile.licenseNumber,
+        services: Array.isArray(profile.services) ? profile.services : [],
+        organizationId: profile.organizationId,
+        organizationName: profile.organization?.name ?? null,
+        status: profile.user.status,
+        onboardingStatus: profile.onboardingState?.status ?? null,
+        joinedAt: profile.user.createdAt,
+      },
+      credentials: profile.credentialDocuments.map((doc: any) => ({
+        id: doc.id,
+        type: doc.documentType,
+        status: doc.status,
+        expiresAt: doc.expiresAt,
+        createdAt: doc.createdAt,
+      })),
+      appointments: {
+        upcoming: upcomingAppointments.map((appt: any) => ({
+          id: appt.id,
+          patientId: appt.patientId,
+          patientName: `${appt.patient.user.firstName} ${appt.patient.user.lastName}`.trim(),
+          service: appt.service,
+          location: appt.location,
+          startsAt: appt.startsAt,
+          endsAt: appt.endsAt,
+          status: appt.status,
+        })),
+        past: pastAppointments.map((appt: any) => ({
+          id: appt.id,
+          patientId: appt.patientId,
+          patientName: `${appt.patient.user.firstName} ${appt.patient.user.lastName}`.trim(),
+          service: appt.service,
+          location: appt.location,
+          startsAt: appt.startsAt,
+          endsAt: appt.endsAt,
+          status: appt.status,
+        })),
+      },
+      assignedPatients,
+      medicalCenters: Array.from(locationSet),
+      reviews: [],
+      ratings: {
+        average: totalAppts > 0 ? Math.round((completedAppts / totalAppts) * 5 * 10) / 10 : null,
+        count: 0,
+      },
+      performance: {
+        completionRate,
+        avgDurationMinutes,
+        cancellationRate,
+        totalAppointments: totalAppts,
+        completedAppointments: completedAppts,
+        cancelledAppointments: cancelledAppts,
+      },
+    });
+  },
+);

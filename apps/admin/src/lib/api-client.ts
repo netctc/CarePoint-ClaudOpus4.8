@@ -89,6 +89,7 @@ export const adminApi = {
   telehealth: () => request('/api/telehealth/sessions'),
   providers: () => request('/api/providers'),
   provider: (providerId: string) => request(`/api/providers/${providerId}`),
+  providerDetail: (providerId: string) => request(`/api/admin/providers/${providerId}`),
   providerQueue: () => request('/api/providers/queue'),
   providerQueueDetail: (providerId: string) => request(`/api/providers/queue/${providerId}`),
   submitProviderReview: (providerId: string, payload: { note?: string }) =>

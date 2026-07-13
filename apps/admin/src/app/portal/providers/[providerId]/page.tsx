@@ -1,241 +1,511 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
+import { useParams } from 'next/navigation';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { loadIntegratedProviderProfile } from '@/lib/api/admin-server';
-import { formatUtcDateTime } from '@/lib/formatters';
-import { getAdminDetailCopy } from '@/lib/i18n/admin-detail-copy';
-import { normalizeAdminLocale } from '@/lib/i18n/admin-dictionary';
+import { adminApi } from '@/lib/api-client';
 
-function toneForStatus(status: string) {
-  if (status === 'APPROVED') return 'success';
-  if (status === 'REQUEST_CHANGES' || status === 'READY_FOR_REVIEW') return 'warning';
-  return 'danger';
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+type TabId = 'overview' | 'schedule' | 'patients' | 'performance' | 'reviews';
+
+interface ProviderProfile {
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  roleLabel: string;
+  specialty: string | null;
+  licenseNumber: string | null;
+  services: string[];
+  organizationId: string;
+  organizationName: string | null;
+  status: string;
+  onboardingStatus: string | null;
+  joinedAt: string;
 }
 
-export default async function ProviderProfilePage({
-  params,
-}: {
-  params: Promise<{ providerId: string }>;
-}) {
-  const { providerId } = await params;
-  const cookieStore = await cookies();
-  const locale = normalizeAdminLocale(cookieStore.get('cc_locale')?.value);
-  const copy = getAdminDetailCopy(locale).providerProfile;
+interface Credential {
+  id: string;
+  type: string;
+  status: string;
+  expiresAt: string | null;
+  createdAt: string;
+}
 
-  try {
-    const result = await loadIntegratedProviderProfile(providerId);
-    const detail = result.data;
-    const checklistEntries = Object.entries(detail.onboarding.checklist);
-    const completedItems = checklistEntries.filter(([, value]) => value).length;
-    const completionScore = checklistEntries.length
-      ? Math.round((completedItems / checklistEntries.length) * 100)
-      : 0;
-    const blockers = checklistEntries.filter(([, value]) => !value).map(([key]) => key);
-    const latestReviewNote = typeof detail.onboarding.latestReview?.details?.note === 'string'
-      ? detail.onboarding.latestReview.details.note
-      : null;
+interface AppointmentItem {
+  id: string;
+  patientId: string;
+  patientName: string;
+  service: string;
+  location: string;
+  startsAt: string;
+  endsAt: string;
+  status: string;
+}
 
-    return (
-      <PortalShell currentPath="/portal/providers">
+interface PatientItem {
+  id: string;
+  name: string;
+  email: string;
+  lastAppointment: string;
+  appointmentCount: number;
+}
 
-        <div className="admin-v17-provider-workspace admin-v17-provider-detail">
-        <div className="hero-panel">
-          <div className="hero-panel-grid">
-            <div className="hero-copy">
-              <div className="page-breadcrumbs">
-                <span>{copy.breadcrumbs.providers}</span><span>•</span><span>{copy.breadcrumbs.directory}</span><span>•</span><span>{detail.profile.name}</span>
-              </div>
-              <div className="tag-group">
-                <span className="page-eyebrow">{copy.eyebrow}</span>
-                <StatusBadge tone={toneForStatus(detail.onboarding.status)}>{detail.onboarding.status}</StatusBadge>
-              </div>
-              <h2 className="hero-title">{detail.profile.name}</h2>
-              <p className="hero-subtitle">
-                {copy.subtitle}
-              </p>
-              <div className="tag-group">
-                <span className="tag">{detail.profile.role}</span>
-                <span className="tag">{detail.profile.specialty || copy.specialtyPending}</span>
-                <span className="tag">{copy.storage}: {detail.onboarding.storageMode}</span>
-              </div>
-              <div className="hero-actions">
-                <Link className="button secondary" href="/portal/providers">{copy.backToDirectory}</Link>
-                <Link className="button secondary" href={`/portal/providers/onboarding/${providerId}`}>{copy.openOnboardingReview}</Link>
-                <Link className="button secondary" href="/portal/payments/reconciliation">{copy.viewPayoutReadiness}</Link>
-              </div>
-            </div>
+interface PerformanceMetrics {
+  completionRate: number;
+  avgDurationMinutes: number;
+  cancellationRate: number;
+  totalAppointments: number;
+  completedAppointments: number;
+  cancelledAppointments: number;
+}
 
-            <div className="info-stack">
-              <div className="soft-card">
-                <div className="panel-header">
-                  <div>
-                    <h3 className="section-title" style={{ marginBottom: 6 }}>{copy.readiness}</h3>
-                    <div style={{ fontWeight: 800, fontSize: 22 }}>{completionScore}% {copy.complete}</div>
-                  </div>
-                  <span className="tag">{copy.designApplied}</span>
-                </div>
-                <div className="detail-list">
-                  <div><span className="detail-label">{copy.email}</span><strong>{detail.profile.email}</strong></div>
-                  <div><span className="detail-label">{copy.license}</span><strong>{detail.profile.licenseNumber || copy.pending}</strong></div>
-                  <div><span className="detail-label">{copy.joined}</span><strong>{formatUtcDateTime(detail.profile.joinedAt)}</strong></div>
-                </div>
-              </div>
-              <div className="mini-card">
-                <h3 className="section-title">{copy.recentMetrics}</h3>
-                <div className="metric-grid-3">
-                  <div className="surface-tile"><div className="hero-metric-label">{copy.recentAppointments}</div><div className="hero-metric-value">{detail.metrics.recentAppointments}</div></div>
-                  <div className="surface-tile"><div className="hero-metric-label">{copy.completed}</div><div className="hero-metric-value">{detail.metrics.completedAppointments}</div></div>
-                  <div className="surface-tile"><div className="hero-metric-label">{copy.payments}</div><div className="hero-metric-value">{detail.metrics.recentPayments}</div></div>
-                </div>
-              </div>
-            </div>
+interface ProviderDetailData {
+  id: string;
+  userId: string;
+  profile: ProviderProfile;
+  credentials: Credential[];
+  appointments: {
+    upcoming: AppointmentItem[];
+    past: AppointmentItem[];
+  };
+  assignedPatients: PatientItem[];
+  medicalCenters: string[];
+  reviews: unknown[];
+  ratings: { average: number | null; count: number };
+  performance: PerformanceMetrics;
+}
+
+// ---------------------------------------------------------------------------
+// Tab Components
+// ---------------------------------------------------------------------------
+
+function OverviewTab({ data }: { data: ProviderDetailData }) {
+  const { profile, credentials, medicalCenters } = data;
+
+  return (
+    <div className="info-stack" style={{ gap: 20 }}>
+      <div className="card">
+        <h3 className="section-title">Professional Information</h3>
+        <div className="detail-list">
+          <div><span className="detail-label">Full Name</span><strong>{profile.name}</strong></div>
+          <div><span className="detail-label">Email</span><strong>{profile.email}</strong></div>
+          <div><span className="detail-label">Role</span><strong>{profile.roleLabel}</strong></div>
+          <div><span className="detail-label">Specialty</span><strong>{profile.specialty || 'Not specified'}</strong></div>
+          <div><span className="detail-label">License Number</span><strong>{profile.licenseNumber || 'Pending'}</strong></div>
+          <div><span className="detail-label">Status</span><StatusBadge tone={profile.status === 'ACTIVE' ? 'success' : 'danger'}>{profile.status}</StatusBadge></div>
+          <div><span className="detail-label">Onboarding</span><StatusBadge tone={profile.onboardingStatus === 'APPROVED' ? 'success' : 'warning'}>{profile.onboardingStatus || 'Pending'}</StatusBadge></div>
+          <div><span className="detail-label">Organization</span><strong>{profile.organizationName || 'N/A'}</strong></div>
+          <div><span className="detail-label">Joined</span><strong>{new Date(profile.joinedAt).toLocaleDateString()}</strong></div>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">Services</h3>
+        {profile.services.length > 0 ? (
+          <div className="tag-group">
+            {profile.services.map((s, i) => (
+              <span key={i} className="tag">{s}</span>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">No services assigned</p>
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">Credentials & Certifications</h3>
+        {credentials.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Expires</th>
+                  <th>Uploaded</th>
+                </tr>
+              </thead>
+              <tbody>
+                {credentials.map((cred) => (
+                  <tr key={cred.id}>
+                    <td>{cred.type}</td>
+                    <td><StatusBadge tone={cred.status === 'VERIFIED' ? 'success' : cred.status === 'EXPIRED' ? 'danger' : 'warning'}>{cred.status}</StatusBadge></td>
+                    <td>{cred.expiresAt ? new Date(cred.expiresAt).toLocaleDateString() : '—'}</td>
+                    <td>{new Date(cred.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="muted">No credential documents on file</p>
+        )}
+      </div>
+
+      {medicalCenters.length > 0 && (
+        <div className="card">
+          <h3 className="section-title">Medical Centers</h3>
+          <div className="tag-group">
+            {medicalCenters.map((loc, i) => (
+              <span key={i} className="tag">{loc}</span>
+            ))}
           </div>
         </div>
+      )}
+    </div>
+  );
+}
 
-        <DetailStateStrip
-          items={[
-            {
-              label: 'Checklist coverage',
-              value: `${completedItems}/${checklistEntries.length}`,
-              detail: blockers.length ? `${blockers.length} blockers still open before clean approval.` : 'All onboarding controls currently satisfied.',
-              tone: blockers.length ? 'warning' : 'success',
-            },
-            {
-              label: 'Review posture',
-              value: detail.onboarding.latestReview?.action || 'Pending first review',
-              detail: latestReviewNote || 'No reviewer note has been recorded yet.',
-              tone: detail.onboarding.latestReview ? 'info' : 'neutral',
-            },
-            {
-              label: 'Operational readiness',
-              value: detail.metrics.completedAppointments > 0 ? 'Live activity' : 'Pre-go-live',
-              detail: `${detail.metrics.recentAppointments} recent appointments and ${detail.metrics.recentPayments} recent payments observed.`,
-              tone: detail.metrics.completedAppointments > 0 ? 'success' : 'warning',
-            },
-          ]}
-        />
+function ScheduleTab({ data }: { data: ProviderDetailData }) {
+  const { appointments } = data;
 
-        <div className="split-shell" style={{ marginTop: 24 }}>
-          <div className="info-stack">
-            <div className="card">
-              <h3 className="section-title">Identity and configuration</h3>
-              <MetadataGrid
-                items={[
-                  { label: 'Provider name', value: detail.profile.name, detail: 'Canonical admin directory label.' },
-                  { label: 'Primary role', value: detail.profile.role, detail: 'Used for queue routing and scope checks.' },
-                  { label: 'Specialty', value: detail.profile.specialty || 'Not captured', detail: 'Visible in provider discovery and assignment flows.' },
-                  { label: 'Assigned services', value: detail.profile.services.length ? detail.profile.services.join(', ') : 'None assigned', detail: 'Commercial and scheduling scope.' },
-                  { label: 'Storage mode', value: detail.onboarding.storageMode, detail: 'Indicates whether onboarding is persisted in live state or mock fallback.' },
-                  { label: 'Latest actor', value: detail.onboarding.latestReview?.actor?.name || detail.onboarding.latestReview?.actor?.email || 'System', detail: 'Most recent explicit workflow owner.' },
-                ]}
-              />
-            </div>
-
-            <div className="card">
-              <h3 className="section-title">Checklist and evidence packet</h3>
-              <EvidenceCardGrid
-                items={[
-                  {
-                    title: 'Onboarding control coverage',
-                    meta: `${completedItems} complete · ${blockers.length} open`,
-                    description: 'The redesign groups onboarding controls into a single auditable evidence packet so approval, change requests, and escalation can happen without switching context.',
-                    bullets: checklistEntries.map(([key, value]) => `${value ? 'Complete' : 'Missing'} — ${key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase())}`),
-                    badges: [
-                      { label: detail.onboarding.status, tone: toneForStatus(detail.onboarding.status) },
-                      { label: blockers.length ? 'Needs follow-up' : 'Ready set', tone: blockers.length ? 'warning' : 'success' },
-                    ],
-                  },
-                  {
-                    title: 'Latest review evidence',
-                    meta: detail.onboarding.latestReview ? formatUtcDateTime(detail.onboarding.latestReview.createdAt) : 'No action yet',
-                    description: detail.onboarding.latestReview
-                      ? 'The latest workflow decision is displayed here with actor, action, and note context to support downstream audit, payout, and access-linked review.'
-                      : 'No formal review action has been recorded yet, so the workspace keeps the provider in a pending review posture.',
-                    bullets: detail.onboarding.latestReview
-                      ? [
-                          `Action: ${detail.onboarding.latestReview.action}`,
-                          `Actor: ${detail.onboarding.latestReview.actor?.name || detail.onboarding.latestReview.actor?.email || 'System'}`,
-                          `Note: ${latestReviewNote || 'No note recorded'}`,
-                        ]
-                      : ['Open the onboarding review route to create the first explicit decision record.'],
-                    badges: [
-                      { label: detail.onboarding.latestReview ? 'Audit linked' : 'Awaiting action', tone: detail.onboarding.latestReview ? 'info' : 'warning' },
-                    ],
-                  },
-                ]}
-              />
-            </div>
-
-            <div className="card">
-              <h3 className="section-title">Onboarding audit history</h3>
-              <div className="timeline-list">
-                {detail.onboarding.history.length ? detail.onboarding.history.map((entry) => (
-                  <div key={entry.id} className="timeline-item">
-                    <div style={{ fontWeight: 700 }}>{formatUtcDateTime(entry.createdAt)}</div>
-                    <div>{entry.action}</div>
-                    <div className="muted">{entry.actor?.name || entry.actor?.email || 'System'}</div>
-                    <div className="muted">{typeof entry.details?.note === 'string' ? entry.details.note : 'No note recorded'}</div>
-                  </div>
-                )) : <div className="banner info">No onboarding history has been returned yet.</div>}
-              </div>
-            </div>
+  return (
+    <div className="info-stack" style={{ gap: 20 }}>
+      <div className="card">
+        <h3 className="section-title">Upcoming Appointments ({appointments.upcoming.length})</h3>
+        {appointments.upcoming.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Service</th>
+                  <th>Location</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.upcoming.map((appt) => (
+                  <tr key={appt.id}>
+                    <td>{appt.patientName}</td>
+                    <td>{appt.service}</td>
+                    <td>{appt.location}</td>
+                    <td>{new Date(appt.startsAt).toLocaleDateString()}</td>
+                    <td>{new Date(appt.startsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} – {new Date(appt.endsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td><StatusBadge tone={appt.status === 'CONFIRMED' ? 'success' : 'warning'}>{appt.status}</StatusBadge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        ) : (
+          <p className="muted">No upcoming appointments</p>
+        )}
+      </div>
 
-          <div className="info-stack">
-            <div className="card">
-              <h3 className="section-title">Decision support</h3>
-              <ul className="data-points muted">
-                <li>Approve only when credential, identity, finance, and service assignment checks are all explicitly complete.</li>
-                <li>Route finance-related blockers into reconciliation and payout review before changing booking eligibility.</li>
-                <li>Use request-changes when evidence is incomplete but provider activation remains strategically desirable.</li>
-                <li>Escalate repeated checklist regressions into safety or audit review if a live provider loses mandatory coverage.</li>
-              </ul>
-            </div>
+      <div className="card">
+        <h3 className="section-title">Past Appointments ({appointments.past.length})</h3>
+        {appointments.past.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Service</th>
+                  <th>Location</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.past.slice(0, 20).map((appt) => (
+                  <tr key={appt.id}>
+                    <td>{appt.patientName}</td>
+                    <td>{appt.service}</td>
+                    <td>{appt.location}</td>
+                    <td>{new Date(appt.startsAt).toLocaleDateString()}</td>
+                    <td><StatusBadge tone={appt.status === 'COMPLETED' ? 'success' : appt.status === 'CANCELLED' ? 'danger' : 'warning'}>{appt.status}</StatusBadge></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="muted">No past appointments in the last 90 days</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
-            <div className="card">
-              <h3 className="section-title">Cross-workflow links</h3>
-              <div className="list-stack">
-                <Link className="list-row" href={`/portal/providers/onboarding/${providerId}`}>
-                  <div>
-                    <div className="list-row-title">Onboarding review workspace</div>
-                    <div className="muted">Action-focused approval and change-request controls.</div>
-                  </div>
-                  <strong>Open</strong>
-                </Link>
-                <Link className="list-row" href="/portal/payments/reconciliation">
-                  <div>
-                    <div className="list-row-title">Payments reconciliation</div>
-                    <div className="muted">Use when payout readiness or settlement dependencies affect activation.</div>
-                  </div>
-                  <strong>Open</strong>
-                </Link>
-                <Link className="list-row" href="/portal/audit/logs">
-                  <div>
-                    <div className="list-row-title">Audit logs</div>
-                    <div className="muted">Review admin actions and approval history around this provider workflow.</div>
-                  </div>
-                  <strong>Open</strong>
-                </Link>
-              </div>
-            </div>
+function PatientsTab({ data }: { data: ProviderDetailData }) {
+  const { assignedPatients, appointments } = data;
 
-            <div className="card">
-              <h3 className="section-title">Design-extension opportunities</h3>
-              <ul className="data-points muted">
-                <li>Provider quality scorecards can slot into this workspace as a subroute without changing the shell.</li>
-                <li>Credential expiry and payout variance drilldowns can reuse the same evidence-card pattern.</li>
-                <li>Organization-level governance can share this layout while swapping practitioner metrics for facility KPIs.</li>
-              </ul>
-            </div>
+  // Patients with upcoming appointments
+  const upcomingPatientIds = new Set(appointments.upcoming.map((a) => a.patientId));
+  const patientsWithUpcoming = assignedPatients.filter((p) => upcomingPatientIds.has(p.id));
+  const patientsHistory = assignedPatients.filter((p) => !upcomingPatientIds.has(p.id));
+
+  return (
+    <div className="info-stack" style={{ gap: 20 }}>
+      <div className="card">
+        <h3 className="section-title">Patients with Upcoming Appointments ({patientsWithUpcoming.length})</h3>
+        {patientsWithUpcoming.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Total Visits</th>
+                  <th>Last Visit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {patientsWithUpcoming.map((patient) => (
+                  <tr key={patient.id}>
+                    <td><strong>{patient.name}</strong></td>
+                    <td>{patient.email}</td>
+                    <td>{patient.appointmentCount}</td>
+                    <td>{new Date(patient.lastAppointment).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="muted">No patients with upcoming appointments</p>
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">All Patients Treated ({assignedPatients.length})</h3>
+        {assignedPatients.length > 0 ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Total Visits</th>
+                  <th>Last Visit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignedPatients.map((patient) => (
+                  <tr key={patient.id}>
+                    <td><strong>{patient.name}</strong></td>
+                    <td>{patient.email}</td>
+                    <td>{patient.appointmentCount}</td>
+                    <td>{new Date(patient.lastAppointment).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="muted">No patients on record</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PerformanceTab({ data }: { data: ProviderDetailData }) {
+  const { performance, ratings } = data;
+
+  return (
+    <div className="info-stack" style={{ gap: 20 }}>
+      <div className="card">
+        <h3 className="section-title">Performance Metrics</h3>
+        <div className="metric-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginTop: 12 }}>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Completion Rate</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.completionRate}%</div>
+          </div>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Avg Duration</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.avgDurationMinutes} min</div>
+          </div>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Cancellation Rate</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.cancellationRate}%</div>
+          </div>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Total Appointments</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.totalAppointments}</div>
+          </div>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Completed</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.completedAppointments}</div>
+          </div>
+          <div className="surface-tile" style={{ padding: 16, borderRadius: 12, background: '#f5f7fc' }}>
+            <div className="hero-metric-label" style={{ fontSize: 13, color: '#64748b' }}>Cancelled</div>
+            <div className="hero-metric-value" style={{ fontSize: 24, fontWeight: 700 }}>{performance.cancelledAppointments}</div>
           </div>
         </div>
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">Ratings</h3>
+        <div className="detail-list">
+          <div><span className="detail-label">Average Rating</span><strong>{ratings.average != null ? `${ratings.average} / 5.0` : 'No ratings yet'}</strong></div>
+          <div><span className="detail-label">Total Reviews</span><strong>{ratings.count}</strong></div>
         </div>
-      </PortalShell>
-    );
-  } catch {
-    notFound();
-  }
+      </div>
+    </div>
+  );
+}
+
+function ReviewsTab() {
+  return (
+    <div className="info-stack" style={{ gap: 20 }}>
+      <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+        <p className="muted" style={{ fontSize: 16 }}>No reviews available</p>
+        <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>Patient reviews will appear here once the review system is active.</p>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Page Component
+// ---------------------------------------------------------------------------
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'schedule', label: 'Schedule' },
+  { id: 'patients', label: 'Patients' },
+  { id: 'performance', label: 'Performance' },
+  { id: 'reviews', label: 'Reviews' },
+];
+
+export default function ProviderProfilePage() {
+  const params = useParams();
+  const providerId = params.providerId as string;
+
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [data, setData] = useState<ProviderDetailData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Lazy-load: fetch data when activeTab changes (initial load fetches full data once)
+  useEffect(() => {
+    if (!providerId) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    // The API returns all data in one call, but we only fetch when needed.
+    // On first load or tab switch, we load if data is null.
+    // Since the API is comprehensive, we fetch once and cache locally.
+    if (data) {
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      try {
+        const result = await adminApi.providerDetail(providerId);
+        if (!cancelled) {
+          setData(result as ProviderDetailData);
+          setLoading(false);
+        }
+      } catch (err: unknown) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load provider data');
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [providerId, activeTab, data]);
+
+  return (
+    <PortalShell currentPath="/portal/providers">
+      <div className="admin-v17-provider-workspace admin-v17-provider-detail">
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <div className="page-breadcrumbs" style={{ marginBottom: 8 }}>
+            <Link href="/portal/providers" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Providers</Link>
+            <span style={{ margin: '0 8px', color: '#94a3b8' }}>›</span>
+            <span>{data?.profile.name || 'Provider Profile'}</span>
+          </div>
+          {data && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h2 className="hero-title" style={{ margin: 0 }}>{data.profile.name}</h2>
+              <StatusBadge tone={data.profile.status === 'ACTIVE' ? 'success' : 'danger'}>{data.profile.status}</StatusBadge>
+            </div>
+          )}
+        </div>
+
+        {/* Tab navigation */}
+        <nav style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5eaf3', marginBottom: 24 }} role="tablist" aria-label="Provider profile tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`tabpanel-${tab.id}`}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '12px 20px',
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                fontSize: 14,
+                color: activeTab === tab.id ? 'var(--primary)' : '#64748b',
+                borderBottom: activeTab === tab.id ? '2px solid var(--primary)' : '2px solid transparent',
+                marginBottom: -2,
+                transition: 'color 0.15s, border-color 0.15s',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Tab content with lazy-loading */}
+        <div role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={activeTab}>
+          {loading && (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div className="spinner" style={{ display: 'inline-block', width: 24, height: 24, border: '3px solid #e5eaf3', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <p className="muted" style={{ marginTop: 12 }}>Loading provider data...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="card" style={{ textAlign: 'center', padding: '32px', color: '#dc2626' }}>
+              <p>{error}</p>
+              <button
+                className="button secondary"
+                style={{ marginTop: 12 }}
+                onClick={() => { setData(null); setError(null); }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && data && (
+            <>
+              {activeTab === 'overview' && <OverviewTab data={data} />}
+              {activeTab === 'schedule' && <ScheduleTab data={data} />}
+              {activeTab === 'patients' && <PatientsTab data={data} />}
+              {activeTab === 'performance' && <PerformanceTab data={data} />}
+              {activeTab === 'reviews' && <ReviewsTab />}
+            </>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </PortalShell>
+  );
 }

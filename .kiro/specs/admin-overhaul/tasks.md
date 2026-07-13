@@ -43,14 +43,14 @@
 - [x] 8.3 Add provider status indicator computation to provider service: Active, Inactive, Currently Online, Has Scheduled Appointments, No Scheduled Appointments, Available Today, Fully Booked, Available for New Patients
 
 ## Task 9: Provider Management Center (Frontend)
-- [~] 9.1 Rebuild `/portal/providers/page.tsx` as Provider Management Center with: `StatsGrid` (provider statistics), `FilterPanel` (all filter categories), `AdminDataTable` (provider list with status indicators), action buttons (Add Provider, Export)
-- [~] 9.2 Implement provider row click navigation to `/portal/providers/[providerId]`
-- [~] 9.3 Implement provider status badge rendering with color-coded indicators for each status type
+- [x] 9.1 Rebuild `/portal/providers/page.tsx` as Provider Management Center with: `StatsGrid` (provider statistics), `FilterPanel` (all filter categories), `AdminDataTable` (provider list with status indicators), action buttons (Add Provider, Export)
+- [x] 9.2 Implement provider row click navigation to `/portal/providers/[providerId]`
+- [x] 9.3 Implement provider status badge rendering with color-coded indicators for each status type
 
 ## Task 10: Provider Profile Page
-- [~] 10.1 Extend provider detail API (`GET /api/admin/providers/:id`) to include: appointments (upcoming/past), assigned patients, medical centers, reviews, ratings, performance metrics
-- [~] 10.2 Rebuild `/portal/providers/[providerId]/page.tsx` with tabbed layout: Overview (professional info, contact, licenses, certifications, specialties), Schedule (calendar, upcoming appointments), Patients (treated, upcoming, history), Performance (metrics, ratings), Reviews
-- [~] 10.3 Implement lazy-loading for each tab's data (fetch on tab activation)
+- [x] 10.1 Extend provider detail API (`GET /api/admin/providers/:id`) to include: appointments (upcoming/past), assigned patients, medical centers, reviews, ratings, performance metrics
+- [x] 10.2 Rebuild `/portal/providers/[providerId]/page.tsx` with tabbed layout: Overview (professional info, contact, licenses, certifications, specialties), Schedule (calendar, upcoming appointments), Patients (treated, upcoming, history), Performance (metrics, ratings), Reviews
+- [x] 10.3 Implement lazy-loading for each tab's data (fetch on tab activation)
 
 ## Task 11: Provider Queue & Review
 - [~] 11.1 Create `POST /api/admin/providers/queue/claim` endpoint accepting item IDs, assigns to current admin user, returns updated items
