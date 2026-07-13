@@ -5060,3 +5060,418 @@ button,
 .empty-state .button {
   margin-top: 20px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Admin Welcome / Device Approval Gate
+   Mirrors Provider app's provider-v13-login-* pattern exactly:
+   same layout, spacing, typography, icons, colors, responsive behavior.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.admin-welcome-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, #f8faff 0%, #eef3fb 100%);
+}
+
+.admin-welcome-frame {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 1fr);
+  width: min(1080px, 100%);
+  min-height: 540px;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow:
+    0 32px 68px rgba(14, 36, 72, 0.10),
+    0 8px 20px rgba(14, 36, 72, 0.06);
+  border: 1px solid rgba(199, 211, 232, 0.7);
+}
+
+.admin-welcome-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 38px 34px;
+  background:
+    linear-gradient(135deg, #1154d7 0%, #0a3fa8 100%);
+  color: #fff;
+}
+
+.admin-welcome-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-welcome-brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.admin-welcome-brand strong {
+  display: block;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.admin-welcome-brand span {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+
+.admin-welcome-copy {
+  margin-top: auto;
+  padding-top: 48px;
+}
+
+.admin-welcome-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 14px;
+}
+
+.admin-welcome-copy h1 {
+  font-size: 30px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+  color: #fff;
+}
+
+.admin-welcome-copy p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 42ch;
+}
+
+.admin-welcome-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 38px 34px;
+  background: #fff;
+}
+
+.admin-welcome-panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.admin-welcome-panel h2 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.035em;
+}
+
+/* Warning banner — same as provider-v13-login-warning */
+.admin-welcome-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 15px 16px;
+  border: 1px solid #d4dbea;
+  border-radius: 16px;
+  background: #f6f8fd;
+  color: #4d5668;
+}
+
+.admin-welcome-warning p {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+/* Form layout — same gap as provider-v13-login-form */
+.admin-welcome-form {
+  display: grid;
+  gap: 15px;
+}
+
+/* Checkbox — identical to provider-v13-login-check */
+.admin-welcome-check {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  padding: 15px 16px;
+  border: 1px solid #d4dbea;
+  border-radius: 16px;
+  background: #f6f8fd;
+  color: #313b50;
+  line-height: 1.5;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.admin-welcome-check:hover {
+  border-color: #b8c5dc;
+  background: #eef3fb;
+}
+
+.admin-welcome-check:has(input:checked) {
+  border-color: #155fe4;
+  background: #edf4ff;
+}
+
+.admin-welcome-check input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: #0f55d8;
+  cursor: pointer;
+}
+
+/* Error message — same as provider-v13-login-error */
+.admin-welcome-error {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #efc7c5;
+  background: #fff1f0;
+  color: #b42318;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Primary button — same as provider-v13-login-primary */
+.admin-welcome-primary {
+  min-height: 50px;
+  border-radius: 14px;
+  font-weight: 850;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  background: #155fe4;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  box-shadow: 0 12px 28px rgba(21, 95, 228, 0.22);
+  transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.admin-welcome-primary:hover {
+  background: #0f4ec7;
+  box-shadow: 0 14px 32px rgba(21, 95, 228, 0.28);
+}
+
+.admin-welcome-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.admin-welcome-primary svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Responsive — mirrors Provider app's responsive behavior */
+@media (max-width: 860px) {
+  .admin-welcome-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-welcome-hero {
+    padding: 28px 24px;
+    min-height: auto;
+  }
+
+  .admin-welcome-copy {
+    padding-top: 24px;
+  }
+
+  .admin-welcome-copy h1 {
+    font-size: 24px;
+  }
+
+  .admin-welcome-panel {
+    padding: 28px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-welcome-shell {
+    padding: 20px 12px;
+  }
+
+  .admin-welcome-frame {
+    border-radius: 24px;
+  }
+
+  .admin-welcome-hero {
+    padding: 22px 18px;
+  }
+
+  .admin-welcome-panel {
+    padding: 22px 18px;
+  }
+
+  .admin-welcome-panel h2 {
+    font-size: 20px;
+  }
+}
+
+/* RTL support */
+html[dir='rtl'] .admin-welcome-check,
+html[dir='rtl'] .admin-welcome-warning,
+html[dir='rtl'] .admin-welcome-brand {
+  direction: rtl;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sidebar Collapse / Expand with localStorage persistence
+   Default state: collapsed (icons only). Expands on hover or toggle click.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(199, 211, 232, 0.8);
+  background: #fff;
+  color: #5e6c84;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-toggle:hover {
+  background: #e9f1ff;
+  color: #155fe4;
+}
+
+.sidebar-collapse-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+/* Collapsed sidebar state */
+.sidebar--collapsed.admin-v16-sidebar.sidebar {
+  width: 72px;
+  min-width: 72px;
+  padding: 26px 8px 22px;
+  align-items: center;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Adjust grid when sidebar is collapsed */
+.admin-v16-shell.page-shell:has(.sidebar--collapsed:not(.sidebar--hover-expanded)) {
+  grid-template-columns: 72px minmax(0, 1fr);
+  transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover-expanded overlay state — expands over content without pushing layout */
+.sidebar--collapsed.sidebar--hover-expanded.admin-v16-sidebar.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 292px;
+  min-width: 292px;
+  padding: 26px 16px 22px;
+  z-index: 100;
+  box-shadow: 16px 0 48px rgba(14, 36, 72, 0.14);
+}
+
+/* Collapsed brand */
+.sidebar--collapsed:not(.sidebar--hover-expanded) .sidebar-brand {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar--collapsed:not(.sidebar--hover-expanded) .sidebar-brand .sidebar-logo {
+  margin: 0;
+}
+
+.sidebar-brand-text {
+  min-width: 0;
+}
+
+/* Collapsed nav items — center icons */
+.sidebar--collapsed:not(.sidebar--hover-expanded) .nav-item.cp-nav-item {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar--collapsed:not(.sidebar--hover-expanded) .nav-item .nav-icon {
+  margin: 0;
+}
+
+/* Icon-only action button in collapsed state */
+.sidebar-icon-only-action.admin-v16-new-action {
+  justify-content: center;
+  padding: 12px;
+  margin: 0 0 12px;
+  min-height: 46px;
+  width: 46px;
+  border-radius: 14px;
+}
+
+/* Collapsed section titles are hidden */
+.sidebar--collapsed:not(.sidebar--hover-expanded) .sidebar-section-title {
+  display: none;
+}
+
+/* Collapsed footer — center items */
+.sidebar--collapsed:not(.sidebar--hover-expanded) .sidebar-footer {
+  align-items: center;
+}
+
+/* Nav label — for transition purposes */
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Expanded (non-collapsed) sidebar transition */
+.admin-v16-sidebar.sidebar:not(.sidebar--collapsed) {
+  width: 292px;
+  min-width: 292px;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth grid transition for the shell */
+.admin-v16-shell.page-shell {
+  transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive override: on mobile, collapsed sidebar hides completely */
+@media (max-width: 860px) {
+  .sidebar--collapsed.admin-v16-sidebar.sidebar:not(.sidebar--hover-expanded) {
+    display: none;
+  }
+
+  .admin-v16-shell.page-shell:has(.sidebar--collapsed) {
+    grid-template-columns: 1fr;
+  }
+}

@@ -11,12 +11,12 @@
 - [x] 1.8 Create `EmptyState` component (`src/components/ui/empty-state.tsx`) with icon, title, description, and optional action button
 
 ## Task 2: Admin Welcome Page
-- [~] 2.1 Update the admin welcome/portal entry page to display device approval checkboxes identical to the Provider app: same layout, spacing, typography, icons, colors, responsive behavior
-- [~] 2.2 Implement left navigation sidebar default-collapsed state (persisted via localStorage), expand on hover or click interaction
+- [x] 2.1 Update the admin welcome/portal entry page to display device approval checkboxes identical to the Provider app: same layout, spacing, typography, icons, colors, responsive behavior
+- [x] 2.2 Implement left navigation sidebar default-collapsed state (persisted via localStorage), expand on hover or click interaction
 
 ## Task 3: Dashboard — Action Buttons (Backend)
-- [~] 3.1 Create `POST /api/admin/reports/generate` endpoint in `services/api/src/modules/admin/` that generates a report (JSON/CSV format), returns downloadable response, and logs the action to audit
-- [~] 3.2 Create `POST /api/admin/system/sync` endpoint that triggers a system sync operation, returns status, and logs the action to audit
+- [x] 3.1 Create `POST /api/admin/reports/generate` endpoint in `services/api/src/modules/admin/` that generates a report (JSON/CSV format), returns downloadable response, and logs the action to audit
+- [x] 3.2 Create `POST /api/admin/system/sync` endpoint that triggers a system sync operation, returns status, and logs the action to audit
 
 ## Task 4: Dashboard — Action Buttons (Frontend)
 - [~] 4.1 Create `DashboardActions` client component (`src/components/admin/dashboard-actions.tsx`) with Download Report and System Sync buttons using `LoadingButton`; calls API endpoints; shows toast on success/error

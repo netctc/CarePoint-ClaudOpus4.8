@@ -62,6 +62,7 @@ import { coverageRouter } from './modules/coverage/coverage.routes';
 import { releaseRouter } from './modules/release/release.routes';
 import { hybridPythonRouter } from './modules/hybrid-python/hybrid-python.routes';
 import { iamRouter } from './modules/iam/iam.routes';
+import { adminActionsRouter } from './modules/admin/admin-actions.routes';
 
 
 function isAllowedCorsOrigin(origin?: string) {
@@ -126,6 +127,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/dashboard', dashboardRouter);
   app.use('/api/admin/users', adminUsersRouter);
   app.use('/api/admin/audit', iamAuditRouter);
+  app.use('/api/admin', adminActionsRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);

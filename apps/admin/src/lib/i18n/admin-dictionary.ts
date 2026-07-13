@@ -132,6 +132,15 @@ export const adminMessages = {
       unableResendCode: 'Unable to resend the privileged sign-in code.',
       unableStartSso: 'Unable to start enterprise SSO.',
     },
+    welcome: {
+      title: 'Admin Portal Access',
+      subtitle: 'Confirm device approval before entering the privileged administration workspace.',
+      deviceApproval: 'I confirm this device is approved for privileged CarePoint administration.',
+      monitoringAcknowledgement: 'I acknowledge that privileged access is monitored and elevated-risk sessions may require SSO or additional review.',
+      continueToPortal: 'Continue to portal',
+      deviceApprovalRequired: 'Please confirm device approval before continuing.',
+      acknowledgementRequired: 'Please acknowledge the monitoring notice before continuing.',
+    },
     dashboard: {
       title: 'Administrative Overview',
       subtitle: 'Platform performance and operational health across provider operations, finance, and governed review workflows.',
@@ -319,6 +328,15 @@ export const adminMessages = {
       unableVerifyCode: 'تعذر التحقق من رمز الدخول المميز.',
       unableResendCode: 'تعذر إعادة إرسال رمز الدخول المميز.',
       unableStartSso: 'تعذر بدء الدخول الموحد للمؤسسة.',
+    },
+    welcome: {
+      title: 'الوصول إلى بوابة الإدارة',
+      subtitle: 'أكد اعتماد الجهاز قبل الدخول إلى مساحة العمل الإدارية ذات الصلاحيات المميزة.',
+      deviceApproval: 'أؤكد أن هذا الجهاز معتمد لإدارة كير بوينت ذات الصلاحيات المميزة.',
+      monitoringAcknowledgement: 'أقر بأن الوصول المميز تتم مراقبته وقد تتطلب الجلسات عالية الخطورة دخولاً موحداً أو مراجعة إضافية.',
+      continueToPortal: 'المتابعة إلى البوابة',
+      deviceApprovalRequired: 'يرجى تأكيد اعتماد الجهاز قبل المتابعة.',
+      acknowledgementRequired: 'يرجى الإقرار بإشعار المراقبة قبل المتابعة.',
     },
     dashboard: {
       title: 'النظرة الإدارية العامة',
