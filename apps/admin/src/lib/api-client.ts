@@ -92,6 +92,16 @@ export const adminApi = {
   providerDetail: (providerId: string) => request(`/api/admin/providers/${providerId}`),
   providerQueue: () => request('/api/providers/queue'),
   providerQueueDetail: (providerId: string) => request(`/api/providers/queue/${providerId}`),
+  claimQueueItems: (itemIds: string[]) =>
+    request<{ success: boolean; data: { items: any[]; claimedCount: number } }>('/api/admin/providers/queue/claim', {
+      method: 'POST',
+      body: JSON.stringify({ itemIds }),
+    }),
+  reassignQueueItems: (itemIds: string[], targetUserId: string) =>
+    request<{ success: boolean; data: { items: any[]; reassignedCount: number; assignedTo: { id: string; name: string; email: string } } }>('/api/admin/providers/queue/reassign', {
+      method: 'POST',
+      body: JSON.stringify({ itemIds, targetUserId }),
+    }),
   submitProviderReview: (providerId: string, payload: { note?: string }) =>
     request(`/api/providers/queue/${providerId}/submit`, {
       method: 'POST',

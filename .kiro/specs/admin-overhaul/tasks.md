@@ -53,10 +53,10 @@
 - [x] 10.3 Implement lazy-loading for each tab's data (fetch on tab activation)
 
 ## Task 11: Provider Queue & Review
-- [~] 11.1 Create `POST /api/admin/providers/queue/claim` endpoint accepting item IDs, assigns to current admin user, returns updated items
-- [~] 11.2 Create `POST /api/admin/providers/queue/reassign` endpoint accepting item IDs and target admin user ID, reassigns and notifies
-- [~] 11.3 Redesign Provider Queue page (`/portal/providers/onboarding`): remove all explanatory text, add action bar with Claim Selected, Reassign, Open SLA Lane buttons, improve filtering (status, SLA, risk, assignee, date)
-- [~] 11.4 Redesign Provider Queue Review page: remove descriptive text, add clear status progression indicators, document review panels, and approval/rejection action buttons
+- [x] 11.1 Create `POST /api/admin/providers/queue/claim` endpoint accepting item IDs, assigns to current admin user, returns updated items
+- [x] 11.2 Create `POST /api/admin/providers/queue/reassign` endpoint accepting item IDs and target admin user ID, reassigns and notifies
+- [x] 11.3 Redesign Provider Queue page (`/portal/providers/onboarding`): remove all explanatory text, add action bar with Claim Selected, Reassign, Open SLA Lane buttons, improve filtering (status, SLA, risk, assignee, date)
+- [x] 11.4 Redesign Provider Queue Review page: remove descriptive text, add clear status progression indicators, document review panels, and approval/rejection action buttons
 
 ## Task 12: Service Catalog (Backend)
 - [~] 12.1 Extend `GET /api/admin/catalog/services` to support filters: category, providerType, specialty, department, availability, priceRange (min/max), insuranceCoverage, status (active/archived); with pagination and sort

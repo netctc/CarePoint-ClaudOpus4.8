@@ -31,7 +31,7 @@ export function ProviderReviewActions({ providerId, disabled = false }: { provid
         await adminApi.submitProviderReview(providerId, { note });
       }
       setState('success');
-      setMessage('Action recorded successfully. Refresh the page to pull the latest review state from the API.');
+      setMessage('Action recorded. Refresh to see updated state.');
     } catch (error) {
       setState('error');
       setMessage(error instanceof Error ? error.message : 'Unable to complete the action.');
@@ -40,22 +40,21 @@ export function ProviderReviewActions({ providerId, disabled = false }: { provid
 
   return (
     <div className="card">
-      <h3 className="section-title">API review actions</h3>
-      <p className="muted">These controls call the real provider queue endpoints in the current API slot.</p>
+      <h3 className="section-title">Review Decision</h3>
 
       <label className="label" style={{ marginTop: 12 }}>
-        Reviewer note
+        Reviewer Note
         <textarea
           className="textarea"
           value={note}
           onChange={(event) => setNote(event.target.value)}
-          placeholder="Enter audit-ready rationale for this queue decision."
+          placeholder="Enter rationale for this decision"
           disabled={disabled || state === 'saving'}
         />
       </label>
 
       <label className="label" style={{ marginTop: 12 }}>
-        Requested fields (comma-separated)
+        Requested Fields (comma-separated)
         <input
           className="input"
           value={requestedFields}
@@ -65,22 +64,49 @@ export function ProviderReviewActions({ providerId, disabled = false }: { provid
         />
       </label>
 
-      <div className="inline-actions" style={{ marginTop: 16, flexWrap: 'wrap' }}>
-        <button className="button secondary" onClick={() => runAction('submit')} disabled={disabled || state === 'saving'}>
-          Submit for review
+      {/* Primary decision buttons */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
+        <button
+          className="button primary"
+          onClick={() => runAction('approve')}
+          disabled={disabled || state === 'saving'}
+          style={{ width: '100%', padding: '12px 16px', fontSize: 15, fontWeight: 700 }}
+        >
+          ✓ Approve Provider
         </button>
-        <button className="button primary" onClick={() => runAction('approve')} disabled={disabled || state === 'saving'}>
-          Approve provider
-        </button>
-        <button className="button secondary" onClick={() => runAction('request-changes')} disabled={disabled || state === 'saving'}>
-          Request changes
-        </button>
-        <button className="button danger" onClick={() => runAction('reject')} disabled={disabled || state === 'saving'}>
-          Reject application
+        <button
+          className="button danger"
+          onClick={() => runAction('reject')}
+          disabled={disabled || state === 'saving'}
+          style={{ width: '100%', padding: '12px 16px', fontSize: 15, fontWeight: 700 }}
+        >
+          ✗ Reject Application
         </button>
       </div>
 
-      {message ? <div className={`banner ${state === 'error' ? 'warning' : 'info'}`} style={{ marginTop: 16 }}>{message}</div> : null}
+      {/* Secondary actions */}
+      <div className="inline-actions" style={{ marginTop: 12 }}>
+        <button
+          className="button secondary"
+          onClick={() => runAction('submit')}
+          disabled={disabled || state === 'saving'}
+        >
+          Submit for Review
+        </button>
+        <button
+          className="button secondary"
+          onClick={() => runAction('request-changes')}
+          disabled={disabled || state === 'saving'}
+        >
+          Request Changes
+        </button>
+      </div>
+
+      {message && (
+        <div className={`banner ${state === 'error' ? 'warning' : 'info'}`} style={{ marginTop: 16 }}>
+          {message}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { iamMiddlewareChain } from '../../middleware/rbac';
 import { prisma } from '../../lib/prisma';
+import { writeAuditLog } from '../../lib/audit';
 
 export const providersAdminRouter = Router();
 
@@ -682,5 +683,192 @@ providersAdminRouter.get(
         cancelledAppointments: cancelledAppts,
       },
     });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// POST /api/admin/providers/queue/claim
+// Claim queue items — assigns to the current admin user
+// ---------------------------------------------------------------------------
+
+providersAdminRouter.post(
+  '/providers/queue/claim',
+  ...iamMiddlewareChain(adminRoles),
+  async (req: any, res: any) => {
+    const { itemIds } = req.body;
+
+    if (!Array.isArray(itemIds) || itemIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_INPUT', message: 'itemIds must be a non-empty array.' },
+      });
+    }
+
+    const actorId: string = req.user?.id;
+    const organizationId: string | undefined = req.user?.organizationId;
+
+    if (!actorId) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Unable to identify current user.' },
+      });
+    }
+
+    // Update all matching onboarding states
+    const updated: any[] = [];
+    for (const id of itemIds) {
+      try {
+        const item = await prisma.providerOnboardingState.update({
+          where: { id },
+          data: {
+            lastActorId: actorId,
+            lastAction: 'CLAIMED',
+            updatedAt: new Date(),
+          },
+          include: {
+            provider: {
+              include: {
+                user: { select: { firstName: true, lastName: true, email: true } },
+              },
+            },
+            organization: { select: { name: true } },
+          },
+        });
+        updated.push(item);
+      } catch {
+        // Skip items that don't exist
+      }
+    }
+
+    // Write audit log for the claim action
+    await writeAuditLog({
+      actorId,
+      organizationId,
+      action: 'provider_queue.claim',
+      resource: 'provider_onboarding',
+      resourceId: itemIds.join(','),
+      details: { claimedCount: updated.length, itemIds },
+    });
+
+    const items = updated.map((item) => ({
+      id: item.id,
+      providerId: item.providerId,
+      providerName: item.provider?.user
+        ? `${item.provider.user.firstName} ${item.provider.user.lastName}`.trim()
+        : item.providerId,
+      organizationName: item.organization?.name ?? null,
+      status: item.status,
+      lastActorId: item.lastActorId,
+      lastAction: item.lastAction,
+      updatedAt: item.updatedAt,
+    }));
+
+    res.json({ success: true, data: { items, claimedCount: items.length } });
+  },
+);
+
+// ---------------------------------------------------------------------------
+// POST /api/admin/providers/queue/reassign
+// Reassign queue items to a different admin user
+// ---------------------------------------------------------------------------
+
+providersAdminRouter.post(
+  '/providers/queue/reassign',
+  ...iamMiddlewareChain(adminRoles),
+  async (req: any, res: any) => {
+    const { itemIds, targetUserId } = req.body;
+
+    if (!Array.isArray(itemIds) || itemIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_INPUT', message: 'itemIds must be a non-empty array.' },
+      });
+    }
+
+    if (!targetUserId || typeof targetUserId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_INPUT', message: 'targetUserId is required.' },
+      });
+    }
+
+    const actorId: string = req.user?.id;
+    const organizationId: string | undefined = req.user?.organizationId;
+
+    if (!actorId) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Unable to identify current user.' },
+      });
+    }
+
+    // Verify target user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true, firstName: true, lastName: true, email: true, role: true },
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'Target user not found.' },
+      });
+    }
+
+    // Update all matching onboarding states
+    const updated: any[] = [];
+    for (const id of itemIds) {
+      try {
+        const item = await prisma.providerOnboardingState.update({
+          where: { id },
+          data: {
+            lastActorId: targetUserId,
+            lastAction: 'REASSIGNED',
+            updatedAt: new Date(),
+          },
+          include: {
+            provider: {
+              include: {
+                user: { select: { firstName: true, lastName: true, email: true } },
+              },
+            },
+            organization: { select: { name: true } },
+          },
+        });
+        updated.push(item);
+      } catch {
+        // Skip items that don't exist
+      }
+    }
+
+    // Write audit log for the reassign action
+    await writeAuditLog({
+      actorId,
+      organizationId,
+      action: 'provider_queue.reassign',
+      resource: 'provider_onboarding',
+      resourceId: itemIds.join(','),
+      details: {
+        reassignedCount: updated.length,
+        itemIds,
+        targetUserId,
+        targetUserName: `${targetUser.firstName} ${targetUser.lastName}`.trim(),
+      },
+    });
+
+    const items = updated.map((item) => ({
+      id: item.id,
+      providerId: item.providerId,
+      providerName: item.provider?.user
+        ? `${item.provider.user.firstName} ${item.provider.user.lastName}`.trim()
+        : item.providerId,
+      organizationName: item.organization?.name ?? null,
+      status: item.status,
+      lastActorId: item.lastActorId,
+      lastAction: item.lastAction,
+      updatedAt: item.updatedAt,
+    }));
+
+    res.json({ success: true, data: { items, reassignedCount: items.length, assignedTo: { id: targetUser.id, name: `${targetUser.firstName} ${targetUser.lastName}`.trim(), email: targetUser.email } } });
   },
 );
