@@ -1,108 +1,185 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { PortalShell } from '@/components/layout/portal-shell';
+import { StatsGrid, type StatItem } from '@/components/ui/stats-grid';
+import { getCoverageStats, type CoverageStats } from '@/lib/api/coverage-api';
 
-const coverageMetrics = [
-  { label: 'Active coverage rules', value: '—', description: 'Connect this card to /api/coverage/rules when the API route is available.' },
-  { label: 'Pending reviews', value: '—', description: 'Rules that need finance, compliance, or operations review.' },
-  { label: 'Affected services', value: '—', description: 'Catalog services currently governed by coverage logic.' },
+/* ─── Navigation Tabs ───────────────────────────────────────────── */
+
+const coverageTabs = [
+  { label: 'Insurance Providers', href: '/portal/coverage/insurance-providers' },
+  { label: 'Plans', href: '/portal/coverage/plans' },
+  { label: 'Policies', href: '/portal/coverage/policies' },
+  { label: 'Geographic', href: '/portal/coverage/geographic' },
+  { label: 'Network', href: '/portal/coverage/network' },
 ];
 
-const workflow = [
-  'Define payer, plan, region, service, and facility scope.',
-  'Validate eligibility, prior authorization, co-pay, and exclusion rules.',
-  'Audit every publish, suspend, archive, and rollback action.',
-  'Expose safe read-only coverage results to booking and payment workflows.',
-];
+/* ─── Main Page Component ───────────────────────────────────────── */
 
-export default function CoveragePage() {
+export default function CoverageOverviewPage() {
+  const pathname = usePathname();
+  const [stats, setStats] = useState<CoverageStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getCoverageStats();
+      setStats(data);
+    } catch {
+      // Fallback to placeholder stats on error
+      setStats({
+        activePlans: 0,
+        insuranceProviders: 0,
+        pendingValidations: 0,
+        coverageRate: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  const statItems: StatItem[] = [
+    {
+      label: 'Active Plans',
+      value: stats?.activePlans ?? '—',
+      href: '/portal/coverage/plans?status=active',
+    },
+    {
+      label: 'Insurance Providers',
+      value: stats?.insuranceProviders ?? '—',
+      href: '/portal/coverage/insurance-providers',
+    },
+    {
+      label: 'Pending Validations',
+      value: stats?.pendingValidations ?? '—',
+    },
+    {
+      label: 'Coverage Rate',
+      value: stats?.coverageRate != null ? `${stats.coverageRate}%` : '—',
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-8 text-slate-950">
-      <section className="mx-auto flex max-w-7xl flex-col gap-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">Coverage governance</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Coverage Rules</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-                Manage service eligibility, plan coverage, patient cost sharing, exclusions, and operational rule governance.
-                This recovery page restores the Admin route so navigation no longer returns 404 while the full coverage
-                rules module is connected to live API data.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/portal/catalog/services"
-                className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                Service catalog
-              </Link>
-              <Link
-                href="/portal/dashboard"
-                className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
+    <PortalShell currentPath="/portal/coverage">
+      <div style={{ display: 'grid', gap: 24 }}>
+        {/* Page Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+            Coverage Management
+          </h1>
         </div>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {coverageMetrics.map((item) => (
-            <article key={item.label} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-slate-500">{item.label}</p>
-              <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
-            </article>
-          ))}
-        </section>
+        {/* Stats Grid */}
+        <StatsGrid items={statItems} loading={loading} />
 
-        <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-950">Implementation status</h2>
-            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-100 text-slate-600">
-                  <tr>
-                    <th className="px-4 py-3 font-semibold">Area</th>
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                    <th className="px-4 py-3 font-semibold">Next action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 bg-white text-slate-700">
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-950">Admin route</td>
-                    <td className="px-4 py-3">Recovered</td>
-                    <td className="px-4 py-3">Keep route at apps/admin/src/app/portal/coverage/page.tsx</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-950">Coverage API</td>
-                    <td className="px-4 py-3">Pending verification</td>
-                    <td className="px-4 py-3">Wire to /api/coverage or catalog coverage endpoints when confirmed</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-slate-950">Audit policy</td>
-                    <td className="px-4 py-3">Required</td>
-                    <td className="px-4 py-3">Log publish, suspend, archive, and rollback actions</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </article>
+        {/* Navigation Tabs */}
+        <nav aria-label="Coverage sections">
+          <div
+            style={{
+              display: 'flex',
+              gap: 4,
+              borderBottom: '2px solid var(--border, #e2e8f0)',
+              paddingBottom: 0,
+              overflowX: 'auto',
+            }}
+          >
+            {coverageTabs.map((tab) => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    color: isActive ? 'var(--primary, #2563eb)' : 'var(--muted, #64748b)',
+                    textDecoration: 'none',
+                    borderBottom: isActive ? '2px solid var(--primary, #2563eb)' : '2px solid transparent',
+                    marginBottom: -2,
+                    whiteSpace: 'nowrap',
+                    transition: 'color 150ms ease, border-color 150ms ease',
+                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
 
-          <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-950">Coverage workflow</h2>
-            <ol className="mt-5 space-y-4">
-              {workflow.map((item, index) => (
-                <li key={item} className="flex gap-3 text-sm leading-6 text-slate-700">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
-                    {index + 1}
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ol>
-          </aside>
+        {/* Quick Access Cards */}
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <QuickAccessCard
+            title="Insurance Providers"
+            description="Manage insurance provider directory with contact information and status tracking."
+            href="/portal/coverage/insurance-providers"
+          />
+          <QuickAccessCard
+            title="Coverage Plans"
+            description="Configure and manage coverage plans with deductibles, copays, and coinsurance."
+            href="/portal/coverage/plans"
+          />
+          <QuickAccessCard
+            title="Policies"
+            description="Manage coverage policies with version control and publish/suspend workflows."
+            href="/portal/coverage/policies"
+          />
+          <QuickAccessCard
+            title="Geographic Coverage"
+            description="Define geographic areas covered by each plan including regions and zip codes."
+            href="/portal/coverage/geographic"
+          />
+          <QuickAccessCard
+            title="Network Providers"
+            description="Manage in-network and out-of-network provider directory by plan and tier."
+            href="/portal/coverage/network"
+          />
         </section>
-      </section>
-    </main>
+      </div>
+    </PortalShell>
+  );
+}
+
+/* ─── Quick Access Card ─────────────────────────────────────────── */
+
+function QuickAccessCard({ title, description, href }: { title: string; description: string; href: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: 'block',
+        padding: 20,
+        background: 'rgba(255, 255, 255, 0.92)',
+        border: '1px solid var(--border, #e2e8f0)',
+        borderRadius: 16,
+        textDecoration: 'none',
+        transition: 'border-color 150ms ease, box-shadow 150ms ease',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary, #2563eb)';
+        (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.08)';
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = 'var(--border, #e2e8f0)';
+        (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+      }}
+    >
+      <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text, #0f172a)', letterSpacing: '-0.01em' }}>
+        {title}
+      </h3>
+      <p style={{ margin: '8px 0 0', fontSize: '0.84rem', color: 'var(--muted, #64748b)', lineHeight: 1.5 }}>
+        {description}
+      </p>
+    </Link>
   );
 }

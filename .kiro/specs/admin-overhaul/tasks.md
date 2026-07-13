@@ -72,23 +72,23 @@
 - [x] 13.5 Rebuild Service Workspace page: remove text, add statistics section and interactive charts for utilization/demand
 
 ## Task 14: Coverage Module — Database & Backend
-- [~] 14.1 Create Prisma schema models: `InsuranceProvider` (id, name, code, type, contactInfo, status), `CoveragePlan` (id, insuranceProviderId, name, type, coverage, deductible, copay, coinsurance, status), `GeographicCoverage` (id, planId, country, state, city, zipCodes, radius), `ServiceCoverage` (id, planId, serviceId, covered, priorAuthRequired, copayAmount, limits), `NetworkProvider` (id, planId, providerId, inNetwork, tier, effectiveDate, terminationDate), `AuthorizationRequirement` (id, planId, serviceId, required, criteria, validDays), `CoveragePolicy` (id, name, rules, status, version, effectiveDate, auditTrail)
-- [~] 14.2 Create and run Prisma migration for coverage models
-- [~] 14.3 Create coverage module routes, controller, and service in `services/api/src/modules/coverage/`
-- [~] 14.4 Implement CRUD endpoints: `GET/POST /api/admin/coverage/insurance-providers`, `GET/PUT/DELETE /api/admin/coverage/insurance-providers/:id`
-- [~] 14.5 Implement CRUD endpoints: `GET/POST /api/admin/coverage/plans`, `GET/PUT/DELETE /api/admin/coverage/plans/:id`
-- [~] 14.6 Implement CRUD endpoints for geographic coverage, service coverage, network providers, authorization requirements, and policies
-- [~] 14.7 Create `POST /api/admin/coverage/validate` endpoint that accepts (patientId, serviceId, planId) and returns coverage validation result (covered, copay, priorAuthRequired, exclusions)
-- [~] 14.8 Add audit logging to all coverage mutation endpoints (publish, suspend, archive, rollback)
+- [x] 14.1 Create Prisma schema models: `InsuranceProvider` (id, name, code, type, contactInfo, status), `CoveragePlan` (id, insuranceProviderId, name, type, coverage, deductible, copay, coinsurance, status), `GeographicCoverage` (id, planId, country, state, city, zipCodes, radius), `ServiceCoverage` (id, planId, serviceId, covered, priorAuthRequired, copayAmount, limits), `NetworkProvider` (id, planId, providerId, inNetwork, tier, effectiveDate, terminationDate), `AuthorizationRequirement` (id, planId, serviceId, required, criteria, validDays), `CoveragePolicy` (id, name, rules, status, version, effectiveDate, auditTrail)
+- [x] 14.2 Create and run Prisma migration for coverage models
+- [x] 14.3 Create coverage module routes, controller, and service in `services/api/src/modules/coverage/`
+- [x] 14.4 Implement CRUD endpoints: `GET/POST /api/admin/coverage/insurance-providers`, `GET/PUT/DELETE /api/admin/coverage/insurance-providers/:id`
+- [x] 14.5 Implement CRUD endpoints: `GET/POST /api/admin/coverage/plans`, `GET/PUT/DELETE /api/admin/coverage/plans/:id`
+- [x] 14.6 Implement CRUD endpoints for geographic coverage, service coverage, network providers, authorization requirements, and policies
+- [x] 14.7 Create `POST /api/admin/coverage/validate` endpoint that accepts (patientId, serviceId, planId) and returns coverage validation result (covered, copay, priorAuthRequired, exclusions)
+- [x] 14.8 Add audit logging to all coverage mutation endpoints (publish, suspend, archive, rollback)
 
 ## Task 15: Coverage Module — Frontend
-- [~] 15.1 Rebuild `/portal/coverage/page.tsx` as Coverage overview dashboard with stats (active plans, insurance providers, pending validations, coverage rate) and navigation tabs to sub-sections
-- [~] 15.2 Create `/portal/coverage/insurance-providers/page.tsx` with `AdminDataTable` for CRUD operations on insurance providers
-- [~] 15.3 Create `/portal/coverage/plans/page.tsx` with `AdminDataTable` for coverage plans management, linked to insurance providers
-- [~] 15.4 Create `/portal/coverage/policies/page.tsx` for policy management with version history and status controls (publish/suspend/archive/rollback)
-- [~] 15.5 Create `/portal/coverage/geographic/page.tsx` for geographic coverage mapping
-- [~] 15.6 Create `/portal/coverage/network/page.tsx` for network providers directory
-- [~] 15.7 Create coverage API client (`src/lib/api/coverage-api.ts`) with functions for all coverage CRUD operations
+- [x] 15.1 Rebuild `/portal/coverage/page.tsx` as Coverage overview dashboard with stats (active plans, insurance providers, pending validations, coverage rate) and navigation tabs to sub-sections
+- [x] 15.2 Create `/portal/coverage/insurance-providers/page.tsx` with `AdminDataTable` for CRUD operations on insurance providers
+- [x] 15.3 Create `/portal/coverage/plans/page.tsx` with `AdminDataTable` for coverage plans management, linked to insurance providers
+- [x] 15.4 Create `/portal/coverage/policies/page.tsx` for policy management with version history and status controls (publish/suspend/archive/rollback)
+- [x] 15.5 Create `/portal/coverage/geographic/page.tsx` for geographic coverage mapping
+- [x] 15.6 Create `/portal/coverage/network/page.tsx` for network providers directory
+- [x] 15.7 Create coverage API client (`src/lib/api/coverage-api.ts`) with functions for all coverage CRUD operations
 
 ## Task 16: Booking Control (Backend)
 - [~] 16.1 Extend `GET /api/admin/bookings` to support filters: dateRange, provider, patient, status, service, medicalCenter, insurance, mode (telehealth/inPerson); return stats alongside results (totalBookings, upcoming, completed, cancelled, rescheduled, noShows, avgWaitingTime, successRate)

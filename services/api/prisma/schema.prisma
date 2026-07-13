@@ -164,6 +164,9 @@ model Organization {
   invitations    Invitation[]
   publishedSlots PublishedSlot[]
   timeOffBlocks  TimeOffBlock[]
+  insuranceProviders InsuranceProvider[]
+  coveragePlans  CoveragePlan[]
+  coveragePolicies CoveragePolicy[]
 }
 
 
@@ -899,4 +902,124 @@ model TimeOffBlock {
   createdBy      User            @relation(fields: [createdById], references: [id])
 
   @@index([organizationId, providerId, startsAt])
+}
+
+// ─── Coverage Module Models ──────────────────────────────────────────────────
+
+model InsuranceProvider {
+  id             String          @id @default(cuid())
+  name           String
+  code           String          @unique
+  type           String
+  contactInfo    Json?
+  status         String          @default("ACTIVE")
+  organizationId String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  coveragePlans  CoveragePlan[]
+
+  @@index([organizationId, status])
+}
+
+model CoveragePlan {
+  id                  String          @id @default(cuid())
+  insuranceProviderId String
+  name                String
+  type                String
+  coverage            Json?
+  deductible          Float           @default(0)
+  copay               Float           @default(0)
+  coinsurance         Float           @default(0)
+  status              String          @default("ACTIVE")
+  organizationId      String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  insuranceProvider   InsuranceProvider @relation(fields: [insuranceProviderId], references: [id], onDelete: Cascade)
+  organization        Organization     @relation(fields: [organizationId], references: [id])
+  geographicCoverages GeographicCoverage[]
+  serviceCoverages    ServiceCoverage[]
+  networkProviders    NetworkProvider[]
+  authorizationRequirements AuthorizationRequirement[]
+
+  @@index([organizationId, status])
+  @@index([insuranceProviderId])
+}
+
+model GeographicCoverage {
+  id        String   @id @default(cuid())
+  planId    String
+  country   String
+  state     String?
+  city      String?
+  zipCodes  String[]
+  radius    Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  plan      CoveragePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+}
+
+model ServiceCoverage {
+  id               String   @id @default(cuid())
+  planId           String
+  serviceId        String
+  covered          Boolean  @default(true)
+  priorAuthRequired Boolean @default(false)
+  copayAmount      Float    @default(0)
+  limits           Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  plan             CoveragePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([serviceId])
+}
+
+model NetworkProvider {
+  id              String    @id @default(cuid())
+  planId          String
+  providerId      String
+  inNetwork       Boolean   @default(true)
+  tier            String?
+  effectiveDate   DateTime
+  terminationDate DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  plan            CoveragePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([providerId])
+}
+
+model AuthorizationRequirement {
+  id        String   @id @default(cuid())
+  planId    String
+  serviceId String
+  required  Boolean  @default(true)
+  criteria  Json?
+  validDays Int      @default(30)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  plan      CoveragePlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([serviceId])
+}
+
+model CoveragePolicy {
+  id             String   @id @default(cuid())
+  name           String
+  rules          Json?
+  status         String   @default("DRAFT")
+  version        Int      @default(1)
+  effectiveDate  DateTime?
+  auditTrail     Json?
+  organizationId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, status])
 }

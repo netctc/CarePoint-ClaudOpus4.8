@@ -65,6 +65,7 @@ import { iamRouter } from './modules/iam/iam.routes';
 import { adminActionsRouter } from './modules/admin/admin-actions.routes';
 import { providersAdminRouter } from './modules/admin/providers-admin.routes';
 import { catalogAdminRouter } from './modules/admin/catalog-admin.routes';
+import { coverageAdminRouter } from './modules/admin/coverage-admin.routes';
 
 
 function isAllowedCorsOrigin(origin?: string) {
@@ -132,6 +133,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/admin', adminActionsRouter);
   app.use('/api/admin', providersAdminRouter);
   app.use('/api/admin', catalogAdminRouter);
+  app.use('/api/admin', coverageAdminRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);
