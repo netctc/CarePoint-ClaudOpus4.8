@@ -317,7 +317,7 @@ export function PatientStatsDashboard() {
 
                   return (
                     <path
-                      key={service.name}
+                      key={`donut-${i}-${service.name}`}
                       d={d}
                       fill={DONUT_COLORS[i % DONUT_COLORS.length]}
                       stroke="white"
@@ -332,7 +332,7 @@ export function PatientStatsDashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
               {services.map((service, i) => (
                 <div
-                  key={service.name}
+                  key={`legend-${i}-${service.name}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
