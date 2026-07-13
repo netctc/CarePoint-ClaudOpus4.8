@@ -1,0 +1,135 @@
+Fecha 13/07/2026
+
+Aquí tienes la lista completa. Todos usan la contraseña `ChangeMe123!`
+
+---
+
+## Administradores del Sistema
+
+| Email | Rol | Especialidad |
+|-------|-----|--------------|
+| superadmin@carepoint.local | SUPER_ADMIN | — |
+| companyadmin@carepoint.local | COMPANY_ADMIN | — |
+| support@carepoint.local | COMPANY_SUPPORT | — |
+| finance@carepoint.local | FINANCE | — |
+| provider@carepoint.local | PROVIDER | — |
+| nurse@carepoint.local | NURSE | — |
+| pharmacist@carepoint.local | PHARMACIST | — |
+| labtech@carepoint.local | LAB_TECH | — |
+| patient@carepoint.local | PATIENT | — |
+
+---
+
+## Médicos (Physicians)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| dr.ramirez@carepoint.local | General Practice | MED-GP-001 | APPROVED |
+| dr.castillo@carepoint.local | Cardiology | MED-CARD-002 | APPROVED |
+| dr.herrera@carepoint.local | Dermatology | MED-DERM-003 | APPROVED |
+| dr.torres@carepoint.local | Neurology | MED-NEUR-004 | APPROVED |
+| dr.navarro@carepoint.local | Pediatrics | MED-PED-005 | APPROVED |
+| dr.silva@carepoint.local | Orthopedics | MED-ORTH-006 | READY_FOR_REVIEW |
+| dr.rojas@carepoint.local | Ophthalmology | MED-OPHT-007 | READY_FOR_REVIEW |
+| dr.vega@carepoint.local | Psychiatry | MED-PSYCH-008 | APPROVED |
+| dr.molina@carepoint.local | Internal Medicine | MED-IM-009 | DRAFT |
+| dr.delgado@carepoint.local | Endocrinology | MED-ENDO-010 | APPROVED |
+
+---
+
+## Enfermeros (Nurses)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| nurse.guerrero@carepoint.local | Emergency Nursing | NUR-ER-001 | APPROVED |
+| nurse.jimenez@carepoint.local | Pediatric Nursing | NUR-PED-002 | APPROVED |
+| nurse.reyes@carepoint.local | ICU Nursing | NUR-ICU-003 | READY_FOR_REVIEW |
+| nurse.ortiz@carepoint.local | Surgical Nursing | NUR-SURG-004 | APPROVED |
+
+---
+
+## Terapeutas (Therapists)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| pt.martinez@carepoint.local | Physical Therapy | PT-PHYS-001 | APPROVED |
+| ot.sanchez@carepoint.local | Occupational Therapy | OT-OCC-002 | APPROVED |
+| st.lopez@carepoint.local | Speech Therapy | ST-SPE-003 | DRAFT |
+| mh.rivera@carepoint.local | Mental Health Counseling | MH-COUN-004 | APPROVED |
+
+---
+
+## Laboratorio (Laboratory)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| lab.paredes@carepoint.local | Clinical Laboratory | LAB-CLIN-001 | APPROVED |
+| lab.acosta@carepoint.local | Pathology | LAB-PATH-002 | APPROVED |
+
+---
+
+## Radiología (Radiology)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| rad.fuentes@carepoint.local | General Radiology | RAD-GEN-001 | APPROVED |
+| rad.mejia@carepoint.local | MRI/CT Imaging | RAD-ADV-002 | READY_FOR_REVIEW |
+
+---
+
+## Farmacia (Pharmacy)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| pharm.castro@carepoint.local | Clinical Pharmacy | PHARM-CLIN-001 | APPROVED |
+| pharm.pena@carepoint.local | Community Pharmacy | PHARM-COMM-002 | APPROVED |
+
+---
+
+## Atención Domiciliaria (Home Care)
+
+| Email | Especialidad | Licencia | Onboarding |
+|-------|-------------|----------|------------|
+| hc.vargas@carepoint.local | Geriatric Home Care | HC-GER-001 | APPROVED |
+| hc.mendez@carepoint.local | Post-surgical Home Care | HC-SURG-002 | DRAFT |
+
+---
+
+## Pacientes
+
+| Email | Nombre | Organización |
+|-------|--------|--------------|
+| juan.perez@carepoint.local | Juan Pérez | CarePoint Medical |
+| maria.gonzalez@carepoint.local | María González | CarePoint Medical |
+| carlos.rodriguez@carepoint.local | Carlos Rodríguez | CarePoint Medical |
+| ana.martinez@carepoint.local | Ana Martínez | CarePoint Medical |
+| luis.hernandez@carepoint.local | Luis Hernández | CarePoint Medical |
+| sofia.lopez@carepoint.local | Sofía López | CarePoint Medical |
+| diego.garcia@carepoint.local | Diego García | CarePoint Medical |
+| camila.torres@carepoint.local | Camila Torres | CarePoint Medical |
+| andres.morales@carepoint.local | Andrés Morales | CarePoint Medical |
+| valentina.diaz@carepoint.local | Valentina Díaz | CarePoint Medical |
+| jorge.ruiz@carepoint.local | Jorge Ruiz | HealthFirst Clinic |
+| laura.castro@carepoint.local | Laura Castro | HealthFirst Clinic |
+| pablo.vargas@carepoint.local | Pablo Vargas | HealthFirst Clinic |
+| elena.flores@carepoint.local | Elena Flores | HealthFirst Clinic |
+| ricardo.ramos@carepoint.local | Ricardo Ramos | HealthFirst Clinic |
+| gabriela.silva@carepoint.local | Gabriela Silva | CarePoint Medical |
+| fernando.mendez@carepoint.local | Fernando Méndez | CarePoint Medical |
+| claudia.reyes@carepoint.local | Claudia Reyes | CarePoint Medical |
+| miguel.herrera@carepoint.local | Miguel Herrera | HealthFirst Clinic |
+| natalia.jimenez@carepoint.local | Natalia Jiménez | HealthFirst Clinic |
+| roberto.acosta@carepoint.local | Roberto Acosta | CarePoint Medical |
+| daniela.ortiz@carepoint.local | Daniela Ortiz | CarePoint Medical |
+
+---
+
+**Total: 57 usuarios** (1 super admin + 8 por rol + 26 proveedores + 22 pacientes)
+
+
+El flujo para un reset completo desde Docker sería:
+
+docker-compose down -v
+docker-compose up -d --build
+npx prisma migrate deploy
+npx prisma db seed
