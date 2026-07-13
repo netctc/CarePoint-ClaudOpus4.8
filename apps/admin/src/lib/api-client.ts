@@ -468,6 +468,44 @@ export const adminApi = {
       content,
       filename: `audit-export.${new URLSearchParams(query).get('format') || 'json'}`,
     })),
+  // Admin Booking Control
+  adminBookings: (params?: Record<string, string>) => {
+    const query = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/admin/bookings${query}`);
+  },
+  adminBookingBulkNotify: (bookingIds: string[], message?: string) =>
+    request('/api/admin/bookings/bulk-notify', {
+      method: 'POST',
+      body: JSON.stringify({ bookingIds, message }),
+    }),
+  adminBookingReassign: (id: string, payload: { providerId: string; reason?: string }) =>
+    request(`/api/admin/bookings/${id}/reassign`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminBookingCancel: (id: string, payload: { reason: string }) =>
+    request(`/api/admin/bookings/${id}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  adminBookingRefundReview: (id: string) =>
+    request(`/api/admin/bookings/${id}/refund-review`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+
+  // Admin Telehealth Operations
+  adminTelehealthMetrics: () => request('/api/admin/telehealth/metrics'),
+  adminTelehealthSessions: (params?: Record<string, string>) => {
+    const query = params ? `?${new URLSearchParams(params).toString()}` : '';
+    return request(`/api/admin/telehealth/sessions${query}`);
+  },
+  adminTelehealthEscalate: (id: string, payload: { severity?: string; reason?: string }) =>
+    request(`/api/admin/telehealth/incidents/${id}/escalate`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
   moderationReviews: () => request('/api/moderation/reviews'),
   moderationReviewDetail: (reviewId: string) => request(`/api/moderation/reviews/${reviewId}`),
   assignModerationReview: (reviewId: string, payload: { reviewerUserId: string; ownerName: string; note?: string }) =>

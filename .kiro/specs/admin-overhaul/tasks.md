@@ -91,27 +91,27 @@
 - [x] 15.7 Create coverage API client (`src/lib/api/coverage-api.ts`) with functions for all coverage CRUD operations
 
 ## Task 16: Booking Control (Backend)
-- [~] 16.1 Extend `GET /api/admin/bookings` to support filters: dateRange, provider, patient, status, service, medicalCenter, insurance, mode (telehealth/inPerson); return stats alongside results (totalBookings, upcoming, completed, cancelled, rescheduled, noShows, avgWaitingTime, successRate)
-- [~] 16.2 Create action endpoints: `POST /api/admin/bookings/bulk-notify` (send notifications to selected bookings), `POST /api/admin/bookings/:id/reassign` (reassign provider with reason), `POST /api/admin/bookings/:id/cancel` (cancel with reason, audit log), `POST /api/admin/bookings/:id/refund-review` (open refund review)
+- [x] 16.1 Extend `GET /api/admin/bookings` to support filters: dateRange, provider, patient, status, service, medicalCenter, insurance, mode (telehealth/inPerson); return stats alongside results (totalBookings, upcoming, completed, cancelled, rescheduled, noShows, avgWaitingTime, successRate)
+- [x] 16.2 Create action endpoints: `POST /api/admin/bookings/bulk-notify` (send notifications to selected bookings), `POST /api/admin/bookings/:id/reassign` (reassign provider with reason), `POST /api/admin/bookings/:id/cancel` (cancel with reason, audit log), `POST /api/admin/bookings/:id/refund-review` (open refund review)
 
 ## Task 17: Booking Control (Frontend)
-- [~] 17.1 Rebuild Booking Control page (`/portal/bookings/control-tower`): remove text, add `StatsGrid` with booking metrics, `FilterPanel`, `AdminDataTable`
-- [~] 17.2 Implement action buttons: Bulk Notify, Export Exceptions, Open Rebooking Queue, Reassign Provider, Cancel with Reason, Open Refund Review, Notify Support Owner — each with `ConfirmDialog` and `useToast` feedback
-- [~] 17.3 Implement booking row links to provider and patient profiles
+- [x] 17.1 Rebuild Booking Control page (`/portal/bookings/control-tower`): remove text, add `StatsGrid` with booking metrics, `FilterPanel`, `AdminDataTable`
+- [x] 17.2 Implement action buttons: Bulk Notify, Export Exceptions, Open Rebooking Queue, Reassign Provider, Cancel with Reason, Open Refund Review, Notify Support Owner — each with `ConfirmDialog` and `useToast` feedback
+- [x] 17.3 Implement booking row links to provider and patient profiles
 
 ## Task 18: Telehealth Operations (Backend)
-- [~] 18.1 Create `GET /api/admin/telehealth/metrics` endpoint returning: onlineConsultationsToday, ongoingSessions, completedSessions, failedSessions, avgDuration, waitingPatients, technicalIncidents, connectionQuality, dailyUsage (array), weeklyTrends (array)
-- [~] 18.2 Create `POST /api/admin/telehealth/incidents/:id/escalate` endpoint that escalates a technical incident, notifies support team, and audit logs
-- [~] 18.3 Create `GET /api/admin/telehealth/sessions` endpoint with filters: provider, patient, date, sessionStatus, connectionQuality, incidentType, medicalCenter, specialty
+- [x] 18.1 Create `GET /api/admin/telehealth/metrics` endpoint returning: onlineConsultationsToday, ongoingSessions, completedSessions, failedSessions, avgDuration, waitingPatients, technicalIncidents, connectionQuality, dailyUsage (array), weeklyTrends (array)
+- [x] 18.2 Create `POST /api/admin/telehealth/incidents/:id/escalate` endpoint that escalates a technical incident, notifies support team, and audit logs
+- [x] 18.3 Create `GET /api/admin/telehealth/sessions` endpoint with filters: provider, patient, date, sessionStatus, connectionQuality, incidentType, medicalCenter, specialty
 
 ## Task 19: Telehealth Operations (Frontend)
-- [~] 19.1 Rebuild Telehealth Operations page (`/portal/telehealth/operations`): remove text, add dashboard stats grid, charts (daily usage line chart, weekly trends bar chart), `FilterPanel`, `AdminDataTable` for sessions
-- [~] 19.2 Implement action buttons: Open Incident Detail (navigates to detail), Export Monitor (downloads report), Open Support Handoff (opens modal), Escalate Technical Incident (with confirmation)
+- [x] 19.1 Rebuild Telehealth Operations page (`/portal/telehealth/operations`): remove text, add dashboard stats grid, charts (daily usage line chart, weekly trends bar chart), `FilterPanel`, `AdminDataTable` for sessions
+- [x] 19.2 Implement action buttons: Open Incident Detail (navigates to detail), Export Monitor (downloads report), Open Support Handoff (opens modal), Escalate Technical Incident (with confirmation)
 
 ## Task 20: Global Polish & Integration
-- [~] 20.1 Audit all pages for remaining placeholder/descriptive text and remove any found
-- [~] 20.2 Verify all buttons across the application are functional (no non-functional buttons remain)
-- [~] 20.3 Ensure all data tables implement empty states with `EmptyState` component
-- [~] 20.4 Verify RBAC integration: all mutating endpoints check admin permissions via existing IAM middleware
-- [~] 20.5 Add responsive styles ensuring all new components work on tablet and desktop viewports
-- [~] 20.6 Run full build (`next build`) and fix any TypeScript or build errors
+- [x] 20.1 Audit all pages for remaining placeholder/descriptive text and remove any found
+- [x] 20.2 Verify all buttons across the application are functional (no non-functional buttons remain)
+- [x] 20.3 Ensure all data tables implement empty states with `EmptyState` component
+- [x] 20.4 Verify RBAC integration: all mutating endpoints check admin permissions via existing IAM middleware
+- [x] 20.5 Add responsive styles ensuring all new components work on tablet and desktop viewports
+- [x] 20.6 Run full build (`next build`) and fix any TypeScript or build errors
