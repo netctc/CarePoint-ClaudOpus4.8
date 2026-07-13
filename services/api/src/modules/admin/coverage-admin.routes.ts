@@ -8,6 +8,31 @@ export const coverageAdminRouter = Router();
 
 const adminRoles = ['SUPER_ADMIN', 'COMPANY_ADMIN'];
 
+// ─── Coverage Stats ──────────────────────────────────────────────────────────
+
+coverageAdminRouter.get(
+  '/coverage/stats',
+  ...iamMiddlewareChain(adminRoles),
+  async (req: any, res: any) => {
+    const organizationId: string | undefined = req.user?.organizationId;
+    if (!organizationId) {
+      return res.json({ activePlans: 0, insuranceProviders: 0, pendingValidations: 0, coverageRate: 0 });
+    }
+
+    const [activePlans, insuranceProviders] = await Promise.all([
+      prisma.coveragePlan.count({ where: { organizationId, status: 'ACTIVE' } }),
+      prisma.insuranceProvider.count({ where: { organizationId } }),
+    ]);
+
+    res.json({
+      activePlans,
+      insuranceProviders,
+      pendingValidations: 0,
+      coverageRate: activePlans > 0 ? Math.round((activePlans / Math.max(activePlans + 1, 1)) * 100) : 0,
+    });
+  }
+);
+
 // ─── Insurance Providers ─────────────────────────────────────────────────────
 
 coverageAdminRouter.get(

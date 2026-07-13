@@ -40,21 +40,23 @@ telehealthAdminRouter.get(
     });
 
     // Session statuses
+    // TelehealthStatus enum: SCHEDULED, READY, LIVE, ENDED
     const [ongoingSessions, completedSessions, failedSessions] = await Promise.all([
       prisma.telehealthSession.count({
-        where: { ...orgFilter, status: 'IN_PROGRESS' },
+        where: { ...orgFilter, status: 'LIVE' },
       }),
       prisma.telehealthSession.count({
-        where: { ...orgFilter, status: 'COMPLETED' },
+        where: { ...orgFilter, status: 'ENDED' },
       }),
+      // No explicit FAILED status in enum — count sessions that ended without startedAt as proxy
       prisma.telehealthSession.count({
-        where: { ...orgFilter, status: { in: ['FAILED', 'DISCONNECTED'] } },
+        where: { ...orgFilter, status: 'SCHEDULED', scheduledAt: { lt: new Date(Date.now() - 60 * 60 * 1000) } },
       }),
     ]);
 
-    // Average duration (from completed sessions)
+    // Average duration (from ended sessions)
     const completedSessionsData = await prisma.telehealthSession.findMany({
-      where: { ...orgFilter, status: 'COMPLETED' },
+      where: { ...orgFilter, status: 'ENDED' },
       select: { startedAt: true, endedAt: true },
       take: 500,
       orderBy: { createdAt: 'desc' },
@@ -72,17 +74,17 @@ telehealthAdminRouter.get(
       avgDuration = Math.round(totalMinutes / completedSessionsData.length);
     }
 
-    // Waiting patients (sessions in WAITING status)
+    // Waiting patients (sessions in READY status)
     const waitingPatients = await prisma.telehealthSession.count({
-      where: { ...orgFilter, status: 'WAITING' },
+      where: { ...orgFilter, status: 'READY' },
     });
 
-    // Technical incidents (failed + disconnected in last 7 days)
+    // Technical incidents (stale scheduled sessions in last 7 days — past their scheduled time)
     const technicalIncidents = await prisma.telehealthSession.count({
       where: {
         ...orgFilter,
-        status: { in: ['FAILED', 'DISCONNECTED'] },
-        createdAt: { gte: sevenDaysAgo },
+        status: 'SCHEDULED',
+        scheduledAt: { gte: sevenDaysAgo, lt: now },
       },
     });
 
@@ -91,7 +93,7 @@ telehealthAdminRouter.get(
       where: { ...orgFilter, createdAt: { gte: sevenDaysAgo } },
     });
     const completedRecent = await prisma.telehealthSession.count({
-      where: { ...orgFilter, status: 'COMPLETED', createdAt: { gte: sevenDaysAgo } },
+      where: { ...orgFilter, status: 'ENDED', createdAt: { gte: sevenDaysAgo } },
     });
     const connectionQuality = totalRecentSessions > 0
       ? Math.round((completedRecent / totalRecentSessions) * 100)
@@ -134,10 +136,10 @@ telehealthAdminRouter.get(
           where: { ...orgFilter, createdAt: { gte: weekStart, lte: weekEnd } },
         }),
         prisma.telehealthSession.count({
-          where: { ...orgFilter, status: 'COMPLETED', createdAt: { gte: weekStart, lte: weekEnd } },
+          where: { ...orgFilter, status: 'ENDED', createdAt: { gte: weekStart, lte: weekEnd } },
         }),
         prisma.telehealthSession.count({
-          where: { ...orgFilter, status: { in: ['FAILED', 'DISCONNECTED'] }, createdAt: { gte: weekStart, lte: weekEnd } },
+          where: { ...orgFilter, status: 'SCHEDULED', createdAt: { gte: weekStart, lte: weekEnd } },
         }),
       ]);
 
@@ -200,7 +202,7 @@ telehealthAdminRouter.post(
     // Update session status to reflect escalation
     await prisma.telehealthSession.update({
       where: { id },
-      data: { status: 'ESCALATED' as any, updatedAt: new Date() },
+      data: { status: 'ENDED', updatedAt: new Date() },
     });
 
     // Write audit log
@@ -285,17 +287,17 @@ telehealthAdminRouter.get(
     // Connection quality filter (map to status categories)
     const connectionQuality = (req.query.connectionQuality as string)?.trim()?.toLowerCase();
     if (connectionQuality === 'poor') {
-      where.status = { in: ['FAILED', 'DISCONNECTED'] };
+      where.status = 'SCHEDULED';
     } else if (connectionQuality === 'good') {
-      where.status = { in: ['COMPLETED', 'IN_PROGRESS'] };
+      where.status = { in: ['ENDED', 'LIVE'] };
     }
 
     // Incident type filter
     const incidentType = (req.query.incidentType as string)?.trim()?.toUpperCase();
     if (incidentType === 'FAILED') {
-      where.status = 'FAILED';
+      where.status = 'SCHEDULED';
     } else if (incidentType === 'DISCONNECTED') {
-      where.status = 'DISCONNECTED';
+      where.status = 'SCHEDULED';
     }
 
     // Build orderBy

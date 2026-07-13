@@ -38,8 +38,8 @@ adminActionsRouter.post(
         prisma.user.count({ where: orgWhere }),
         prisma.providerProfile.count({ where: orgWhere }),
         prisma.appointment.count({ where: orgWhere }),
-        prisma.payment.aggregate({ where: orgWhere ?? {}, _sum: { amountMinor: true }, _count: true }),
-        prisma.providerProfile.count({ where: { ...orgWhere, status: 'ACTIVE' } }),
+        prisma.payment.aggregate({ _sum: { amountMinor: true }, _count: true }),
+        prisma.providerProfile.count({ where: { ...orgWhere, user: { is: { status: 'ACTIVE' } } } }),
         prisma.appointment.count({ where: { ...orgWhere, status: 'REQUESTED' } }),
       ]);
 
@@ -114,7 +114,7 @@ adminActionsRouter.post(
         prisma.user.count({ where: orgWhere }),
         prisma.providerProfile.count({ where: orgWhere }),
         prisma.appointment.count({ where: orgWhere }),
-        prisma.providerProfile.count({ where: { ...orgWhere, status: 'ACTIVE' } }),
+        prisma.providerProfile.count({ where: { ...orgWhere, user: { is: { status: 'ACTIVE' } } } }),
         prisma.appointment.count({ where: { ...orgWhere, status: 'COMPLETED' } }),
         prisma.telehealthSession.count({
           where: organizationId ? { appointment: { organizationId } } : undefined,

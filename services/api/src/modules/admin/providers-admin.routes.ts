@@ -486,7 +486,7 @@ providersAdminRouter.get(
         roleCatalog: { select: { code: true, label: true } },
         onboardingState: { select: { status: true } },
         credentialDocuments: {
-          select: { id: true, documentType: true, status: true, expiresAt: true, createdAt: true },
+          select: { id: true, type: true, status: true, expiresAt: true, createdAt: true },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -640,7 +640,7 @@ providersAdminRouter.get(
       },
       credentials: profile.credentialDocuments.map((doc: any) => ({
         id: doc.id,
-        type: doc.documentType,
+        type: doc.type,
         status: doc.status,
         expiresAt: doc.expiresAt,
         createdAt: doc.createdAt,
