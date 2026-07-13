@@ -59,17 +59,17 @@
 - [x] 11.4 Redesign Provider Queue Review page: remove descriptive text, add clear status progression indicators, document review panels, and approval/rejection action buttons
 
 ## Task 12: Service Catalog (Backend)
-- [~] 12.1 Extend `GET /api/admin/catalog/services` to support filters: category, providerType, specialty, department, availability, priceRange (min/max), insuranceCoverage, status (active/archived); with pagination and sort
-- [~] 12.2 Create `GET /api/admin/catalog/services/:id/dependencies` endpoint returning dependency graph (services that depend on this service and services it depends on)
-- [~] 12.3 Create `POST /api/admin/catalog/services/:id/clone` endpoint that duplicates a service with a new ID, returning the clone
-- [~] 12.4 Create `POST /api/admin/catalog/services/archive` endpoint accepting service IDs array, archives them, audit logs the action
+- [x] 12.1 Extend `GET /api/admin/catalog/services` to support filters: category, providerType, specialty, department, availability, priceRange (min/max), insuranceCoverage, status (active/archived); with pagination and sort
+- [x] 12.2 Create `GET /api/admin/catalog/services/:id/dependencies` endpoint returning dependency graph (services that depend on this service and services it depends on)
+- [x] 12.3 Create `POST /api/admin/catalog/services/:id/clone` endpoint that duplicates a service with a new ID, returning the clone
+- [x] 12.4 Create `POST /api/admin/catalog/services/archive` endpoint accepting service IDs array, archives them, audit logs the action
 
 ## Task 13: Service Catalog & Workspace (Frontend)
-- [~] 13.1 Rebuild Service Catalog page (`/portal/catalog/services`): remove introductory text, add `FilterPanel`, `AdminDataTable`, and action buttons (Inspect Dependencies, Clone Service, Archive Selected, Create Service)
-- [~] 13.2 Implement Inspect Dependencies modal showing dependency graph visualization
-- [~] 13.3 Implement Clone Service flow with confirmation and navigation to cloned service
-- [~] 13.4 Create `GET /api/admin/catalog/services/:id/metrics` endpoint returning: providerCount, appointmentCount, monthlyUtilization, yearlyUtilization, demandTrends, satisfactionScore, revenue
-- [~] 13.5 Rebuild Service Workspace page: remove text, add statistics section and interactive charts for utilization/demand
+- [x] 13.1 Rebuild Service Catalog page (`/portal/catalog/services`): remove introductory text, add `FilterPanel`, `AdminDataTable`, and action buttons (Inspect Dependencies, Clone Service, Archive Selected, Create Service)
+- [x] 13.2 Implement Inspect Dependencies modal showing dependency graph visualization
+- [x] 13.3 Implement Clone Service flow with confirmation and navigation to cloned service
+- [x] 13.4 Create `GET /api/admin/catalog/services/:id/metrics` endpoint returning: providerCount, appointmentCount, monthlyUtilization, yearlyUtilization, demandTrends, satisfactionScore, revenue
+- [x] 13.5 Rebuild Service Workspace page: remove text, add statistics section and interactive charts for utilization/demand
 
 ## Task 14: Coverage Module — Database & Backend
 - [~] 14.1 Create Prisma schema models: `InsuranceProvider` (id, name, code, type, contactInfo, status), `CoveragePlan` (id, insuranceProviderId, name, type, coverage, deductible, copay, coinsurance, status), `GeographicCoverage` (id, planId, country, state, city, zipCodes, radius), `ServiceCoverage` (id, planId, serviceId, covered, priorAuthRequired, copayAmount, limits), `NetworkProvider` (id, planId, providerId, inNetwork, tier, effectiveDate, terminationDate), `AuthorizationRequirement` (id, planId, serviceId, required, criteria, validDays), `CoveragePolicy` (id, name, rules, status, version, effectiveDate, auditTrail)

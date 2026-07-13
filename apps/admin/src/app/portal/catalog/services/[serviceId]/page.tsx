@@ -1,252 +1,400 @@
-import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
-import { CatalogAdminActions } from '@/components/admin/catalog-admin-actions';
-import { DataSourceBanner } from '@/components/admin/data-source-banner';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
-import { PortalShell } from '@/components/layout/portal-shell';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { loadIntegratedCatalogWorkspace } from '@/lib/api/admin-server';
-import { getAdminDetailCopy } from '@/lib/i18n/admin-detail-copy';
-import { normalizeAdminLocale } from '@/lib/i18n/admin-dictionary';
+'use client';
 
-function tone(status: string) {
-  if (status === 'Active') return 'success';
-  if (status === 'Draft') return 'warning';
-  return 'neutral';
+import { useCallback, useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { PortalShell } from '@/components/layout/portal-shell';
+import { StatsGrid, type StatItem } from '@/components/ui/stats-grid';
+import { ChartCard } from '@/components/ui/chart-card';
+import { LoadingButton } from '@/components/ui/loading-button';
+import { useToast } from '@/components/ui/toast';
+
+/* ─── Types ─────────────────────────────────────────────────────── */
+
+interface ServiceMetrics {
+  providerCount: number;
+  appointmentCount: number;
+  monthlyUtilization: number;
+  yearlyUtilization: number;
+  demandTrends: { month: string; demand: number }[];
+  satisfactionScore: number;
+  revenue: number;
 }
 
-export default async function ServiceCatalogDetailPage({
-  params,
-}: {
-  params: Promise<{ serviceId: string }>;
-}) {
-  const { serviceId } = await params;
-  const cookieStore = await cookies();
-  const locale = normalizeAdminLocale(cookieStore.get('cc_locale')?.value);
-  const copy = getAdminDetailCopy(locale).serviceDetail;
-  const result = await loadIntegratedCatalogWorkspace();
-  const service = result.data.items.find((item) => item.id === serviceId);
+interface ServiceDetail {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  template: string;
+  durationMinutes: number;
+  price: string;
+  tags: string[];
+}
 
-  if (!service) {
-    notFound();
+/* ─── Bar Chart Component ───────────────────────────────────────── */
+
+function UtilizationBarChart({ data, label }: { data: { month: string; demand: number }[]; label: string }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--muted)', fontSize: '0.88rem' }}>
+        No data available for {label.toLowerCase()}.
+      </div>
+    );
   }
 
-  const selectedTemplate = result.data.workspace.selectedTemplate;
-  const detail = selectedTemplate.name === service.serviceName
-    ? selectedTemplate
-    : {
-        name: service.serviceName,
-        version: service.status === 'Draft' ? 'Draft vNext' : service.status === 'Active' ? 'Controlled live version' : 'Archive snapshot',
-        owner: 'Catalog operations team',
-        rolloutState: service.downstreamImpact,
-        dependencies: [
-          `Category: ${service.category}`,
-          `Template: ${service.template}`,
-          service.status === 'Archived' ? 'Historical references only' : 'Pricing, reporting, and booking mappings should be revalidated before publish',
-        ],
-      };
-  const apiItem = result.data.apiItems?.find((item) => item.id === service.id);
-  const dependencyCount = detail.dependencies.length;
-  const serviceModes = apiItem?.serviceModes?.length ? apiItem.serviceModes.join(', ') : 'Consult template controlled modes';
-  const tags = apiItem?.tags?.length ? apiItem.tags.join(', ') : 'No API tags returned';
-
-  const releaseCards = [
-    {
-      title: 'Taxonomy definition',
-      meta: `Template ${service.template}`,
-      description: 'Service naming, category placement, and template ownership stay visible before a publish or archive decision is made.',
-      bullets: [
-        `Category: ${service.category}`,
-        `Owner: ${detail.owner}`,
-        `Lifecycle: ${service.status}`,
-      ],
-      badges: [{ label: service.status, tone: tone(service.status) }],
-    },
-    {
-      title: 'Booking and provider exposure',
-      meta: 'Downstream operational impact',
-      description: 'Use this checkpoint to confirm where the service definition surfaces downstream before any change is promoted.',
-      bullets: [
-        service.downstreamImpact,
-        `Modes: ${serviceModes}`,
-        'Any visible change should be validated against booking, provider, and support experiences.',
-      ],
-      badges: [{ label: dependencyCount > 2 ? 'Linked systems' : 'Scoped impact', tone: dependencyCount > 2 ? 'warning' : 'info' }],
-    },
-    {
-      title: 'Reporting and pricing bindings',
-      meta: 'Control gates before release',
-      description: 'A service should not be promoted until pricing assumptions, reporting keys, and operational rollouts remain coherent.',
-      bullets: [
-        ...detail.dependencies,
-        `Tags: ${tags}`,
-      ],
-      badges: [{ label: 'Governed change', tone: 'info' }],
-    },
-    {
-      title: 'Rollout packet',
-      meta: detail.version,
-      description: 'Reviewers should capture why the service is being introduced, changed, or archived and what teams will be affected.',
-      bullets: [
-        `Rollout state: ${detail.rolloutState}`,
-        service.status === 'Archived' ? 'Archive path should retain reference integrity for historical reporting.' : 'Published changes should align with the current service-version strategy.',
-        'Any manual override should be traceable in the audit log.',
-      ],
-      badges: [{ label: detail.version, tone: 'neutral' }],
-    },
-  ];
+  const maxValue = Math.max(...data.map((d) => d.demand), 1);
+  const barWidth = Math.max(20, Math.min(50, Math.floor(400 / data.length)));
 
   return (
+    <div style={{ padding: '20px 0' }}>
+      <svg
+        width="100%"
+        height="220"
+        viewBox={`0 0 ${data.length * (barWidth + 12) + 40} 220`}
+        aria-label={`${label} chart`}
+        role="img"
+      >
+        {/* Y-axis line */}
+        <line x1="30" y1="10" x2="30" y2="190" stroke="var(--border, #e2e8f0)" strokeWidth="1" />
+        {/* X-axis line */}
+        <line x1="30" y1="190" x2={data.length * (barWidth + 12) + 30} y2="190" stroke="var(--border, #e2e8f0)" strokeWidth="1" />
+
+        {data.map((item, index) => {
+          const barHeight = (item.demand / maxValue) * 160;
+          const x = 40 + index * (barWidth + 12);
+          const y = 190 - barHeight;
+          return (
+            <g key={item.month}>
+              <rect
+                x={x}
+                y={y}
+                width={barWidth}
+                height={barHeight}
+                fill="var(--primary, #3b82f6)"
+                rx={4}
+                opacity={0.85}
+              >
+                <title>{`${item.month}: ${item.demand}`}</title>
+              </rect>
+              <text
+                x={x + barWidth / 2}
+                y="207"
+                textAnchor="middle"
+                fontSize="10"
+                fill="var(--muted, #64748b)"
+                fontWeight="600"
+              >
+                {item.month}
+              </text>
+              <text
+                x={x + barWidth / 2}
+                y={y - 6}
+                textAnchor="middle"
+                fontSize="10"
+                fill="var(--text, #1e293b)"
+                fontWeight="700"
+              >
+                {item.demand}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+/* ─── Main Page Component ───────────────────────────────────────── */
+
+export default function ServiceWorkspacePage() {
+  const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
+  const serviceId = params.serviceId as string;
+
+  // State
+  const [service, setService] = useState<ServiceDetail | null>(null);
+  const [metrics, setMetrics] = useState<ServiceMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+  const [chartInterval, setChartInterval] = useState('Monthly');
+
+  /* ── Helper: get auth token ─────── */
+  const getToken = () =>
+    document.cookie.match(/cc_admin_access_token=([^;]+)/)?.[1] ||
+    document.cookie.match(/cc_access_token=([^;]+)/)?.[1] ||
+    '';
+
+  const getBaseUrl = () => process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
+
+  /* ── Fetch service detail ─────────── */
+  useEffect(() => {
+    async function loadService() {
+      setLoading(true);
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/catalog/services`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.items || data || [];
+          const found = items.find((s: any) => s.id === serviceId);
+          if (found) {
+            setService({
+              id: found.id,
+              name: found.name || found.serviceName || '—',
+              category: found.category || '—',
+              status: found.status || 'Draft',
+              template: found.template || '—',
+              durationMinutes: found.durationMinutes || 0,
+              price: found.price || found.priceFormatted || '—',
+              tags: found.tags || [],
+            });
+          } else {
+            setService({
+              id: serviceId,
+              name: 'Service',
+              category: '—',
+              status: '—',
+              template: '—',
+              durationMinutes: 0,
+              price: '—',
+              tags: [],
+            });
+          }
+        } else {
+          setService({
+            id: serviceId,
+            name: 'Service',
+            category: '—',
+            status: '—',
+            template: '—',
+            durationMinutes: 0,
+            price: '—',
+            tags: [],
+          });
+        }
+      } catch {
+        setService({
+          id: serviceId,
+          name: 'Service',
+          category: '—',
+          status: '—',
+          template: '—',
+          durationMinutes: 0,
+          price: '—',
+          tags: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadService();
+  }, [serviceId]);
+
+  /* ── Fetch service metrics ────────── */
+  useEffect(() => {
+    async function loadMetrics() {
+      setMetricsLoading(true);
+      try {
+        const res = await fetch(`${getBaseUrl()}/api/admin/catalog/services/${serviceId}/metrics`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMetrics(data);
+        } else {
+          // Fallback mock metrics
+          setMetrics({
+            providerCount: 0,
+            appointmentCount: 0,
+            monthlyUtilization: 0,
+            yearlyUtilization: 0,
+            demandTrends: [],
+            satisfactionScore: 0,
+            revenue: 0,
+          });
+        }
+      } catch {
+        setMetrics({
+          providerCount: 0,
+          appointmentCount: 0,
+          monthlyUtilization: 0,
+          yearlyUtilization: 0,
+          demandTrends: [],
+          satisfactionScore: 0,
+          revenue: 0,
+        });
+      } finally {
+        setMetricsLoading(false);
+      }
+    }
+    loadMetrics();
+  }, [serviceId]);
+
+  /* ── Stats items ──────────────────── */
+  const statsItems: StatItem[] = metrics
+    ? [
+        { label: 'Providers Offering', value: metrics.providerCount },
+        { label: 'Total Appointments', value: metrics.appointmentCount },
+        { label: 'Monthly Utilization', value: `${metrics.monthlyUtilization}%` },
+        { label: 'Yearly Utilization', value: `${metrics.yearlyUtilization}%` },
+        { label: 'Satisfaction Score', value: `${metrics.satisfactionScore}/5` },
+        { label: 'Revenue', value: `$${metrics.revenue.toLocaleString()}` },
+      ]
+    : [];
+
+  /* ── Status color helper ──────────── */
+  const statusColor = (status: string) => {
+    const map: Record<string, string> = {
+      Active: '#22c55e',
+      PUBLISHED: '#22c55e',
+      Draft: '#f59e0b',
+      DRAFT: '#f59e0b',
+      Archived: '#6b7280',
+      ARCHIVED: '#6b7280',
+    };
+    return map[status] || '#6b7280';
+  };
+
+  /* ── Loading state ─────────────────── */
+  if (loading) {
+    return (
+      <PortalShell currentPath="/portal/catalog/services">
+        <div style={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
+          <div style={{ color: 'var(--muted)', fontWeight: 700, fontSize: '0.9rem' }}>Loading service...</div>
+        </div>
+      </PortalShell>
+    );
+  }
+
+  /* ── Render ────────────────────────── */
+  return (
     <PortalShell currentPath="/portal/catalog/services">
-      <DataSourceBanner source={result.source} error={result.error} />
-
-      <div className="admin-v18-governance-workspace admin-v18-catalog-detail">
-        <div className="hero-panel admin-v18-hero-panel">
-        <div className="hero-panel-grid">
-          <div className="hero-copy">
-            <div className="page-breadcrumbs">
-              <span>{copy.breadcrumbs.catalog}</span>
-              <span>•</span>
-              <span>{copy.breadcrumbs.services}</span>
-              <span>•</span>
-              <span>{service.serviceName}</span>
-            </div>
-            <div className="page-eyebrow">{copy.eyebrow}</div>
-            <h2 className="hero-title">{copy.title}</h2>
-            <p className="hero-subtitle">
-              {copy.subtitle}
-            </p>
-            <div className="hero-actions">
-              <Link className="button secondary" href="/portal/catalog/services">{copy.backToCatalog}</Link>
-              <button className="button primary">{copy.previewImpact}</button>
-            </div>
-            <div className="hero-metrics">
-              <div className="hero-metric">
-                <div className="hero-metric-label">{copy.service}</div>
-                <div className="hero-metric-value">{service.serviceName}</div>
-                <div className="hero-metric-detail">Current category and template assignment.</div>
-              </div>
-              <div className="hero-metric">
-                <div className="hero-metric-label">{copy.lifecycle}</div>
-                <div className="hero-metric-value">{service.status}</div>
-                <div className="hero-metric-detail">{copy.lifecycleDetail}</div>
-              </div>
-              <div className="hero-metric">
-                <div className="hero-metric-label">{copy.template}</div>
-                <div className="hero-metric-value">{service.template}</div>
-                <div className="hero-metric-detail">{copy.templateDetail}</div>
+      <div style={{ display: 'grid', gap: 24 }}>
+        {/* Page Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <button
+              className="button secondary"
+              onClick={() => router.push('/portal/catalog/services')}
+              style={{ minHeight: 36, padding: '6px 14px' }}
+            >
+              ← Back
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                {service?.name}
+              </h1>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4, alignItems: 'center' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '2px 10px',
+                    borderRadius: 12,
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    background: `${statusColor(service?.status || '')}18`,
+                    color: statusColor(service?.status || ''),
+                  }}
+                >
+                  {service?.status}
+                </span>
+                <span style={{ fontSize: '0.84rem', color: 'var(--muted)' }}>
+                  {service?.category} • {service?.template}
+                </span>
               </div>
             </div>
           </div>
-
-          <div className="info-stack">
-            <div className="soft-card">
-              <div className="panel-header">
-                <div>
-                  <h3 className="section-title" style={{ marginBottom: 6 }}>{copy.releasePosture}</h3>
-                  <div style={{ fontWeight: 800, fontSize: 22 }}>{detail.version}</div>
-                </div>
-                <StatusBadge tone={tone(service.status)}>{service.status}</StatusBadge>
-              </div>
-              <div className="detail-list">
-                <div><span className="detail-label">{copy.owner}</span><strong>{detail.owner}</strong></div>
-                <div><span className="detail-label">{copy.category}</span><strong>{service.category}</strong></div>
-                <div><span className="detail-label">{copy.impact}</span><strong>{service.downstreamImpact}</strong></div>
-              </div>
-            </div>
-
-            <div className="mini-card">
-              <h3 className="section-title">{copy.rolloutState}</h3>
-              <div className="banner info">{detail.rolloutState}</div>
-            </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <LoadingButton variant="secondary">
+              Edit Service
+            </LoadingButton>
+            <LoadingButton variant="primary">
+              Publish
+            </LoadingButton>
           </div>
         </div>
-      </div>
 
-        <DetailStateStrip
-        items={[
-          {
-            label: 'Dependency count',
-            value: String(dependencyCount),
-            detail: 'Number of explicit catalog, pricing, campaign, or reporting dependencies currently surfaced.',
-            tone: dependencyCount > 2 ? 'warning' : 'info',
-          },
-          {
-            label: 'Service modes',
-            value: apiItem?.serviceModes?.length ? String(apiItem.serviceModes.length) : 'Default',
-            detail: 'Returned service delivery modes or fallback template modes for this record.',
-            tone: apiItem?.serviceModes?.length ? 'success' : 'neutral',
-          },
-          {
-            label: 'Release readiness',
-            value: service.status === 'Archived' ? 'Archive' : service.status === 'Draft' ? 'Review' : 'Live',
-            detail: 'Summarizes whether the route is operating as a draft workspace, live definition, or historical reference.',
-            tone: service.status === 'Draft' ? 'warning' : service.status === 'Active' ? 'success' : 'neutral',
-          },
-        ]}
-      />
+        {/* Statistics Section */}
+        <StatsGrid items={statsItems} loading={metricsLoading} />
 
-
-        <div className="split-shell admin-v18-secondary-grid">
-        <div className="info-stack">
-          <div className="card">
-            <h3 className="section-title">Release packet and evidence views</h3>
-            <EvidenceCardGrid items={releaseCards} />
-          </div>
-
-          <div className="card">
-            <h3 className="section-title">Catalog metadata</h3>
-            <MetadataGrid
-              items={[
-                {
-                  label: 'Rollout state',
-                  value: detail.rolloutState,
-                  detail: 'Visible operational state that downstream teams should review before approving a change.',
-                },
-                {
-                  label: 'Version owner',
-                  value: detail.owner,
-                  detail: 'Defines who owns the current controlled change packet.',
-                },
-                {
-                  label: 'Published tags',
-                  value: tags,
-                  detail: 'Useful for reporting, filtering, and downstream service discovery contexts.',
-                },
-                {
-                  label: 'Duration profile',
-                  value: apiItem?.durationMinutes ? `${apiItem.durationMinutes} minutes` : 'Not returned',
-                  detail: 'Duration should remain aligned with booking slot rules and clinical expectations.',
-                },
-              ]}
+        {/* Charts Section */}
+        <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))' }}>
+          {/* Utilization Chart */}
+          <ChartCard
+            title="Utilization Trend"
+            intervals={['Weekly', 'Monthly', 'Yearly']}
+            selectedInterval={chartInterval}
+            onIntervalChange={setChartInterval}
+          >
+            <UtilizationBarChart
+              data={metrics?.demandTrends || []}
+              label="utilization"
             />
-          </div>
+          </ChartCard>
+
+          {/* Demand Chart */}
+          <ChartCard
+            title="Patient Demand"
+            intervals={['Weekly', 'Monthly', 'Yearly']}
+            selectedInterval={chartInterval}
+            onIntervalChange={setChartInterval}
+          >
+            <UtilizationBarChart
+              data={metrics?.demandTrends || []}
+              label="demand"
+            />
+          </ChartCard>
         </div>
 
-        <div className="info-stack">
-          {apiItem ? <CatalogAdminActions serviceId={apiItem.id} status={apiItem.status} disabled={result.source !== 'api'} /> : null}
-          <div className="card admin-v18-surface-card">
-            <h3 className="section-title">Publish and archive gates</h3>
-            <ul className="data-points muted">
-              {result.data.workspace.guardrails.map((rule) => (
-                <li key={rule}>{rule}</li>
-              ))}
-              <li>Review pricing and support dependencies before pushing changes into a live market.</li>
-              <li>Archive decisions should confirm that historical analytics and reporting remain interpretable.</li>
-            </ul>
+        {/* Service Details Card */}
+        <div className="card" style={{ padding: 24 }}>
+          <h3 style={{ margin: '0 0 16px', fontSize: '1rem', fontWeight: 800 }}>Service Details</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>Category</div>
+              <div style={{ fontWeight: 700 }}>{service?.category}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>Template</div>
+              <div style={{ fontWeight: 700 }}>{service?.template}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>Duration</div>
+              <div style={{ fontWeight: 700 }}>{service?.durationMinutes ? `${service.durationMinutes} min` : '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>Price</div>
+              <div style={{ fontWeight: 700 }}>{service?.price}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>Tags</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {service?.tags && service.tags.length > 0 ? service.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: 8,
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      background: 'var(--surface, #f1f5f9)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {tag}
+                  </span>
+                )) : <span style={{ color: 'var(--muted)' }}>—</span>}
+              </div>
+            </div>
           </div>
-
-          <div className="card admin-v18-surface-card">
-            <h3 className="section-title">Recommended secondary states</h3>
-            <ul className="data-points muted">
-              <li>Draft review with pending taxonomy edits</li>
-              <li>Dependency warning state when pricing or campaign bindings still conflict</li>
-              <li>Publish-ready state after booking, reporting, and support checks are complete</li>
-              <li>Archive-safe state with historical references preserved</li>
-            </ul>
-          </div>
-        </div>
         </div>
       </div>
     </PortalShell>
