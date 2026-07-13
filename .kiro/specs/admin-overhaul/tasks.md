@@ -19,16 +19,16 @@
 - [x] 3.2 Create `POST /api/admin/system/sync` endpoint that triggers a system sync operation, returns status, and logs the action to audit
 
 ## Task 4: Dashboard — Action Buttons (Frontend)
-- [~] 4.1 Create `DashboardActions` client component (`src/components/admin/dashboard-actions.tsx`) with Download Report and System Sync buttons using `LoadingButton`; calls API endpoints; shows toast on success/error
+- [x] 4.1 Create `DashboardActions` client component (`src/components/admin/dashboard-actions.tsx`) with Download Report and System Sync buttons using `LoadingButton`; calls API endpoints; shows toast on success/error
 
 ## Task 5: Dashboard — Interactive Statistics
-- [~] 5.1 Modify `StatCard` component to accept optional `href` prop; when provided, renders as clickable `<Link>` element
-- [~] 5.2 Wire dashboard KPI stats: "Providers" links to `/portal/providers`, "Appointments" links to `/portal/bookings/control-tower`, "Active Providers" links to `/portal/providers?status=active`
-- [~] 5.3 Create `GET /api/admin/providers/growth` endpoint accepting `interval` query param (daily/weekly/monthly/yearly), returning time-series data for provider registrations and activity
+- [x] 5.1 Modify `StatCard` component to accept optional `href` prop; when provided, renders as clickable `<Link>` element
+- [x] 5.2 Wire dashboard KPI stats: "Providers" links to `/portal/providers`, "Appointments" links to `/portal/bookings/control-tower`, "Active Providers" links to `/portal/providers?status=active`
+- [x] 5.3 Create `GET /api/admin/providers/growth` endpoint accepting `interval` query param (daily/weekly/monthly/yearly), returning time-series data for provider registrations and activity
 - [~] 5.4 Create `ProviderGrowthChart` client component (`src/components/admin/provider-growth-chart.tsx`) with time interval selector, fetches data from growth endpoint, renders interactive SVG bar chart with hover tooltips
 
 ## Task 6: Dashboard — Patient Statistics
-- [~] 6.1 Create `GET /api/admin/patients/statistics` endpoint returning: totalPatients, newPatients, activePatients, chronicPatients, upcomingAppointments, telehealthUsage, avgVisitsPerMonth, satisfactionRating, emergencyCases, mostRequestedServices
+- [x] 6.1 Create `GET /api/admin/patients/statistics` endpoint returning: totalPatients, newPatients, activePatients, chronicPatients, upcomingAppointments, telehealthUsage, avgVisitsPerMonth, satisfactionRating, emergencyCases, mostRequestedServices
 - [~] 6.2 Create `PatientStatsDashboard` component (`src/components/admin/patient-stats-dashboard.tsx`) displaying all patient metrics with two charts (visits bar chart, services distribution donut)
 - [~] 6.3 Replace "Subject Context Summary" section in dashboard page with `PatientStatsDashboard` component
 

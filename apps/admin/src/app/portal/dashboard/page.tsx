@@ -5,6 +5,7 @@ import { StatCard } from '@/components/ui/stat-card';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
 import { AdminIcon } from '@/components/ui/admin-icon';
+import { DashboardActions } from '@/components/admin/dashboard-actions';
 import { loadIntegratedDashboard, loadIntegratedPaymentsWorkspace, loadRefillRequests } from '@/lib/api/admin-server';
 import { formatUtcDateTime } from '@/lib/formatters';
 import { getAdminDictionary, normalizeAdminLocale } from '@/lib/i18n/admin-dictionary';
@@ -111,23 +112,26 @@ export default async function DashboardPage() {
           <h2>{t.dashboard.title}</h2>
           <p className="dashboard-subtitle">{t.dashboard.subtitle}</p>
         </div>
-        <div className="inline-actions">
-          <button className="button secondary">
-            <AdminIcon name="download" />
-            {t.dashboard.downloadReport}
-          </button>
-          <button className="button primary">
-            <AdminIcon name="sync" />
-            {t.dashboard.systemSync}
-          </button>
-        </div>
+        <DashboardActions />
       </div>
 
       <div className="grid-4">
-        {dashboard.kpis.map((item) => (
-          <StatCard key={item.id} label={item.label} value={item.value} trend={item.trend} />
-        ))}
-        <StatCard label={t.dashboard.activeProviders} value={String(activeProviders)} trend={t.dashboard.activeProvidersTrend} tone="success" />
+        {dashboard.kpis.map((item) => {
+          const hrefMap: Record<string, string> = {
+            providers: '/portal/providers',
+            appointments: '/portal/bookings/control-tower',
+          };
+          return (
+            <StatCard
+              key={item.id}
+              label={item.label}
+              value={item.value}
+              trend={item.trend}
+              href={hrefMap[item.id]}
+            />
+          );
+        })}
+        <StatCard label={t.dashboard.activeProviders} value={String(activeProviders)} trend={t.dashboard.activeProvidersTrend} tone="success" href="/portal/providers?status=active" />
       </div>
 
       <div className="dashboard-layout">

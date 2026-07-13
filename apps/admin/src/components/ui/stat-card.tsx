@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { AdminIcon } from './admin-icon';
 
 type StatCardProps = {
@@ -5,12 +6,13 @@ type StatCardProps = {
   value: string;
   trend: string;
   tone?: 'info' | 'success' | 'warning' | 'neutral';
+  href?: string;
 };
 
 function inferIcon(label: string) {
   const text = label.toLowerCase();
   if (text.includes('uptime') || text.includes('live session')) return 'spark';
-  if (text.includes('booking') || text.includes('queue')) return 'bookings';
+  if (text.includes('booking') || text.includes('queue') || text.includes('appointment')) return 'bookings';
   if (text.includes('provider')) return 'providers';
   if (text.includes('refill') || text.includes('export') || text.includes('audit')) return 'queue';
   if (text.includes('payment') || text.includes('settlement') || text.includes('rejected') || text.includes('value')) return 'money';
@@ -24,11 +26,11 @@ function inferTone(value: string, trend: string): NonNullable<StatCardProps['ton
   return 'info';
 }
 
-export function StatCard({ label, value, trend, tone }: StatCardProps) {
+export function StatCard({ label, value, trend, tone, href }: StatCardProps) {
   const resolvedTone = tone ?? inferTone(value, trend);
 
-  return (
-    <article className="card stat-card stat-card--modern cp-dashboard-card" aria-label={`${label}: ${value}`}>
+  const content = (
+    <>
       <div className="stat-card-header">
         <div className={`stat-icon ${resolvedTone}`} aria-hidden="true">
           <AdminIcon name={inferIcon(label)} />
@@ -40,6 +42,25 @@ export function StatCard({ label, value, trend, tone }: StatCardProps) {
       <h3 className="cp-kpi-label">{label}</h3>
       <div className="kpi-value cp-kpi-value">{value}</div>
       <p className="muted">{trend}</p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="card stat-card stat-card--modern stat-card--clickable cp-dashboard-card"
+        aria-label={`${label}: ${value}`}
+        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <article className="card stat-card stat-card--modern cp-dashboard-card" aria-label={`${label}: ${value}`}>
+      {content}
     </article>
   );
 }
