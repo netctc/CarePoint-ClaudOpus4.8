@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
 import { AdminIcon } from '@/components/ui/admin-icon';
 import { DashboardActions } from '@/components/admin/dashboard-actions';
+import { PatientStatsDashboard } from '@/components/admin/patient-stats-dashboard';
 import { loadIntegratedDashboard, loadIntegratedPaymentsWorkspace, loadRefillRequests } from '@/lib/api/admin-server';
 import { formatUtcDateTime } from '@/lib/formatters';
 import { getAdminDictionary, normalizeAdminLocale } from '@/lib/i18n/admin-dictionary';
@@ -34,7 +35,7 @@ export default async function DashboardPage() {
     loadIntegratedPaymentsWorkspace(),
   ]);
 
-  const { dashboard, providerDirectory, providerQueue, auditLogs, governedRefillSummary, subjectSummary } = result.data;
+  const { dashboard, providerDirectory, providerQueue, auditLogs, governedRefillSummary } = result.data;
   const settlements = paymentsResult.data.items;
 
   const providersPendingAction = providerDirectory.filter((item) => item.operatingStatus !== 'Active').length;
@@ -264,21 +265,7 @@ export default async function DashboardPage() {
           </section>
 
 
-          <section className="card dashboard-table-card">
-            <div className="dashboard-table-header">
-              <div>
-                <h3 style={{ margin: 0, fontSize: 18 }}>{t.dashboard.subjectContextSummary}</h3>
-                <p className="muted" style={{ margin: '4px 0 0' }}>{t.dashboard.subjectContextSubtitle}</p>
-              </div>
-              <StatusBadge tone={(subjectSummary?.familyCount ?? 0) > 0 ? 'info' : 'success'}>{subjectSummary?.familyCount ?? 0} {t.dashboard.familySubjects}</StatusBadge>
-            </div>
-            <div className="metric-grid">
-              <div className="metric-item"><div>{t.dashboard.subjectTotal}</div><div>{subjectSummary?.total ?? 0}</div></div>
-              <div className="metric-item"><div>{t.dashboard.selfProfiles}</div><div>{subjectSummary?.selfCount ?? 0}</div></div>
-              <div className="metric-item"><div>{t.dashboard.familySubjects}</div><div>{subjectSummary?.familyCount ?? 0}</div></div>
-              <div className="metric-item"><div>{t.dashboard.topRelationship}</div><div>{subjectSummary?.topRelationship ?? '—'}</div></div>
-            </div>
-          </section>
+          <PatientStatsDashboard />
         </div>
       </div>
 

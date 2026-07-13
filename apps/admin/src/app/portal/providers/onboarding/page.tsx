@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { ProviderOnboardingTable } from '@/components/admin/provider-onboarding-table';
-import { DataSourceBanner } from '@/components/admin/data-source-banner';
 import { loadIntegratedProviderQueue } from '@/lib/api/admin-server';
 import { getAdminPortalCopy } from '@/lib/i18n/admin-portal-copy';
 import { normalizeAdminLocale } from '@/lib/i18n/admin-dictionary';
@@ -20,7 +19,6 @@ export default async function ProviderOnboardingQueuePage() {
 
   return (
     <PortalShell currentPath="/portal/providers/onboarding">
-      <DataSourceBanner source={result.source} error={result.error} />
 
         <div className="admin-v17-provider-workspace admin-v17-provider-onboarding">
       <div className="hero-panel">

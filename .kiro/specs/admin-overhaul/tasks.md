@@ -25,17 +25,17 @@
 - [x] 5.1 Modify `StatCard` component to accept optional `href` prop; when provided, renders as clickable `<Link>` element
 - [x] 5.2 Wire dashboard KPI stats: "Providers" links to `/portal/providers`, "Appointments" links to `/portal/bookings/control-tower`, "Active Providers" links to `/portal/providers?status=active`
 - [x] 5.3 Create `GET /api/admin/providers/growth` endpoint accepting `interval` query param (daily/weekly/monthly/yearly), returning time-series data for provider registrations and activity
-- [~] 5.4 Create `ProviderGrowthChart` client component (`src/components/admin/provider-growth-chart.tsx`) with time interval selector, fetches data from growth endpoint, renders interactive SVG bar chart with hover tooltips
+- [x] 5.4 Create `ProviderGrowthChart` client component (`src/components/admin/provider-growth-chart.tsx`) with time interval selector, fetches data from growth endpoint, renders interactive SVG bar chart with hover tooltips
 
 ## Task 6: Dashboard — Patient Statistics
 - [x] 6.1 Create `GET /api/admin/patients/statistics` endpoint returning: totalPatients, newPatients, activePatients, chronicPatients, upcomingAppointments, telehealthUsage, avgVisitsPerMonth, satisfactionRating, emergencyCases, mostRequestedServices
-- [~] 6.2 Create `PatientStatsDashboard` component (`src/components/admin/patient-stats-dashboard.tsx`) displaying all patient metrics with two charts (visits bar chart, services distribution donut)
-- [~] 6.3 Replace "Subject Context Summary" section in dashboard page with `PatientStatsDashboard` component
+- [x] 6.2 Create `PatientStatsDashboard` component (`src/components/admin/patient-stats-dashboard.tsx`) displaying all patient metrics with two charts (visits bar chart, services distribution donut)
+- [x] 6.3 Replace "Subject Context Summary" section in dashboard page with `PatientStatsDashboard` component
 
 ## Task 7: Provider Section — UI Cleanup
-- [~] 7.1 Remove `DataSourceBanner` usage from all provider pages
-- [~] 7.2 Remove hero panel descriptive text, "Design Applied" tags, focus areas card, redesign feature lists, intelligence strip explanatory labels from provider directory page
-- [~] 7.3 Remove design coverage section and evidence expected section from provider directory page
+- [x] 7.1 Remove `DataSourceBanner` usage from all provider pages
+- [x] 7.2 Remove hero panel descriptive text, "Design Applied" tags, focus areas card, redesign feature lists, intelligence strip explanatory labels from provider directory page
+- [x] 7.3 Remove design coverage section and evidence expected section from provider directory page
 
 ## Task 8: Provider Management Center (Backend)
 - [~] 8.1 Extend `GET /api/admin/providers` to support query params: name, type, specialty, medicalCenter, department, license, email, phone, country, state, city, languages, gender, yearsOfExperience, availability (online/inPerson/homeVisit), status (active/inactive), verified, acceptingNewPatients, calendarAvailability; with pagination (page, limit) and sort

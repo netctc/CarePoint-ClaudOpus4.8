@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { DataSourceBanner } from '@/components/admin/data-source-banner';
 import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -41,7 +40,6 @@ export default async function ProviderProfilePage({
 
     return (
       <PortalShell currentPath="/portal/providers">
-        <DataSourceBanner source={result.source} error={result.error} />
 
         <div className="admin-v17-provider-workspace admin-v17-provider-detail">
         <div className="hero-panel">

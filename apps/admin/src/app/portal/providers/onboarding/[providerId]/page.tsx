@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { DataSourceBanner } from '@/components/admin/data-source-banner';
 import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
 import { ProviderReviewActions } from '@/components/admin/provider-review-actions';
 import { PortalShell } from '@/components/layout/portal-shell';
@@ -75,7 +74,6 @@ export default async function ProviderOnboardingReviewPage({ params }: { params:
 
     return (
       <PortalShell currentPath="/portal/providers/onboarding">
-        <DataSourceBanner source={result.source} error={result.error} />
 
         <div className="admin-v17-provider-workspace admin-v17-provider-detail">
         <div className="hero-panel">
