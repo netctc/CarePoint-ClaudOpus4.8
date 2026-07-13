@@ -38,9 +38,9 @@
 - [x] 7.3 Remove design coverage section and evidence expected section from provider directory page
 
 ## Task 8: Provider Management Center (Backend)
-- [~] 8.1 Extend `GET /api/admin/providers` to support query params: name, type, specialty, medicalCenter, department, license, email, phone, country, state, city, languages, gender, yearsOfExperience, availability (online/inPerson/homeVisit), status (active/inactive), verified, acceptingNewPatients, calendarAvailability; with pagination (page, limit) and sort
-- [~] 8.2 Create `GET /api/admin/providers/statistics` endpoint returning: totalProviders, activeCount, onlineCount, availableTodayCount, avgRating, avgAppointmentDuration, cancellationRate, patientSatisfaction
-- [~] 8.3 Add provider status indicator computation to provider service: Active, Inactive, Currently Online, Has Scheduled Appointments, No Scheduled Appointments, Available Today, Fully Booked, Available for New Patients
+- [x] 8.1 Extend `GET /api/admin/providers` to support query params: name, type, specialty, medicalCenter, department, license, email, phone, country, state, city, languages, gender, yearsOfExperience, availability (online/inPerson/homeVisit), status (active/inactive), verified, acceptingNewPatients, calendarAvailability; with pagination (page, limit) and sort
+- [x] 8.2 Create `GET /api/admin/providers/statistics` endpoint returning: totalProviders, activeCount, onlineCount, availableTodayCount, avgRating, avgAppointmentDuration, cancellationRate, patientSatisfaction
+- [x] 8.3 Add provider status indicator computation to provider service: Active, Inactive, Currently Online, Has Scheduled Appointments, No Scheduled Appointments, Available Today, Fully Booked, Available for New Patients
 
 ## Task 9: Provider Management Center (Frontend)
 - [~] 9.1 Rebuild `/portal/providers/page.tsx` as Provider Management Center with: `StatsGrid` (provider statistics), `FilterPanel` (all filter categories), `AdminDataTable` (provider list with status indicators), action buttons (Add Provider, Export)
