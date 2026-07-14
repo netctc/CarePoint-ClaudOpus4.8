@@ -63,6 +63,8 @@ export function SidebarNav({ role, currentPath }: { role: AdminRole; currentPath
     setCollapsed((prev) => {
       const next = !prev;
       persistCollapsedState(next);
+      // Notify shell about collapse state change
+      window.dispatchEvent(new CustomEvent('sidebar-collapse-change', { detail: { collapsed: next } }));
       return next;
     });
   }, []);

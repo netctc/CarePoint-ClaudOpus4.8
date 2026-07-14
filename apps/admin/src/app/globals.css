@@ -1950,8 +1950,8 @@ button,
   --cp-control-pad-x: 16px;
   --cp-control-radius: 16px;
   --cp-table-min-width: 760px;
-  --cp-dashboard-stat-min-height: 156px;
-  --cp-dashboard-stat-grid-min: 220px;
+  --cp-dashboard-stat-min-height: auto;
+  --cp-dashboard-stat-grid-min: 180px;
 }
 
 .toolbar,
@@ -2040,12 +2040,13 @@ button,
 .grid-4,
 .stats-grid,
 .cp-dashboard-grid {
-  grid-template-columns: repeat(auto-fit, minmax(var(--cp-dashboard-stat-grid-min), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .stat-card--modern,
 .cp-dashboard-card {
-  min-height: var(--cp-dashboard-stat-min-height);
+  min-height: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2053,14 +2054,14 @@ button,
 
 .cp-kpi-label {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .cp-kpi-value {
-  font-size: clamp(1.8rem, 2.5vw, 2.35rem);
+  font-size: 1.3rem;
   line-height: 1;
   font-weight: 850;
   letter-spacing: -0.04em;
@@ -2179,12 +2180,22 @@ button,
   .grid-4,
   .stats-grid,
   .cp-dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .topbar-actions,
   .cp-topbar-actions {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .stats-grid,
+  .cp-dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2708,7 +2719,7 @@ button,
 /* Admin V16 login, shell and dashboard redesign
    Preserves all existing Admin loaders, RBAC route visibility, session loading and dashboard data calls. */
 .admin-v16-shell.page-shell {
-  grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-columns: auto 1fr;
   background:
     radial-gradient(circle at 12% 0%, rgba(30, 99, 215, 0.10), transparent 28%),
     linear-gradient(180deg, #f8faff 0%, #f3f6fc 48%, #eef3fb 100%);
@@ -2882,7 +2893,8 @@ button,
 
 .admin-v16-main .grid-4,
 .admin-v16-main .stats-grid {
-  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .admin-v16-main .stat-card,
@@ -2890,7 +2902,7 @@ button,
 .admin-v16-main .card,
 .admin-v16-main .chart-card {
   border: 1px solid rgba(203, 214, 234, 0.92);
-  border-radius: 28px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 16px 36px rgba(24, 42, 74, 0.06);
 }
@@ -2900,7 +2912,7 @@ button,
 }
 
 .admin-v16-main .stat-card {
-  padding: 22px;
+  padding: 16px 18px;
 }
 
 .admin-v16-main .stat-card strong,
@@ -3026,7 +3038,7 @@ button,
 
 @media (max-width: 1120px) {
   .admin-v16-shell.page-shell {
-    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-columns: auto 1fr;
   }
 
   .admin-v16-emergency-button span,
@@ -4959,7 +4971,9 @@ button,
 .stats-grid-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  padding: 16px 18px;
+  border-radius: 14px;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
 }
 
@@ -5376,14 +5390,14 @@ html[dir='rtl'] .admin-welcome-brand {
   min-width: 72px;
   padding: 26px 8px 22px;
   align-items: center;
+  overflow: visible;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
               min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
               padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
 }
 
-/* Adjust grid when sidebar is collapsed */
-.admin-v16-shell.page-shell:has(.sidebar--collapsed:not(.sidebar--hover-expanded)) {
+/* Adjust grid when sidebar is collapsed — class-based (no :has() needed) */
+.admin-v16-shell.shell--sidebar-collapsed {
   grid-template-columns: 72px minmax(0, 1fr);
   transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -5471,7 +5485,7 @@ html[dir='rtl'] .admin-welcome-brand {
     display: none;
   }
 
-  .admin-v16-shell.page-shell:has(.sidebar--collapsed) {
+  .admin-v16-shell.shell--sidebar-collapsed {
     grid-template-columns: 1fr;
   }
 }

@@ -8,6 +8,8 @@ import { MOCK_ADMIN_SESSION } from '@/lib/auth/mock-session';
 import { SidebarNav } from './sidebar-nav';
 import { Topbar } from './topbar';
 
+const SIDEBAR_COLLAPSED_KEY = 'cp_admin_sidebar_collapsed';
+
 type AdminProfile = {
   email?: string;
   fullName?: string;
@@ -38,6 +40,7 @@ function mapBackendRole(role: string | null | undefined): AdminRole {
 export function PortalShell({ currentPath, children }: { currentPath: string; children: ReactNode }) {
   const [browserSession, setBrowserSession] = useState<BrowserSession>({ accessToken: null, role: null });
   const [me, setMe] = useState<AdminProfile | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     const session = getBrowserSession();
@@ -50,6 +53,26 @@ export function PortalShell({ currentPath, children }: { currentPath: string; ch
     adminApi.me().then((response) => setMe(response as AdminProfile)).catch(() => undefined);
   }, []);
 
+  // Read initial sidebar state from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+      setSidebarCollapsed(stored === null ? true : stored === '1');
+    } catch {
+      // localStorage may be unavailable
+    }
+  }, []);
+
+  // Listen for sidebar state changes via a custom event
+  useEffect(() => {
+    function handleSidebarChange(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      setSidebarCollapsed(detail.collapsed);
+    }
+    window.addEventListener('sidebar-collapse-change', handleSidebarChange);
+    return () => window.removeEventListener('sidebar-collapse-change', handleSidebarChange);
+  }, []);
+
   const session = useMemo(
     () => ({
       name: me?.fullName || me?.email || MOCK_ADMIN_SESSION.name,
@@ -59,8 +82,17 @@ export function PortalShell({ currentPath, children }: { currentPath: string; ch
     [browserSession.role, me],
   );
 
+  const shellClasses = [
+    'page-shell',
+    'admin-theme-shell',
+    'cp-app-shell',
+    'cp-app-shell--admin',
+    'admin-v16-shell',
+    sidebarCollapsed ? 'shell--sidebar-collapsed' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className="page-shell admin-theme-shell cp-app-shell cp-app-shell--admin admin-v16-shell">
+    <div className={shellClasses}>
       <a className="skip-link" href="#admin-main-content">Skip to admin workspace</a>
       <SidebarNav role={session.role} currentPath={currentPath} />
       <div className="content-area cp-content-area admin-v16-content">
