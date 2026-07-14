@@ -76,13 +76,14 @@ textarea {
   position: sticky;
   top: 0;
   height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 18px 16px 18px 18px;
   background: rgba(248, 251, 255, 0.86);
   border-right: 1px solid rgba(204, 216, 236, 0.75);
   backdrop-filter: blur(18px);
+  overflow: hidden;
 }
 
 .sidebar-brand {
@@ -90,6 +91,7 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 8px 8px 10px;
+  flex-shrink: 0;
 }
 
 .sidebar-logo {
@@ -119,7 +121,10 @@ textarea {
 }
 
 .sidebar-scroll {
-  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 4px;
 }
 
@@ -184,6 +189,7 @@ textarea {
 }
 
 .sidebar-footer {
+  flex-shrink: 0;
   padding-top: 14px;
   border-top: 1px solid rgba(204, 216, 236, 0.75);
 }
@@ -2767,6 +2773,7 @@ button,
   color: #fff;
   font-weight: 800;
   box-shadow: 0 16px 30px rgba(21, 95, 228, 0.20);
+  flex-shrink: 0;
 }
 
 .admin-v16-new-action .nav-icon {
