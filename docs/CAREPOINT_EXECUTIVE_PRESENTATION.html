@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarePoint Platform — Executive Presentation</title>
+<style>
+:root{--primary:#0066CC;--primary-dark:#004999;--accent:#00B4D8;--success:#10B981;--warning:#F59E0B;--danger:#EF4444;--dark:#1E293B;--gray:#64748B;--light:#F8FAFC;--white:#FFFFFF;--gradient:linear-gradient(135deg,#0066CC 0%,#00B4D8 100%)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:var(--dark);overflow:hidden;height:100vh}
+.slide{display:none;width:100vw;height:100vh;padding:60px 80px;position:relative;overflow:hidden}
+.slide.active{display:flex;flex-direction:column;justify-content:center}
+.slide-counter{position:fixed;bottom:20px;right:30px;color:rgba(255,255,255,0.6);font-size:14px;z-index:100}
+.nav-controls{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:100}
+.nav-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:14px;transition:all 0.3s}
+.nav-btn:hover{background:rgba(255,255,255,0.3)}
+.slide-title{background:var(--gradient);color:var(--white);padding:60px 80px}
+.slide-title h1{font-size:3.5rem;font-weight:800;margin-bottom:20px;letter-spacing:-1px}
+.slide-title h2{font-size:1.8rem;font-weight:300;opacity:0.9}
+.slide-title .subtitle{font-size:1.2rem;opacity:0.7;margin-top:30px}
+.slide-content{background:var(--white);padding:60px 80px}
+.slide-content h2{font-size:2.2rem;color:var(--primary);margin-bottom:30px;padding-bottom:15px;border-bottom:3px solid var(--accent)}
+.slide-content h3{font-size:1.4rem;color:var(--dark);margin:20px 0 10px}
+.slide-gradient{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:60px 80px}
+.slide-gradient h2{font-size:2.2rem;margin-bottom:30px;border-bottom:2px solid rgba(255,255,255,0.3);padding-bottom:15px}
+.slide-dark{background:var(--dark);color:var(--white);padding:60px 80px}
+.slide-dark h2{font-size:2.2rem;margin-bottom:30px;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:15px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:25px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px}
+.card{background:rgba(255,255,255,0.1);border-radius:12px;padding:25px;border:1px solid rgba(255,255,255,0.15)}
+.card-white{background:var(--white);border-radius:12px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,0.08);border:1px solid #e2e8f0}
+.card-white h4{color:var(--primary);margin-bottom:10px;font-size:1.1rem}
+.card-white p{color:var(--gray);font-size:0.9rem;line-height:1.5}
+.stat-box{text-align:center;padding:20px;background:rgba(255,255,255,0.08);border-radius:10px;border:1px solid rgba(255,255,255,0.12)}
+.stat-box .number{font-size:2.8rem;font-weight:800;color:var(--accent)}
+.stat-box .label{font-size:0.85rem;opacity:0.8;margin-top:5px}
+.progress-bar{height:24px;background:rgba(0,0,0,0.1);border-radius:12px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:12px;display:flex;align-items:center;padding-left:10px;font-size:0.75rem;font-weight:600;color:white}
+.tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;margin:3px}
+.tag-green{background:#d1fae5;color:#065f46}
+.tag-yellow{background:#fef3c7;color:#92400e}
+.tag-blue{background:#dbeafe;color:#1e40af}
+.tag-red{background:#fee2e2;color:#991b1b}
+ul{list-style:none;padding:0}
+ul li{padding:8px 0;padding-left:25px;position:relative;font-size:0.95rem;line-height:1.5}
+ul li::before{content:"▸";position:absolute;left:0;color:var(--accent);font-weight:bold}
+.diagram-box{background:rgba(0,0,0,0.03);border:2px dashed #cbd5e1;border-radius:12px;padding:30px;text-align:center;font-family:'Courier New',monospace;font-size:0.85rem;line-height:1.8;white-space:pre;overflow:auto}
+.diagram-dark{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:25px;font-family:'Courier New',monospace;font-size:0.8rem;line-height:1.7;white-space:pre;overflow:auto;color:rgba(255,255,255,0.9)}
+.flow-container{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;padding:20px 0}
+.flow-box{background:var(--primary);color:white;padding:12px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;text-align:center;min-width:120px}
+.flow-arrow{font-size:1.5rem;color:var(--accent)}
+.timeline{position:relative;padding-left:30px}
+.timeline::before{content:"";position:absolute;left:10px;top:0;bottom:0;width:3px;background:var(--accent)}
+.timeline-item{position:relative;margin-bottom:20px;padding-left:20px}
+.timeline-item::before{content:"";position:absolute;left:-24px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--accent)}
+.table-simple{width:100%;border-collapse:collapse;font-size:0.85rem}
+.table-simple th{background:var(--primary);color:white;padding:10px 15px;text-align:left}
+.table-simple td{padding:10px 15px;border-bottom:1px solid #e2e8f0}
+.table-simple tr:nth-child(even){background:#f8fafc}
+.watermark{position:absolute;bottom:20px;left:30px;opacity:0.4;font-size:0.75rem;color:inherit}
+@media print{.slide{display:flex!important;page-break-after:always;height:100vh}.nav-controls,.slide-counter{display:none}}
+</style>
+</head>
+<body>
+
+
+<!-- SLIDE 1: Title -->
+<div class="slide slide-title active" id="slide-1">
+  <h1>CarePoint Platform</h1>
+  <h2>Comprehensive Healthcare Management System</h2>
+  <div class="subtitle">Executive Presentation — Project Review & Status Update<br>June 2026</div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 2: Agenda -->
+<div class="slide slide-content" id="slide-2">
+  <h2>Agenda</h2>
+  <div class="grid-2">
+    <div>
+      <ul>
+        <li><strong>1.</strong> Project Vision & Scope</li>
+        <li><strong>2.</strong> Platform Architecture</li>
+        <li><strong>3.</strong> Technology Stack</li>
+        <li><strong>4.</strong> Core Modules Overview</li>
+        <li><strong>5.</strong> Clinical Workflows</li>
+        <li><strong>6.</strong> Patient Experience</li>
+        <li><strong>7.</strong> Telehealth Integration (Daily)</li>
+        <li><strong>8.</strong> SMS/OTP Integration (Twilio)</li>
+        <li><strong>9.</strong> Payment Processing (Stripe)</li>
+        <li><strong>10.</strong> Security & Compliance</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong>11.</strong> Database Architecture</li>
+        <li><strong>12.</strong> Application Portfolio</li>
+        <li><strong>13.</strong> Implementation Status</li>
+        <li><strong>14.</strong> CI/CD & Quality Assurance</li>
+        <li><strong>15.</strong> Hybrid Python Worker</li>
+        <li><strong>16.</strong> Data Flow Diagram</li>
+        <li><strong>17.</strong> Integration Architecture</li>
+        <li><strong>18.</strong> Risk Assessment</li>
+        <li><strong>19.</strong> Roadmap & Next Steps</li>
+        <li><strong>20.</strong> Key Takeaways</li>
+      </ul>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 3: Vision & Scope -->
+<div class="slide slide-gradient" id="slide-3">
+  <h2>Project Vision & Scope</h2>
+  <p style="font-size:1.2rem;opacity:0.9;margin-bottom:30px;">CarePoint is an end-to-end healthcare management platform enabling organizations, providers, and patients to connect through secure digital workflows.</p>
+  <div class="grid-4">
+    <div class="stat-box">
+      <div class="number">4</div>
+      <div class="label">Frontend Apps</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">50+</div>
+      <div class="label">API Modules</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">9</div>
+      <div class="label">User Roles</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">30+</div>
+      <div class="label">Data Models</div>
+    </div>
+  </div>
+  <div style="margin-top:30px;">
+    <div class="grid-3">
+      <div class="card">
+        <h4 style="color:white;margin-bottom:8px;">For Organizations</h4>
+        <p style="opacity:0.8;font-size:0.9rem;">Complete administrative control, reporting, compliance, and multi-provider management</p>
+      </div>
+      <div class="card">
+        <h4 style="color:white;margin-bottom:8px;">For Providers</h4>
+        <p style="opacity:0.8;font-size:0.9rem;">Clinical workflows, telehealth, scheduling, prescriptions, labs, and RPM</p>
+      </div>
+      <div class="card">
+        <h4 style="color:white;margin-bottom:8px;">For Patients</h4>
+        <p style="opacity:0.8;font-size:0.9rem;">Mobile access, family management, appointments, care plans, and secure messaging</p>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 4: Platform Architecture -->
+<div class="slide slide-content" id="slide-4">
+  <h2>Platform Architecture</h2>
+  <div class="diagram-box" style="font-size:0.78rem;">
+┌───────────────────────────────────────────────────────────────────────┐
+│                        CAREPOINT PLATFORM                              │
+├───────────────────────────────────────────────────────────────────────┤
+│                                                                       │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
+│  │Admin Portal │ │Provider Web │ │Patient Mobile│ │Provider Mobile│  │
+│  │  Next.js    │ │  Next.js    │ │  Flutter     │ │  Flutter     │   │
+│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘   │
+│         └────────────────┼───────────────┼───────────────┘           │
+│                          ▼               ▼                            │
+│              ┌────────────────────────────────────┐                   │
+│              │     Express REST API (Node.js)     │                   │
+│              │     Port 4000 | 50+ Route Modules  │                   │
+│              └─────────┬─────────────┬────────────┘                   │
+│                        │             │                                 │
+│              ┌─────────▼──┐  ┌───────▼────────────┐                  │
+│              │PostgreSQL 16│  │  Redis 7 (Cache)   │                  │
+│              └────────────┘  └────────────────────┘                   │
+│                        │                                              │
+│              ┌─────────▼──────────────────────────┐                   │
+│              │  Python Worker (FastAPI + Celery)   │                   │
+│              │  Port 8010 | 120+ Async Job Types   │                  │
+│              └────────────────────────────────────┘                   │
+│                                                                       │
+│  External: [Daily.co] [Twilio] [Stripe] [SMTP]                       │
+└───────────────────────────────────────────────────────────────────────┘
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 5: Technology Stack -->
+<div class="slide slide-dark" id="slide-5">
+  <h2>Technology Stack</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Backend</h4>
+      <ul>
+        <li>Node.js 22+ (Express 4.19)</li>
+        <li>PostgreSQL 16 (Prisma ORM)</li>
+        <li>Redis 7 (Cache/Queue)</li>
+        <li>Python 3.12 (FastAPI)</li>
+        <li>Celery (Task Queue)</li>
+        <li>Socket.IO (Real-time)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Frontend</h4>
+      <ul>
+        <li>Next.js (Admin & Provider)</li>
+        <li>Flutter/Dart (Mobile Apps)</li>
+        <li>TypeScript (Type Safety)</li>
+        <li>Zod (Shared Contracts)</li>
+        <li>i18n (English + Arabic)</li>
+        <li>Responsive Design</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Infrastructure</h4>
+      <ul>
+        <li>Docker / Docker Compose</li>
+        <li>GitHub Actions (CI/CD)</li>
+        <li>npm Workspaces (Monorepo)</li>
+        <li>Helmet.js (Security)</li>
+        <li>Prometheus (Metrics)</li>
+        <li>Automated QA Scripts</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:25px;">
+    <div class="grid-3">
+      <div class="card">
+        <h4 style="color:var(--accent);margin-bottom:10px;">Integrations</h4>
+        <ul>
+          <li>Daily.co (Video/Telehealth)</li>
+          <li>Twilio (SMS/OTP)</li>
+          <li>Stripe (Payments)</li>
+          <li>SMTP (Email)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent);margin-bottom:10px;">Security</h4>
+        <ul>
+          <li>JWT + Refresh Tokens</li>
+          <li>bcrypt Password Hashing</li>
+          <li>RBAC (9 Roles)</li>
+          <li>MFA (TOTP/SMS/Email)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--accent);margin-bottom:10px;">Quality</h4>
+        <ul>
+          <li>Vitest (API Tests)</li>
+          <li>Pytest (Python Worker)</li>
+          <li>Flutter Analyze</li>
+          <li>TypeScript Strict</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 6: Core Modules Overview -->
+<div class="slide slide-content" id="slide-6">
+  <h2>Core Modules Overview</h2>
+  <div class="grid-4">
+    <div class="card-white">
+      <h4>Authentication</h4>
+      <p>JWT, MFA, OTP, SSO, session management with role-scoped cookies</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Appointments</h4>
+      <p>Scheduling, booking, status workflow, subject context for family</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Telehealth</h4>
+      <p>Video sessions via Daily, consent enforcement, compliance policies</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Payments</h4>
+      <p>Stripe intents, wallet methods, refunds, holds, reconciliation</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Medical Records</h4>
+      <p>Clinical records, PHI release requests, scope control</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Messaging</h4>
+      <p>Real-time threads, patient-provider & internal, Socket.IO</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Provider Workflows</h4>
+      <p>Orders, prescriptions, labs, RPM, onboarding, calendar</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+    <div class="card-white">
+      <h4>Administration</h4>
+      <p>User CRUD, RBAC, audit logs, catalog, coverage, pricing</p>
+      <span class="tag tag-green">Complete</span>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 7: Clinical Workflows -->
+<div class="slide slide-content" id="slide-7">
+  <h2>Clinical Workflows</h2>
+  <h3>Provider Clinical Journey</h3>
+  <div class="flow-container">
+    <div class="flow-box">Onboarding &<br>Credentials</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Schedule<br>Management</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Patient<br>Queue</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Consultation<br>(Telehealth/Visit)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Clinical<br>Documentation</div>
+  </div>
+  <div class="flow-container" style="margin-top:10px;">
+    <div class="flow-box" style="background:var(--accent);">Orders</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="background:var(--accent);">Prescriptions</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="background:var(--accent);">Lab Results</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="background:var(--accent);">RPM<br>Monitoring</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="background:var(--accent);">Alerts &<br>Follow-up</div>
+  </div>
+  <h3 style="margin-top:25px;">Key Clinical Modules</h3>
+  <div class="grid-3" style="margin-top:10px;">
+    <div class="card-white">
+      <h4>Credential Verification</h4>
+      <p>License, ID, insurance, certification documents with review tasks and notifications</p>
+    </div>
+    <div class="card-white">
+      <h4>Clinical Orders</h4>
+      <p>Order composition, compliance validation, submission, tracking, and history</p>
+    </div>
+    <div class="card-white">
+      <h4>Remote Patient Monitoring</h4>
+      <p>Device enrollment, vital readings, trend analysis, alert triggers</p>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 8: Patient Experience -->
+<div class="slide slide-gradient" id="slide-8">
+  <h2>Patient Experience</h2>
+  <p style="opacity:0.9;margin-bottom:25px;font-size:1.1rem;">Mobile-first patient engagement with comprehensive care management features</p>
+  <div class="grid-3">
+    <div class="card">
+      <h4 style="color:white;margin-bottom:10px;">Access & Authentication</h4>
+      <ul style="color:rgba(255,255,255,0.85);">
+        <li>Passwordless OTP login</li>
+        <li>Family profile management</li>
+        <li>Locale preferences (EN/AR)</li>
+        <li>Digital consent management</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:white;margin-bottom:10px;">Care Management</h4>
+      <ul style="color:rgba(255,255,255,0.85);">
+        <li>Appointment booking</li>
+        <li>Video consultations</li>
+        <li>Care plan tasks</li>
+        <li>Medication reminders</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="color:white;margin-bottom:10px;">Health Monitoring</h4>
+      <ul style="color:rgba(255,255,255,0.85);">
+        <li>RPM readings & trends</li>
+        <li>Questionnaires</li>
+        <li>Notifications center</li>
+        <li>Support tickets</li>
+      </ul>
+    </div>
+  </div>
+  <h3 style="margin-top:25px;color:white;">Patient Journey Flow</h3>
+  <div class="flow-container">
+    <div class="flow-box" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">OTP Login</div>
+    <div class="flow-arrow" style="color:white;">&rarr;</div>
+    <div class="flow-box" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">Book Appointment</div>
+    <div class="flow-arrow" style="color:white;">&rarr;</div>
+    <div class="flow-box" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">Video Consultation</div>
+    <div class="flow-arrow" style="color:white;">&rarr;</div>
+    <div class="flow-box" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">Care Plan &amp; RPM</div>
+    <div class="flow-arrow" style="color:white;">&rarr;</div>
+    <div class="flow-box" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);">Follow-up</div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 9: Daily Telehealth Integration -->
+<div class="slide slide-content" id="slide-9">
+  <h2>Telehealth Integration — Daily.co</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Architecture</h3>
+      <div class="diagram-box" style="font-size:0.75rem;text-align:left;">
+Patient/Provider          CarePoint API           Daily.co
+      │                        │                    │
+      │  1. Join Request       │                    │
+      │───────────────────────►│                    │
+      │                        │ 2. Create Room     │
+      │                        │───────────────────►│
+      │                        │ 3. Room URL        │
+      │                        │◄───────────────────│
+      │  4. Join URL + Token   │                    │
+      │◄───────────────────────│                    │
+      │                        │                    │
+      │  5. WebRTC Video ◄─────────────────────────►│
+      │                        │                    │
+      </div>
+    </div>
+    <div>
+      <h3>Features Implemented</h3>
+      <ul>
+        <li>Session lifecycle (SCHEDULED→READY→LIVE→ENDED)</li>
+        <li>Patient readiness & consent enforcement</li>
+        <li>Recording policy with explicit consent</li>
+        <li>HSP facility-scoped access control</li>
+        <li>Operations dashboard with live metrics</li>
+        <li>Room restart and escalation workflows</li>
+        <li>Full audit trail for compliance</li>
+      </ul>
+      <h3 style="margin-top:20px;">Configuration</h3>
+      <ul>
+        <li><code>TELEHEALTH_VENDOR=daily</code></li>
+        <li><code>DAILY_API_KEY=&lt;secret&gt;</code></li>
+        <li>Deterministic room URL generation</li>
+        <li>HIPAA-ready architecture</li>
+      </ul>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 10: Twilio SMS/OTP Integration -->
+<div class="slide slide-dark" id="slide-10">
+  <h2>SMS/OTP Integration — Twilio</h2>
+  <div class="grid-2">
+    <div>
+      <h3 style="color:var(--accent);margin-bottom:15px;">Authentication Flows</h3>
+      <div class="diagram-dark" style="font-size:0.72rem;">
+Patient OTP Flow:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Patient enters phone/email
+2. API generates 6-digit code
+3. Code stored (Redis + file)
+4. SMS sent via Twilio
+5. Patient enters code
+6. Verified → JWT issued
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Privileged MFA Flow:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Admin/Provider logs in
+2. MFA challenge issued
+3. Code via TOTP/SMS/Email
+4. User verifies challenge
+5. Full session granted
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      </div>
+    </div>
+    <div>
+      <h3 style="color:var(--accent);margin-bottom:15px;">Security Controls</h3>
+      <div class="card" style="margin-bottom:15px;">
+        <table style="width:100%;color:rgba(255,255,255,0.9);font-size:0.85rem;">
+          <tr><td>Code Length</td><td style="text-align:right;"><strong>6 digits</strong></td></tr>
+          <tr><td>TTL</td><td style="text-align:right;"><strong>5 minutes</strong></td></tr>
+          <tr><td>Max Attempts</td><td style="text-align:right;"><strong>5</strong></td></tr>
+          <tr><td>Lockout</td><td style="text-align:right;"><strong>15 minutes</strong></td></tr>
+          <tr><td>Resend Cooldown</td><td style="text-align:right;"><strong>60 seconds</strong></td></tr>
+          <tr><td>Storage</td><td style="text-align:right;"><strong>Redis + File</strong></td></tr>
+        </table>
+      </div>
+      <h3 style="color:var(--accent);margin-bottom:15px;">Reliability</h3>
+      <ul style="color:rgba(255,255,255,0.85);">
+        <li>Dual-storage (Redis primary, file fallback)</li>
+        <li>Rate limiting prevents toll fraud</li>
+        <li>Automatic lockout protection</li>
+        <li>Channel flexibility (SMS/Email/TOTP)</li>
+        <li>Full audit trail logging</li>
+      </ul>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 11: Payment Processing -->
+<div class="slide slide-content" id="slide-11">
+  <h2>Payment Processing — Stripe</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Payment Flow</h3>
+      <div class="flow-container" style="flex-direction:column;align-items:flex-start;">
+        <div style="display:flex;align-items:center;gap:15px;margin:5px 0;">
+          <div class="flow-box" style="min-width:180px;">Patient Booking</div>
+          <span class="flow-arrow">&rarr;</span>
+          <span style="font-size:0.85rem;color:var(--gray);">Appointment created</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:15px;margin:5px 0;">
+          <div class="flow-box" style="min-width:180px;">Payment Intent</div>
+          <span class="flow-arrow">&rarr;</span>
+          <span style="font-size:0.85rem;color:var(--gray);">Stripe or manual gateway</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:15px;margin:5px 0;">
+          <div class="flow-box" style="min-width:180px;">Authorization</div>
+          <span class="flow-arrow">&rarr;</span>
+          <span style="font-size:0.85rem;color:var(--gray);">Review if required</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:15px;margin:5px 0;">
+          <div class="flow-box" style="min-width:180px;background:var(--success);">Settlement</div>
+          <span class="flow-arrow">&rarr;</span>
+          <span style="font-size:0.85rem;color:var(--gray);">Captured + commission</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Capabilities</h3>
+      <div class="grid-2" style="gap:10px;">
+        <div class="card-white"><h4>Wallet Methods</h4><p>Card, Apple Pay, MADA, STC Pay</p></div>
+        <div class="card-white"><h4>Admin Holds</h4><p>Finance review with hold/release</p></div>
+        <div class="card-white"><h4>Refunds</h4><p>Full/partial with reason codes</p></div>
+        <div class="card-white"><h4>Reconciliation</h4><p>Search, filter, status tracking</p></div>
+      </div>
+      <h3 style="margin-top:15px;">Financial Summary Dashboard</h3>
+      <ul>
+        <li>Total payments and revenue tracking</li>
+        <li>Status breakdown (pending/captured/refunded)</li>
+        <li>10% platform commission on settlements</li>
+        <li>Held payments monitoring</li>
+      </ul>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 12: Security & Compliance -->
+<div class="slide slide-gradient" id="slide-12">
+  <h2>Security & Compliance Architecture</h2>
+  <div class="grid-2">
+    <div>
+      <h3 style="color:white;margin-bottom:15px;">Authentication Layers</h3>
+      <div class="card">
+        <ul style="color:rgba(255,255,255,0.9);">
+          <li>bcrypt password hashing with salt</li>
+          <li>JWT Access Tokens (15 min TTL)</li>
+          <li>JWT Refresh Tokens (30 day TTL)</li>
+          <li>HttpOnly, SameSite cookies</li>
+          <li>Role-scoped portal cookies</li>
+          <li>Multi-factor auth (TOTP/SMS/Email)</li>
+          <li>Enterprise SSO support</li>
+          <li>Patient OTP passwordless login</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:white;margin-bottom:15px;">RBAC — 9 Roles, 4 Categories</h3>
+      <div class="card">
+        <table style="width:100%;color:rgba(255,255,255,0.9);font-size:0.82rem;">
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.2)"><td><strong>Platform</strong></td><td>SUPER_ADMIN</td></tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.2)"><td><strong>Organization</strong></td><td>COMPANY_ADMIN, COMPANY_SUPPORT, FINANCE</td></tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.2)"><td><strong>Clinical</strong></td><td>PROVIDER, NURSE, PHARMACIST, LAB_TECH</td></tr>
+          <tr><td><strong>Consumer</strong></td><td>PATIENT</td></tr>
+        </table>
+      </div>
+      <h3 style="color:white;margin-top:20px;margin-bottom:10px;">Data Protection</h3>
+      <div class="card">
+        <ul style="color:rgba(255,255,255,0.9);font-size:0.85rem;">
+          <li>Medical profile encryption key</li>
+          <li>Organization-level data isolation</li>
+          <li>PHI scope controls (Full/Limited/Billing)</li>
+          <li>Comprehensive audit trail</li>
+          <li>HSP facility-based access scoping</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 13: Database Architecture -->
+<div class="slide slide-content" id="slide-13">
+  <h2>Database Architecture</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Core Entity Relationships</h3>
+      <div class="diagram-box" style="font-size:0.7rem;text-align:left;">
+Organization (Multi-Tenant Root)
+  ├── User (9 roles)
+  │    ├── PatientProfile
+  │    │    ├── Appointments
+  │    │    ├── MedicalRecords
+  │    │    ├── Payments
+  │    │    ├── MessageThreads
+  │    │    └── FamilyProfiles
+  │    └── ProviderProfile
+  │         ├── Appointments
+  │         ├── CredentialDocuments
+  │         ├── OnboardingState
+  │         └── ScheduleTemplates
+  ├── TelehealthSession
+  ├── ClinicalOrder
+  ├── PrescriptionDraft
+  ├── LabWorkItem
+  ├── RpmEnrollment
+  ├── ServiceCatalog
+  ├── CoverageRule
+  ├── PricingRule
+  ├── AuditLog
+  └── RefreshToken
+      </div>
+    </div>
+    <div>
+      <h3>Key Design Patterns</h3>
+      <ul>
+        <li><strong>Multi-tenancy:</strong> All tables scoped to Organization</li>
+        <li><strong>Soft deletes:</strong> Status fields vs hard delete</li>
+        <li><strong>JSON flexibility:</strong> Metadata/data columns for evolving schemas</li>
+        <li><strong>Strategic indexes:</strong> (orgId, status, date) patterns</li>
+        <li><strong>Enum constraints:</strong> DB-level validation</li>
+      </ul>
+      <h3 style="margin-top:20px;">Model Categories</h3>
+      <div class="grid-2" style="gap:8px;margin-top:10px;">
+        <div class="card-white" style="padding:12px;"><h4 style="font-size:0.9rem;">Clinical</h4><p style="font-size:0.8rem;">7 models</p></div>
+        <div class="card-white" style="padding:12px;"><h4 style="font-size:0.9rem;">Patient</h4><p style="font-size:0.8rem;">7 models</p></div>
+        <div class="card-white" style="padding:12px;"><h4 style="font-size:0.9rem;">Operations</h4><p style="font-size:0.8rem;">10 models</p></div>
+        <div class="card-white" style="padding:12px;"><h4 style="font-size:0.9rem;">Credentialing</h4><p style="font-size:0.8rem;">5 models</p></div>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 14: Application Portfolio -->
+<div class="slide slide-dark" id="slide-14">
+  <h2>Application Portfolio</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Admin Portal (Next.js)</h4>
+      <p style="color:rgba(255,255,255,0.8);margin-bottom:10px;">Company administration and governance</p>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.85rem;">
+        <li>User & account management</li>
+        <li>RBAC & role assignments</li>
+        <li>Audit log viewer</li>
+        <li>Reports & campaigns</li>
+        <li>Integrations & moderation</li>
+        <li>Coverage & pricing rules</li>
+      </ul>
+      <div style="margin-top:10px;"><span class="tag tag-green">v1.1 — Slot 5</span></div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Provider Portal (Next.js)</h4>
+      <p style="color:rgba(255,255,255,0.8);margin-bottom:10px;">Clinical workflows and practice management</p>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.85rem;">
+        <li>Dashboard & patient queue</li>
+        <li>Calendar & scheduling</li>
+        <li>Telehealth sessions</li>
+        <li>Orders, Rx, Labs, RPM</li>
+        <li>Team & settings management</li>
+        <li>Billing & compliance</li>
+      </ul>
+      <div style="margin-top:10px;"><span class="tag tag-green">v0.6 — Slot 1</span></div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Patient Mobile (Flutter)</h4>
+      <p style="color:rgba(255,255,255,0.8);margin-bottom:10px;">Patient-facing mobile application</p>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.85rem;">
+        <li>OTP passwordless login</li>
+        <li>Appointment booking & management</li>
+        <li>Family profile management</li>
+        <li>Care plan & reminders</li>
+        <li>RPM readings & trends</li>
+        <li>Support & notifications</li>
+      </ul>
+      <div style="margin-top:10px;"><span class="tag tag-blue">v0.7 — Integration</span></div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Provider Mobile (Flutter)</h4>
+      <p style="color:rgba(255,255,255,0.8);margin-bottom:10px;">Provider clinical mobile workflows</p>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.85rem;">
+        <li>Queue & calendar</li>
+        <li>Telehealth on-the-go</li>
+        <li>Clinical encounter signing</li>
+        <li>Offline mutation queue</li>
+        <li>Facility settings</li>
+        <li>HSP consent enforcement</li>
+      </ul>
+      <div style="margin-top:10px;"><span class="tag tag-blue">Clinical+Ops Phase</span></div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 15: Implementation Status -->
+<div class="slide slide-content" id="slide-15">
+  <h2>Implementation Status Dashboard</h2>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Backend API</strong></span><span style="color:var(--success);font-weight:700;">100%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--success);">50+ modules complete</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Admin Portal</strong></span><span style="color:var(--success);font-weight:700;">90%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:90%;background:var(--success);">5 integration slots delivered</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Provider Portal</strong></span><span style="color:var(--success);font-weight:700;">90%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:90%;background:var(--success);">Full clinical workflow suite</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Patient Mobile</strong></span><span style="color:var(--warning);font-weight:700;">70%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:70%;background:var(--warning);">Core features live, device testing pending</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Provider Mobile</strong></span><span style="color:var(--primary);font-weight:700;">80%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--primary);">Clinical + offline readiness</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>External Integrations</strong></span><span style="color:var(--primary);font-weight:700;">80%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--primary);">Architecture ready, SDK wiring in progress</div></div>
+  </div>
+  <div style="margin-bottom:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span><strong>Overall Project</strong></span><span style="color:var(--primary);font-weight:700;">79%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:79%;background:linear-gradient(90deg,var(--primary),var(--accent));">On track for pilot launch</div></div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 16: CI/CD & Quality Assurance -->
+<div class="slide slide-content" id="slide-16">
+  <h2>CI/CD & Quality Assurance</h2>
+  <div class="grid-2">
+    <div>
+      <h3>GitHub Actions Pipeline</h3>
+      <div class="diagram-box" style="font-size:0.75rem;text-align:left;">
+┌─── Pull Request / Push ───┐
+│                            │
+├─► Job 1: Backend Build     │
+│   • npm ci                 │
+│   • Secrets check          │
+│   • Prisma generate        │
+│   • Build contracts + API  │
+│   • API smoke tests        │
+│   • Vitest suite           │
+│   • Python worker tests    │
+│                            │
+├─► Job 2: Web Build         │
+│   • Build admin portal     │
+│   • Build provider portal  │
+│                            │
+├─► Job 3: Mobile Analyze    │
+│   • Flutter analyze patient│
+│   • Flutter analyze provider│
+│                            │
+└────────────────────────────┘
+      </div>
+    </div>
+    <div>
+      <h3>Quality Automation Scripts</h3>
+      <div class="card-white" style="margin-bottom:10px;">
+        <h4>UX Audit Suite</h4>
+        <p>Layout, components, responsive, accessibility, workflow polish scans</p>
+      </div>
+      <div class="card-white" style="margin-bottom:10px;">
+        <h4>QA Audit Suite</h4>
+        <p>Admin, provider, API, UAT, production readiness, go-live closure</p>
+      </div>
+      <div class="card-white" style="margin-bottom:10px;">
+        <h4>Pilot Execution Suite</h4>
+        <p>Staging rehearsal, launch runbook, monitoring, feedback, closure</p>
+      </div>
+      <div class="card-white">
+        <h4>Test Infrastructure</h4>
+        <p>PostgreSQL 16 + Redis 7 service containers in CI, Python pytest, Vitest</p>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 17: Hybrid Python Worker -->
+<div class="slide slide-dark" id="slide-17">
+  <h2>Hybrid Python Worker Service</h2>
+  <p style="color:rgba(255,255,255,0.8);margin-bottom:25px;">Progressive adoption architecture for migrating workloads from Node.js to Python</p>
+  <div class="grid-2">
+    <div>
+      <h3 style="color:var(--accent);margin-bottom:15px;">Architecture</h3>
+      <div class="diagram-dark" style="font-size:0.72rem;">
+Node.js API ──► Bridge Layer ──► Python Worker
+    │                                  │
+    │  Shadow Traffic                  │
+    │  (record + compare)              │
+    │                                  │
+    ├── Canary Gate ──► Decision       │
+    │   • advance                      │
+    │   • hold                         │
+    │   • rollback                     │
+    │                                  │
+    └── Rollout Controller             │
+        • 0% → 5% → 25% → 100%       │
+                                       │
+        FastAPI + Celery Workers ◄─────┘
+        Redis Queue | Prometheus
+      </div>
+    </div>
+    <div>
+      <h3 style="color:var(--accent);margin-bottom:15px;">Capabilities</h3>
+      <div class="grid-2" style="gap:10px;">
+        <div class="card">
+          <div style="font-size:2rem;text-align:center;color:var(--accent);">120+</div>
+          <div style="text-align:center;font-size:0.8rem;opacity:0.8;">Job Types</div>
+        </div>
+        <div class="card">
+          <div style="font-size:2rem;text-align:center;color:var(--accent);">100%</div>
+          <div style="text-align:center;font-size:0.8rem;opacity:0.8;">Canary Safe</div>
+        </div>
+      </div>
+      <h3 style="color:var(--accent);margin-top:20px;margin-bottom:10px;">Job Categories</h3>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.85rem;">
+        <li>Admin: audit export, accounts validation</li>
+        <li>Scheduling: availability snapshots</li>
+        <li>Billing: payment reconciliation</li>
+        <li>Clinical: records access audit</li>
+        <li>Platform: 90+ operational reviews</li>
+        <li>Notifications: dispatch</li>
+        <li>Analytics: snapshot generation</li>
+        <li>AI: triage preview (planned)</li>
+      </ul>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 18: Data Flow Diagram -->
+<div class="slide slide-content" id="slide-18">
+  <h2>Data Flow & Information Exchange</h2>
+  <div class="diagram-box" style="font-size:0.72rem;text-align:left;">
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                            DATA FLOW ARCHITECTURE                                    │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  PATIENT MOBILE                    API SERVER                    PROVIDER PORTAL     │
+│  ┌──────────────┐                ┌──────────────┐              ┌──────────────┐    │
+│  │ OTP Login    │───────────────►│ Auth Module  │◄─────────────│ MFA Login    │    │
+│  │ Book Appt    │───────────────►│ Appointments │◄─────────────│ Queue View   │    │
+│  │ Join Video   │───────────────►│ Telehealth   │◄─────────────│ Start Session│    │
+│  │ Pay Invoice  │───────────────►│ Payments     │◄─────────────│ Settle/Refund│    │
+│  │ Submit RPM   │───────────────►│ RPM Module   │◄─────────────│ RPM Monitor  │    │
+│  │ Send Message │───────────────►│ Messaging    │◄─────────────│ Reply Thread │    │
+│  └──────────────┘                └──────┬───────┘              └──────────────┘    │
+│                                          │                                          │
+│                                          ▼                                          │
+│                              ┌──────────────────────┐                               │
+│                              │    PostgreSQL 16      │                               │
+│                              │  (30+ data models)    │                               │
+│                              └──────────┬───────────┘                               │
+│                                         │                                           │
+│  ADMIN PORTAL                           ▼                     EXTERNAL SERVICES     │
+│  ┌──────────────┐            ┌──────────────────┐            ┌──────────────┐      │
+│  │ User Mgmt    │◄──────────►│  Python Worker   │───────────►│ Daily.co     │      │
+│  │ RBAC Config  │            │  (120+ jobs)     │            │ Twilio SMS   │      │
+│  │ Audit Logs   │            │  Celery + Redis  │            │ Stripe API   │      │
+│  │ Reports      │            └──────────────────┘            │ SMTP Email   │      │
+│  └──────────────┘                                            └──────────────┘      │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+  </div>
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="card-white"><h4>Synchronous</h4><p>REST API calls with JWT auth, Zod validation, and RBAC enforcement</p></div>
+    <div class="card-white"><h4>Real-time</h4><p>Socket.IO for messaging, notifications, and live session updates</p></div>
+    <div class="card-white"><h4>Asynchronous</h4><p>Celery task queue for background jobs, reports, and batch processing</p></div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 19: Integration Architecture -->
+<div class="slide slide-gradient" id="slide-19">
+  <h2>Integration Architecture</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4 style="color:white;margin-bottom:15px;text-align:center;">Daily.co</h4>
+      <div style="text-align:center;font-size:2.5rem;margin-bottom:10px;">📹</div>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <li>WebRTC video infrastructure</li>
+        <li>HIPAA-compliant rooms</li>
+        <li>Session lifecycle managed</li>
+        <li>Recording with consent</li>
+        <li>Room restart capability</li>
+      </ul>
+      <div style="margin-top:15px;text-align:center;">
+        <span class="tag tag-green">Architecture Ready</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="color:white;margin-bottom:15px;text-align:center;">Twilio</h4>
+      <div style="text-align:center;font-size:2.5rem;margin-bottom:10px;">📱</div>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <li>SMS delivery for OTP codes</li>
+        <li>Patient passwordless login</li>
+        <li>Provider MFA channel</li>
+        <li>Rate limiting & lockout</li>
+        <li>Multi-channel support</li>
+      </ul>
+      <div style="margin-top:15px;text-align:center;">
+        <span class="tag tag-green">Logic Complete</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="color:white;margin-bottom:15px;text-align:center;">Stripe</h4>
+      <div style="text-align:center;font-size:2.5rem;margin-bottom:10px;">💳</div>
+      <ul style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <li>Payment intent creation</li>
+        <li>Multi-method wallet</li>
+        <li>Automated refunds</li>
+        <li>Commission tracking</li>
+        <li>Manual fallback mode</li>
+      </ul>
+      <div style="margin-top:15px;text-align:center;">
+        <span class="tag tag-green">SDK Integrated</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:25px;">
+    <h3 style="color:white;margin-bottom:15px;">Integration Status Summary</h3>
+    <table style="width:100%;color:rgba(255,255,255,0.9);font-size:0.85rem;border-collapse:collapse;">
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.2);"><td style="padding:8px;">Daily.co SDK wiring</td><td style="text-align:right;padding:8px;"><span class="tag tag-yellow">In Progress</span></td></tr>
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.2);"><td style="padding:8px;">Twilio SMS delivery dispatch</td><td style="text-align:right;padding:8px;"><span class="tag tag-yellow">In Progress</span></td></tr>
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.2);"><td style="padding:8px;">Stripe payment processing</td><td style="text-align:right;padding:8px;"><span class="tag tag-green">Complete</span></td></tr>
+      <tr><td style="padding:8px;">SMTP email delivery</td><td style="text-align:right;padding:8px;"><span class="tag tag-green">Config Ready</span></td></tr>
+    </table>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 20: Risk Assessment -->
+<div class="slide slide-content" id="slide-20">
+  <h2>Risk Assessment & Mitigation</h2>
+  <table class="table-simple">
+    <thead>
+      <tr><th>Risk</th><th>Severity</th><th>Mitigation Plan</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Daily SDK not fully wired for production</td><td><span class="tag tag-yellow">Medium</span></td><td>URL builder placeholder works; full API integration scheduled</td><td><span class="tag tag-yellow">In Progress</span></td></tr>
+      <tr><td>Twilio SMS delivery not connected</td><td><span class="tag tag-yellow">Medium</span></td><td>OTP logic complete; API call implementation next sprint</td><td><span class="tag tag-yellow">In Progress</span></td></tr>
+      <tr><td>Mobile apps not device-tested</td><td><span class="tag tag-yellow">Medium</span></td><td>Source validated; device QA cycle planned</td><td><span class="tag tag-blue">Planned</span></td></tr>
+      <tr><td>HIPAA BAA agreements pending</td><td><span class="tag tag-red">High</span></td><td>Required before PHI handling in production</td><td><span class="tag tag-red">Not Started</span></td></tr>
+      <tr><td>Load testing not performed</td><td><span class="tag tag-yellow">Medium</span></td><td>Infrastructure supports scale; tests planned pre-pilot</td><td><span class="tag tag-blue">Planned</span></td></tr>
+      <tr><td>Production secrets management</td><td><span class="tag tag-yellow">Medium</span></td><td>Env templates ready; vault integration needed</td><td><span class="tag tag-blue">Planned</span></td></tr>
+      <tr><td>Arabic localization incomplete</td><td><span class="tag tag-yellow">Low</span></td><td>i18n framework in place; translation in progress</td><td><span class="tag tag-yellow">In Progress</span></td></tr>
+    </tbody>
+  </table>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 21: Roadmap & Next Steps -->
+<div class="slide slide-dark" id="slide-21">
+  <h2>Roadmap & Next Steps</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Immediate (0-30 days)</h4>
+      <div class="timeline" style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <div class="timeline-item">Wire Twilio SMS delivery</div>
+        <div class="timeline-item">Complete Daily.co API calls</div>
+        <div class="timeline-item">Device-level mobile testing</div>
+        <div class="timeline-item">Security audit & pen testing</div>
+        <div class="timeline-item">HIPAA BAA execution</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Short-Term (30-90 days)</h4>
+      <div class="timeline" style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <div class="timeline-item">Load testing at scale</div>
+        <div class="timeline-item">Production deployment</div>
+        <div class="timeline-item">Arabic localization</div>
+        <div class="timeline-item">Push notifications (FCM/APNs)</div>
+        <div class="timeline-item">E2E test suite</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--accent);margin-bottom:15px;">Medium-Term (90-180 days)</h4>
+      <div class="timeline" style="color:rgba(255,255,255,0.85);font-size:0.82rem;">
+        <div class="timeline-item">AI triage preview</div>
+        <div class="timeline-item">Advanced analytics</div>
+        <div class="timeline-item">Native file uploads</div>
+        <div class="timeline-item">Offline queue expansion</div>
+        <div class="timeline-item">Multi-region deployment</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:25px;">
+    <h3 style="color:var(--accent);margin-bottom:15px;">Pilot Launch Timeline</h3>
+    <div class="flow-container">
+      <div class="flow-box" style="background:var(--success);">Integration<br>Complete</div>
+      <div class="flow-arrow" style="color:var(--accent);">&rarr;</div>
+      <div class="flow-box" style="background:var(--warning);">Security<br>Audit</div>
+      <div class="flow-arrow" style="color:var(--accent);">&rarr;</div>
+      <div class="flow-box" style="background:var(--warning);">Staging<br>Rehearsal</div>
+      <div class="flow-arrow" style="color:var(--accent);">&rarr;</div>
+      <div class="flow-box" style="background:var(--primary);">Controlled<br>Launch</div>
+      <div class="flow-arrow" style="color:var(--accent);">&rarr;</div>
+      <div class="flow-box" style="background:var(--primary);">Pilot<br>Monitoring</div>
+      <div class="flow-arrow" style="color:var(--accent);">&rarr;</div>
+      <div class="flow-box" style="background:var(--accent);">General<br>Availability</div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- SLIDE 22: Key Metrics & Achievements -->
+<div class="slide slide-gradient" id="slide-22">
+  <h2>Key Metrics & Achievements</h2>
+  <div class="grid-4">
+    <div class="stat-box">
+      <div class="number">50+</div>
+      <div class="label">API Modules<br>Implemented</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">30+</div>
+      <div class="label">Database<br>Models</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">120+</div>
+      <div class="label">Async Job<br>Types</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">4</div>
+      <div class="label">Frontend<br>Applications</div>
+    </div>
+  </div>
+  <div class="grid-4" style="margin-top:20px;">
+    <div class="stat-box">
+      <div class="number">9</div>
+      <div class="label">User Roles<br>with RBAC</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">3</div>
+      <div class="label">External<br>Integrations</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">3</div>
+      <div class="label">CI/CD Jobs<br>Automated</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">79%</div>
+      <div class="label">Overall<br>Completion</div>
+    </div>
+  </div>
+  <div style="margin-top:25px;">
+    <div class="card">
+      <h4 style="color:white;margin-bottom:10px;">Key Technical Achievements</h4>
+      <div class="grid-2" style="color:rgba(255,255,255,0.85);font-size:0.9rem;">
+        <ul>
+          <li>Full multi-tenant architecture with organization isolation</li>
+          <li>Comprehensive audit trail for healthcare compliance</li>
+          <li>Progressive hybrid Python adoption with canary gates</li>
+        </ul>
+        <ul>
+          <li>Real-time communication with Socket.IO</li>
+          <li>HSP facility-scoped data access enforcement</li>
+          <li>Graceful degradation (frontend fallback to mock data)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 23: Key Takeaways -->
+<div class="slide slide-title" id="slide-23">
+  <h1 style="font-size:2.8rem;">Key Takeaways</h1>
+  <div style="margin-top:30px;font-size:1.2rem;opacity:0.9;line-height:2.2;">
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+      <span style="background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-weight:700;">1</span>
+      <span>Platform architecture is <strong>production-grade</strong> — 50+ modules, full RBAC, multi-tenant</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+      <span style="background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-weight:700;">2</span>
+      <span>Clinical workflows are <strong>complete</strong> — orders, prescriptions, labs, RPM, telehealth</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+      <span style="background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-weight:700;">3</span>
+      <span>Integrations (Daily, Twilio, Stripe) are <strong>architecturally ready</strong> — final SDK wiring in progress</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+      <span style="background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-weight:700;">4</span>
+      <span>Security & compliance foundations are <strong>strong</strong> — MFA, PHI scoping, audit trails</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+      <span style="background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-weight:700;">5</span>
+      <span>Path to pilot is <strong>clear</strong> — 30-day sprint to production readiness</span>
+    </div>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+<!-- SLIDE 24: Thank You -->
+<div class="slide slide-dark" id="slide-24" style="justify-content:center;align-items:center;text-align:center;">
+  <h1 style="font-size:3.5rem;color:var(--accent);margin-bottom:20px;">Thank You</h1>
+  <h2 style="font-size:1.8rem;color:rgba(255,255,255,0.8);font-weight:300;margin-bottom:30px;">CarePoint Platform — Executive Review</h2>
+  <p style="font-size:1.1rem;color:rgba(255,255,255,0.6);max-width:600px;line-height:1.6;">
+    Questions, feedback, and next-step decisions are welcome.<br>
+    Detailed technical report available for reference.
+  </p>
+  <div style="margin-top:40px;padding:20px 40px;background:rgba(255,255,255,0.05);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+    <p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">June 2026 | Confidential</p>
+  </div>
+  <span class="watermark">CarePoint | Confidential</span>
+</div>
+
+
+<!-- Navigation Controls -->
+<div class="slide-counter" id="counter">1 / 24</div>
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()">&#9664; Previous</button>
+  <button class="nav-btn" onclick="nextSlide()">Next &#9654;</button>
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+
+  function showSlide(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[index].classList.add('active');
+    counter.textContent = (index + 1) + ' / ' + total;
+  }
+
+  window.nextSlide = function() {
+    current = (current + 1) % total;
+    showSlide(current);
+  };
+
+  window.prevSlide = function() {
+    current = (current - 1 + total) % total;
+    showSlide(current);
+  };
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      window.nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+      e.preventDefault();
+      window.prevSlide();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      current = 0;
+      showSlide(current);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      current = total - 1;
+      showSlide(current);
+    }
+  });
+
+  // Touch support for mobile
+  let touchStartX = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+  document.addEventListener('touchend', function(e) {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 50) {
+      if (diff < 0) window.nextSlide();
+      else window.prevSlide();
+    }
+  });
+
+  showSlide(0);
+})();
+</script>
+
+</body>
+</html>
