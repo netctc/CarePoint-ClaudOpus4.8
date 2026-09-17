@@ -11,6 +11,8 @@ const adminBoundary = read('apps/admin/src/lib/api/admin-server.ts');
 const appSource = read('services/api/src/app.ts');
 const authRoutes = read('services/api/src/modules/auth/auth.routes.ts');
 const incidentRunbook = read('docs/release/V1_INCIDENT_RUNBOOK.md');
+const stagingRunbook = read('docs/release/V1_STAGING_RUNBOOK.md');
+const stagingE2eRunbook = read('docs/release/V1_STAGING_E2E_RUNBOOK.md');
 const loadHarnessPath = 'scripts/release/pilot-load.mjs';
 const loadHarness = read(loadHarnessPath);
 const performanceRunbook = read('docs/release/V1_PERFORMANCE_RESILIENCE_RUNBOOK.md');
@@ -75,6 +77,17 @@ assert(incidentRunbook.includes('## 4. First 10 minutes'), 'incident runbook def
 assert(incidentRunbook.includes('## 6. Containment and rollback'), 'incident runbook defines containment and rollback');
 assert(incidentRunbook.includes('Never include in operational logs/incident notes'), 'incident runbook defines PHI/secret logging restrictions');
 assert(incidentRunbook.includes('TBD — required before Go/No-Go'), 'incident runbook keeps missing operational ownership as an explicit release blocker');
+
+assert(stagingRunbook.includes('docs/release/V1_STAGING_E2E_RUNBOOK.md'), 'staging activation hands off to the versioned critical E2E runbook');
+assert(stagingRunbook.includes('same exact approved SHA'), 'staging activation requires E2E against the same approved SHA');
+assert(stagingE2eRunbook.includes('## 6. Admin critical workflow'), 'staging E2E runbook covers Admin critical workflow');
+assert(stagingE2eRunbook.includes('## 7. Patient critical workflow'), 'staging E2E runbook covers Patient critical workflow');
+assert(stagingE2eRunbook.includes('## 8. Provider critical workflow'), 'staging E2E runbook covers Provider critical workflow');
+assert(stagingE2eRunbook.includes('## 10. Negative-path matrix'), 'staging E2E runbook covers authorization/validation/session negative paths');
+assert(stagingE2eRunbook.includes('#17 has an explicit IN/OUT decision'), 'staging E2E runbook freezes the integration scope before execution');
+assert(stagingE2eRunbook.includes('Only synthetic test accounts and synthetic clinical/business data are used'), 'staging E2E runbook requires synthetic data');
+assert(stagingE2eRunbook.includes('zero unexplained 5xx'), 'staging E2E runbook blocks closure on unexplained critical-path 5xx');
+assert(stagingE2eRunbook.includes('cannot substitute for the real staging execution'), 'staging E2E documentation does not claim repository evidence is real staging evidence');
 
 let loadHarnessSyntaxValid = true;
 try {
