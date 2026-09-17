@@ -20,7 +20,7 @@ RUN npm ci --include=dev
 
 COPY . .
 
-RUN npm run build --workspace @care-center/contracts  && npm run prisma:generate --workspace @care-center/api  && npm run build --workspace @care-center/api
+RUN npm run build --workspace @care-center/contracts  && npm run prisma:generate --workspace @care-center/api  && npm run build --workspace @care-center/api  && npm prune --omit=dev
 
 ENV NODE_ENV=production
 EXPOSE 4000
