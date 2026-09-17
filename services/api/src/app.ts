@@ -9,7 +9,7 @@ import { env } from './lib/env';
 import { apiRoutePaths } from '@care-center/contracts';
 import { requestContext } from './middleware/request-context';
 import { errorHandler } from './middleware/error-handler';
-import { notFound } from './lib/http';
+import { notFound, serviceUnavailable } from './lib/http';
 import { healthRouter } from './modules/health/health.routes';
 import { authRouter } from './modules/auth/auth.routes';
 import { appointmentsRouter } from './modules/appointments/appointments.routes';
@@ -77,6 +77,10 @@ function isAllowedCorsOrigin(origin?: string) {
   return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 }
 
+function telehealthReleaseGate(_req: express.Request, _res: express.Response, next: express.NextFunction) {
+  next(serviceUnavailable('Telehealth is not enabled for the CarePoint v1 production pilot.'));
+}
+
 export function createApp(getIo?: () => SocketIOServer | undefined) {
   const app = express();
 
@@ -126,7 +130,11 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use(apiRoutePaths.records, recordsRouter);
   app.use(apiRoutePaths.records, releaseRouter);
   app.use(apiRoutePaths.messaging, messagingRouter);
-  app.use('/api/telehealth', telehealthRouter);
+  // The current telehealth implementation only generates placeholder Daily
+  // room URLs; production must not present those as working sessions. Keep the
+  // full router available in non-production test/dev, and fail explicitly in
+  // staging/production until a real vendor room-provisioning adapter is added.
+  app.use('/api/telehealth', env.isProduction ? telehealthReleaseGate : telehealthRouter);
   app.use('/api/payments', paymentsRouter);
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
@@ -140,7 +148,9 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/admin', catalogAdminRouter);
   app.use('/api/admin', coverageAdminRouter);
   app.use('/api/admin', bookingsAdminRouter);
-  app.use('/api/admin', telehealthAdminRouter);
+  if (!env.isProduction) {
+    app.use('/api/admin', telehealthAdminRouter);
+  }
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);
