@@ -74,8 +74,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      # Build-time only. The web apps degrade to mock data at runtime when the
-      # API is unreachable, so a placeholder base URL is sufficient to compile.
+      # Build-time placeholder only. Production runtime must fail closed rather
+      # than present synthetic data when the API is unavailable.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
@@ -86,6 +86,13 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run build:contracts
+      - name: Strict TypeScript check (admin + provider)
+        shell: bash
+        run: |
+          status=0
+          npm exec --workspace @care-center/admin -- tsc --noEmit -p tsconfig.json || status=$?
+          npm exec --workspace @care-center/provider -- tsc --noEmit -p tsconfig.json || status=$?
+          exit "$status"
       - run: npm run build:web
 
   mobile-analyze:
