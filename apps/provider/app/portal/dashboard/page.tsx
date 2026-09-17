@@ -31,7 +31,10 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [result, governedSummary] = await Promise.all([providerApi.dashboard(), providerApi.providerAuditPacketSummary(30)]);
+      const [result, governedSummary] = await Promise.all([
+        providerApi.dashboard(),
+        providerApi.providerAuditPacketSummary(30),
+      ]) as [Record<string, unknown>, unknown];
       setData({
         ...result,
         governedRefillSummary: governedSummary,
