@@ -64,7 +64,13 @@ describe.skipIf(!dbReady)('state transitions (accounts + catalog)', () => {
 
   it('suspends and reactivates a patient account', async () => {
     const email = `itest-state-patient-${Date.now()}@example.com`;
-    const created = await authPost('/api/admin/users/patients', { email, firstName: 'St', lastName: 'Ate' });
+    const password = `State-Flow-${Date.now()}-Aa9!`;
+    const created = await authPost('/api/admin/users/patients', {
+      email,
+      firstName: 'St',
+      lastName: 'Ate',
+      password,
+    });
     expect(created.status).toBe(201);
     const patientId = created.body.item.id as string;
 
