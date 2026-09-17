@@ -21,7 +21,7 @@
     "check:secrets": "node scripts/s0/check-secrets.mjs",
     "gen:secrets": "node scripts/security/generate-secrets.mjs",
     "verify:workspace": "node scripts/s0/verify-workspace.mjs",
-    "verify:release:deploy": "node scripts/release/verify-vps-deploy.mjs",
+    "verify:release:deploy": "node scripts/release/verify-vps-deploy.mjs && node scripts/release/verify-account-password-policy.mjs",
     "baseline:s0": "node scripts/s0/baseline.mjs",
     "smoke:api": "node scripts/s1/smoke-api.mjs",
     "verify:s0": "npm run check:secrets && npm run verify:workspace && npm run build:backend",
