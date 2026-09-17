@@ -45,7 +45,7 @@ export default async function SafetyCaseDetailPage({ params }: { params: Promise
       title: 'Action and remediation plan',
       meta: item.status,
       description: 'The route now keeps current intervention steps and remediation planning visible before the case is advanced or closed.',
-      bullets: item.actions,
+      bullets: [...item.actions],
       badges: [{ label: item.status, tone: statusTone(item.status) }],
     },
     {
