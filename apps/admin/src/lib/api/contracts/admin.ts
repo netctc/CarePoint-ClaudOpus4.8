@@ -233,7 +233,7 @@ export type AuditLogContract = {
   actor: string;
   action: string;
   target: string;
-  subject?: string;
+  subject?: string | null;
   purpose: string;
   outcome: 'Success' | 'Denied' | 'Escalated';
 };
