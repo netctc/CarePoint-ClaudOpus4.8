@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
+import { DetailStateStrip, EvidenceCardGrid, MetadataGrid, type EvidenceCardItem } from '@/components/admin/detail-primitives';
 import { ModerationAdminActions } from '@/components/admin/moderation-admin-actions';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -52,7 +52,7 @@ export default async function ModerationDetailPage({ params }: { params: Promise
         guardrails: result.data.workspace.selectedReview.guardrails,
       };
 
-  const evidenceCards = [
+  const evidenceCards: EvidenceCardItem[] = [
     {
       title: 'Source review evidence',
       meta: selected.reviewRef,
