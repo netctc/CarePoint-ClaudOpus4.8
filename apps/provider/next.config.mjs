@@ -2,7 +2,7 @@
 const nextConfig = {
   typedRoutes: false,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 };
 
