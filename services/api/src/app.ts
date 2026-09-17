@@ -9,6 +9,7 @@ import { env } from './lib/env';
 import { apiRoutePaths } from '@care-center/contracts';
 import { requestContext } from './middleware/request-context';
 import { errorHandler } from './middleware/error-handler';
+import { releaseOrganizationScopeGuard } from './middleware/release-org-scope';
 import { notFound, serviceUnavailable } from './lib/http';
 import { healthRouter } from './modules/health/health.routes';
 import { authV1HardeningRouter } from './modules/auth/auth-v1-hardening.routes';
@@ -141,8 +142,12 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   // staging/production until a real vendor room-provisioning adapter is added.
   app.use('/api/telehealth', env.isProduction ? telehealthReleaseGate : telehealthRouter);
   app.use('/api/payments', paymentsRouter);
+  app.use('/api/providers', releaseOrganizationScopeGuard);
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
+  // Fail closed for tenant-scoped administrative user surfaces before either
+  // the isolated IAM router or the legacy admin user router can run a query.
+  app.use('/api/admin/users', releaseOrganizationScopeGuard);
   // Mount the isolated IAM user-management surface before the legacy admin
   // router so enum-safe search and explicit RBAC/org scoping take precedence.
   app.use('/api/admin/users/iam-users', iamUsersRouter);
@@ -165,6 +170,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use(apiRoutePaths.coverage, coverageRouter);
   app.use('/api/pricing', pricingRouter);
   app.use('/api/policies', policyRouter);
+  app.use('/api/bookings', releaseOrganizationScopeGuard);
   app.use('/api/bookings', bookingsRouter);
   app.use('/api/support', supportRouter);
   app.use('/api/safety', safetyRouter);
