@@ -26,6 +26,11 @@ for (const reference of remoteUses) {
   assert(/^[0-9a-f]{40}$/i.test(target), `${reference} is pinned to a full 40-character commit SHA`);
 }
 
+const checkoutSteps = [...workflow.matchAll(/^\s*-\s+uses:\s+actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?\n\s+with:\s*\n\s+persist-credentials:\s*false\s*$/gmi)];
+const checkoutUses = remoteUses.filter((reference) => reference.startsWith('actions/checkout@'));
+assert(checkoutUses.length > 0, 'CI contains checkout steps to validate');
+assert(checkoutSteps.length === checkoutUses.length, 'every checkout step disables persisted Git credentials');
+
 const failed = checks.filter((check) => !check.passed);
 for (const check of checks) {
   console.log(`${check.passed ? 'PASS' : 'FAIL'} ${check.message}`);
