@@ -5,7 +5,11 @@ const compose = read('deploy/vps/docker-compose.yml');
 const deploy = read('deploy/vps/deploy.sh');
 const caddy = read('deploy/vps/Caddyfile');
 const preflight = read('deploy/vps/preflight.sh');
+const healthReport = read('deploy/vps/health-report.sh');
 const adminBoundary = read('apps/admin/src/lib/api/admin-server.ts');
+const appSource = read('services/api/src/app.ts');
+const authRoutes = read('services/api/src/modules/auth/auth.routes.ts');
+const incidentRunbook = read('docs/release/V1_INCIDENT_RUNBOOK.md');
 
 const checks = [];
 const assert = (condition, message) => {
@@ -45,6 +49,28 @@ assert(adminBoundary.includes("process.env.ADMIN_ALLOW_MOCK_DATA === 'true'"), '
 assert(deploy.includes('EXPECTED_RELEASE_SHA'), 'deploy supports immutable SHA pinning');
 assert(preflight.includes('EXPECTED_RELEASE_SHA is required'), 'preflight requires immutable SHA pinning');
 assert(preflight.includes('docker compose') && preflight.includes('config --quiet'), 'preflight validates compose configuration');
+
+assert(preflight.includes('validate_email_provider'), 'preflight requires a real OTP email provider');
+assert(preflight.includes('validate_privileged_domains'), 'preflight requires an explicit privileged email-domain allowlist');
+assert(authRoutes.includes("secure: process.env.NODE_ENV === 'production'"), 'production auth cookies use Secure');
+
+assert(
+  appSource.includes("? morgan(':method :status :response-time ms - :res[content-length]')") &&
+    appSource.includes(": morgan('dev')"),
+  'production access logs omit URL and query strings',
+);
+assert(!appSource.includes('Route not found: ${req.method} ${req.originalUrl}'), '404 responses do not echo query strings');
+
+assert(healthReport.includes("restart_count=$(docker inspect --format '{{.RestartCount}}'"), 'health report records container restart counts');
+assert(healthReport.includes("oom_killed=$(docker inspect --format '{{.State.OOMKilled}}'"), 'health report records container OOM state');
+assert(healthReport.includes("echo 'host_resources:'"), 'health report includes host resource pressure');
+assert(healthReport.includes('MEMORY_CRITICAL_PERCENT') && healthReport.includes('DISK_CRITICAL_PERCENT'), 'health report enforces memory and disk critical thresholds');
+
+assert(incidentRunbook.includes('## 2. Severity model'), 'incident runbook defines severity model');
+assert(incidentRunbook.includes('## 4. First 10 minutes'), 'incident runbook defines first-response triage');
+assert(incidentRunbook.includes('## 6. Containment and rollback'), 'incident runbook defines containment and rollback');
+assert(incidentRunbook.includes('Never include in operational logs/incident notes'), 'incident runbook defines PHI/secret logging restrictions');
+assert(incidentRunbook.includes('TBD — required before Go/No-Go'), 'incident runbook keeps missing operational ownership as an explicit release blocker');
 
 const forbiddenFirewallRules = ['API_PORT', 'ADMIN_PORT', 'PROVIDER_PORT', 'PATIENT_PORT', 'PROVIDER_MOBILE_PORT']
   .filter((name) => deploy.includes('ufw allow ${' + name + '}'));
