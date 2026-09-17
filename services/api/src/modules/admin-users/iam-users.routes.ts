@@ -45,6 +45,15 @@ function isSuperAdmin(req: any) {
   return req.user?.role === UserRole.SUPER_ADMIN;
 }
 
+function requireOrganizationScope(req: any) {
+  if (isSuperAdmin(req)) return null;
+  const organizationId = clean(req.user?.organizationId);
+  if (!organizationId) {
+    throw forbidden('Organization scope is required for this administrative operation');
+  }
+  return organizationId;
+}
+
 async function ensureFallbackOrganization() {
   const existing = await prisma.organization.findFirst({
     where: { name: { equals: defaultOrganizationName, mode: 'insensitive' } },
@@ -60,8 +69,7 @@ async function ensureFallbackOrganization() {
 
 async function resolveOrganizationId(req: any, requested: unknown) {
   if (!isSuperAdmin(req)) {
-    if (!req.user?.organizationId) throw badRequest('Organization context is required');
-    return req.user.organizationId;
+    return requireOrganizationScope(req)!;
   }
 
   const explicit = clean(requested);
@@ -123,9 +131,10 @@ iamUsersRouter.get('/', async (req, res) => {
   const pageSize = Math.max(1, Math.min(100, Number.parseInt(clean(req.query.pageSize) || '20', 10) || 20));
   const search = clean(req.query.search).toLowerCase();
   const skip = (page - 1) * pageSize;
+  const organizationScope = requireOrganizationScope(req);
 
-  const orgWhere: any = req.user?.organizationId && !isSuperAdmin(req)
-    ? { organizationId: req.user.organizationId }
+  const orgWhere: any = organizationScope
+    ? { organizationId: organizationScope }
     : {};
 
   const matchingRoles = search
@@ -224,13 +233,14 @@ iamUsersRouter.post('/', async (req, res) => {
 });
 
 iamUsersRouter.get('/:userId', async (req, res) => {
+  const organizationScope = requireOrganizationScope(req);
   const user = await prisma.user.findUnique({
     where: { id: req.params.userId },
     include: { organization: { select: { id: true, name: true } } },
   });
 
   if (!user) throw notFound('User not found');
-  if (!isSuperAdmin(req) && req.user?.organizationId && user.organizationId !== req.user.organizationId) {
+  if (organizationScope && user.organizationId !== organizationScope) {
     throw forbidden('Requested account is outside the current organization scope');
   }
 
@@ -238,6 +248,7 @@ iamUsersRouter.get('/:userId', async (req, res) => {
 });
 
 iamUsersRouter.patch('/:userId/status', async (req, res) => {
+  const organizationScope = requireOrganizationScope(req);
   const newStatus = clean(req.body?.status).toUpperCase();
   if (!newStatus || !accountStatuses.includes(newStatus as AccountStatus)) {
     throw badRequest(`status must be one of: ${accountStatuses.join(', ')}`);
@@ -249,7 +260,7 @@ iamUsersRouter.patch('/:userId/status', async (req, res) => {
   });
   if (!user) throw notFound('User not found');
 
-  if (!isSuperAdmin(req) && req.user?.organizationId && user.organizationId !== req.user.organizationId) {
+  if (organizationScope && user.organizationId !== organizationScope) {
     throw forbidden('Requested account is outside the current organization scope');
   }
 
