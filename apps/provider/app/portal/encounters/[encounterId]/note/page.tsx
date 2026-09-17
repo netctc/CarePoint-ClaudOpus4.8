@@ -162,7 +162,7 @@ export default function EncounterNoteEditorPage() {
     }
   }
 
-  const patientName = appointment?.subjectLabel ?? appointment?.patientName ?? fallback?.patientName ?? 'Patient';
+  const patientName = String(appointment?.subjectLabel ?? appointment?.patientName ?? fallback?.patientName ?? 'Patient');
   const quickTemplates = fallback?.templates ?? ['Normal physical exam', 'Medication counseling', 'Follow-up summary'];
   const chartHref = appendProviderSubjectParams(`/portal/chart/${appointment?.patientId ?? patientId ?? ''}`, appointment);
   const labsHref = appendProviderSubjectParams(`/portal/labs/inbox?patientId=${appointment?.patientId ?? patientId ?? ''}`, appointment);
@@ -184,7 +184,7 @@ export default function EncounterNoteEditorPage() {
 
       <section className="encounter-workspace">
         <aside className="encounter-patient-rail panel-card">
-          <div className="profile-avatar-large">{patientName.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div>
+          <div className="profile-avatar-large">{patientName.split(' ').map((part: string) => part[0]).slice(0, 2).join('')}</div>
           <h2>{patientName}</h2>
           <p className="muted small">Encounter ID: {encounterId}</p>
           <nav className="encounter-rail-nav">
