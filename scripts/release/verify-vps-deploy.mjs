@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const read = (path) => readFileSync(path, 'utf8');
 const compose = read('deploy/vps/docker-compose.yml');
@@ -10,6 +11,9 @@ const adminBoundary = read('apps/admin/src/lib/api/admin-server.ts');
 const appSource = read('services/api/src/app.ts');
 const authRoutes = read('services/api/src/modules/auth/auth.routes.ts');
 const incidentRunbook = read('docs/release/V1_INCIDENT_RUNBOOK.md');
+const loadHarnessPath = 'scripts/release/pilot-load.mjs';
+const loadHarness = read(loadHarnessPath);
+const performanceRunbook = read('docs/release/V1_PERFORMANCE_RESILIENCE_RUNBOOK.md');
 
 const checks = [];
 const assert = (condition, message) => {
@@ -71,6 +75,28 @@ assert(incidentRunbook.includes('## 4. First 10 minutes'), 'incident runbook def
 assert(incidentRunbook.includes('## 6. Containment and rollback'), 'incident runbook defines containment and rollback');
 assert(incidentRunbook.includes('Never include in operational logs/incident notes'), 'incident runbook defines PHI/secret logging restrictions');
 assert(incidentRunbook.includes('TBD — required before Go/No-Go'), 'incident runbook keeps missing operational ownership as an explicit release blocker');
+
+let loadHarnessSyntaxValid = true;
+try {
+  execFileSync(process.execPath, ['--check', loadHarnessPath], { stdio: 'pipe' });
+} catch {
+  loadHarnessSyntaxValid = false;
+}
+assert(loadHarnessSyntaxValid, 'pilot load harness parses successfully under the current Node runtime');
+assert(loadHarness.includes("parseRate('CAREPOINT_LOAD_MAX_ERROR_RATE')"), 'load harness requires predeclared error-rate acceptance');
+assert(loadHarness.includes("parsePositiveNumber('CAREPOINT_LOAD_MAX_P95_MS')"), 'load harness requires predeclared p95 acceptance');
+assert(loadHarness.includes("parseIntBounded('CAREPOINT_LOAD_MAX_5XX'"), 'load harness gates 5xx count');
+assert(loadHarness.includes("'find-care'") && loadHarness.includes("'/api/providers'"), 'load harness covers Find Care read pressure');
+assert(loadHarness.includes("'patient-dashboard'") && loadHarness.includes("'/api/dashboard/patient'"), 'load harness covers patient dashboard read pressure');
+assert(loadHarness.includes("'booking-summary'") && loadHarness.includes("'/api/bookings/summary'"), 'load harness covers booking read pressure');
+assert(loadHarness.includes("'session-refresh'") && loadHarness.includes("'/api/auth/refresh'"), 'load harness covers auth/session refresh pressure without bulk OTP delivery');
+assert(loadHarness.includes('Sensitive headers, tokens, request bodies and response bodies are never printed.'), 'load harness explicitly preserves sensitive-data output boundary');
+assert(!loadHarness.includes('console.log(patientToken)') && !loadHarness.includes('console.log(staffToken)') && !loadHarness.includes('console.log(refreshToken)'), 'load harness does not print configured tokens');
+
+assert(performanceRunbook.includes('## Controlled resilience exercises'), 'performance runbook defines controlled resilience exercises');
+assert(performanceRunbook.includes('## Rollback drill'), 'performance runbook defines rollback evidence');
+assert(performanceRunbook.includes('acceptance thresholds agreed **before** the load run'), 'performance runbook requires predeclared acceptance thresholds');
+assert(performanceRunbook.includes('synthetic/test accounts only'), 'performance runbook prohibits real PHI test accounts');
 
 const forbiddenFirewallRules = ['API_PORT', 'ADMIN_PORT', 'PROVIDER_PORT', 'PATIENT_PORT', 'PROVIDER_MOBILE_PORT']
   .filter((name) => deploy.includes('ufw allow ${' + name + '}'));
