@@ -13,6 +13,7 @@ const authRoutes = read('services/api/src/modules/auth/auth.routes.ts');
 const incidentRunbook = read('docs/release/V1_INCIDENT_RUNBOOK.md');
 const stagingRunbook = read('docs/release/V1_STAGING_RUNBOOK.md');
 const stagingE2eRunbook = read('docs/release/V1_STAGING_E2E_RUNBOOK.md');
+const databaseRecoveryRunbook = read('docs/release/V1_DATABASE_RECOVERY_RUNBOOK.md');
 const loadHarnessPath = 'scripts/release/pilot-load.mjs';
 const loadHarness = read(loadHarnessPath);
 const performanceRunbook = read('docs/release/V1_PERFORMANCE_RESILIENCE_RUNBOOK.md');
@@ -88,6 +89,15 @@ assert(stagingE2eRunbook.includes('#17 has an explicit IN/OUT decision'), 'stagi
 assert(stagingE2eRunbook.includes('Only synthetic test accounts and synthetic clinical/business data are used'), 'staging E2E runbook requires synthetic data');
 assert(stagingE2eRunbook.includes('zero unexplained 5xx'), 'staging E2E runbook blocks closure on unexplained critical-path 5xx');
 assert(stagingE2eRunbook.includes('cannot substitute for the real staging execution'), 'staging E2E documentation does not claim repository evidence is real staging evidence');
+
+assert(databaseRecoveryRunbook.includes('RPO target: <= 24 hours'), 'database recovery runbook defines the initial pilot RPO target');
+assert(databaseRecoveryRunbook.includes('RTO target: <= 4 hours'), 'database recovery runbook defines the initial pilot RTO target');
+assert(databaseRecoveryRunbook.includes('Recovery owner: TBD — required before Go/No-Go'), 'database recovery runbook keeps recovery ownership as an explicit unresolved gate');
+assert(databaseRecoveryRunbook.includes('off-host copy'), 'database recovery runbook requires an off-host backup copy');
+assert(databaseRecoveryRunbook.includes('checksum of the off-host copy must match'), 'database recovery runbook requires checksum verification for off-host protection');
+assert(databaseRecoveryRunbook.includes('ALLOW_IN_PLACE_RESTORE') && databaseRecoveryRunbook.includes('must remain unset/false'), 'database recovery drill forbids an in-place restore');
+assert(databaseRecoveryRunbook.includes('Synthetic Organization count') && databaseRecoveryRunbook.includes('Synthetic MedicalRecord count'), 'database recovery runbook requires synthetic business/clinical integrity evidence');
+assert(databaseRecoveryRunbook.includes('Repository CI or shell syntax checks cannot substitute'), 'database recovery documentation does not claim repository evidence proves real recoverability');
 
 let loadHarnessSyntaxValid = true;
 try {
