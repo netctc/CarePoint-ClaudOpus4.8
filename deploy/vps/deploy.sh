@@ -7,45 +7,48 @@ set -euo pipefail
 # Run this script ON your VPS as root (or with sudo).
 #
 # Usage:
-#   chmod +x deploy.sh
-#   ./deploy.sh
+#   VPS_IP=<public-ip-or-host> ./deploy.sh
+# Optional:
+#   CAREPOINT_BRANCH=release/v1-go-live VPS_IP=<public-ip-or-host> ./deploy.sh
 #
 # What it does:
 #   1. Installs Docker + Docker Compose if not present
 #   2. Clones (or pulls) the repository
 #   3. Generates production secrets
-#   4. Creates the .env file
+#   4. Creates the runtime environment file on the VPS only
 #   5. Builds and starts all services
-#   6. Runs database migrations
+#   6. Runs database migrations through the API production start command
 #   7. Prints access URLs
 # =============================================================================
 
-# ---- Configuration (edit these if needed) ------------------------------------
-VPS_IP="167.86.92.207"
-REPO_URL="https://github.com/netctc/CarePoint-ClaudOpus4.8.git"
-INSTALL_DIR="/opt/carepoint"
-BRANCH="deploy/vps-script"
+# ---- Configuration -----------------------------------------------------------
+VPS_IP="${VPS_IP:-}"
+REPO_URL="${REPO_URL:-https://github.com/netctc/CarePoint-ClaudOpus4.8.git}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/carepoint}"
+BRANCH="${CAREPOINT_BRANCH:-release/v1-go-live}"
+
+if [ -z "${VPS_IP}" ]; then
+    echo "ERROR: VPS_IP is required. Example: VPS_IP=203.0.113.10 ./deploy.sh"
+    exit 1
+fi
 
 # Ports exposed to the internet
-API_PORT=4000
-ADMIN_PORT=3001
-PROVIDER_PORT=3002
-PATIENT_PORT=8080
-PROVIDER_MOBILE_PORT=8081
+API_PORT="${API_PORT:-4000}"
+ADMIN_PORT="${ADMIN_PORT:-3001}"
+PROVIDER_PORT="${PROVIDER_PORT:-3002}"
+PATIENT_PORT="${PATIENT_PORT:-8080}"
+PROVIDER_MOBILE_PORT="${PROVIDER_MOBILE_PORT:-8081}"
 
-# Database
-POSTGRES_DB="care_center"
-POSTGRES_USER="carecenter"
-POSTGRES_PASSWORD="Ab987654321"
-
-# Redis
-REDIS_PASSWORD="Ab987654321"
+# Database identity (password is generated at runtime)
+POSTGRES_DB="${POSTGRES_DB:-care_center}"
+POSTGRES_USER="${POSTGRES_USER:-carecenter}"
 
 # =============================================================================
 
 echo "============================================"
 echo "  CarePoint VPS Deployment"
 echo "  Target: ${VPS_IP}"
+echo "  Branch: ${BRANCH}"
 echo "============================================"
 echo ""
 
@@ -71,7 +74,7 @@ if [ -d "${INSTALL_DIR}/.git" ]; then
     cd "${INSTALL_DIR}"
     git fetch origin
     git checkout "${BRANCH}"
-    git pull origin "${BRANCH}"
+    git pull --ff-only origin "${BRANCH}"
     echo "Repository updated."
 else
     rm -rf "${INSTALL_DIR}"
@@ -82,6 +85,8 @@ fi
 
 # ---- Step 3: Generate secrets ------------------------------------------------
 echo "[3/7] Generating production secrets..."
+POSTGRES_PASSWORD=$(openssl rand -hex 32)
+REDIS_PASSWORD=$(openssl rand -hex 32)
 JWT_ACCESS_SECRET=$(openssl rand -hex 32)
 JWT_REFRESH_SECRET=$(openssl rand -hex 32)
 MEDICAL_KEY=$(openssl rand -hex 32)
@@ -89,14 +94,13 @@ PYTHON_SECRET=$(openssl rand -hex 32)
 
 echo "Secrets generated."
 
-# ---- Step 4: Create .env file ------------------------------------------------
-echo "[4/7] Creating .env file..."
+# ---- Step 4: Create runtime environment file ---------------------------------
+echo "[4/7] Creating runtime environment file..."
 mkdir -p "${INSTALL_DIR}/deploy/vps"
 
 cat > "${INSTALL_DIR}/deploy/vps/.env" <<EOF
 # === CarePoint Production Environment ===
 # Generated on $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-# VPS IP: ${VPS_IP}
 
 NODE_ENV=production
 
@@ -122,8 +126,9 @@ MEDICAL_PROFILE_ENCRYPTION_KEY=${MEDICAL_KEY}
 AUTH_CHALLENGE_REDIS_ENABLED=true
 AUTH_CHALLENGE_REDIS_PREFIX=carepoint:auth:challenge
 ALLOW_LOCALHOST_CORS_WILDCARD=false
+ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false
 
-# --- CORS / Frontend URLs (using IP since no domain yet) ---
+# --- CORS / Frontend URLs ---
 FRONTEND_ADMIN_URL=http://${VPS_IP}:${ADMIN_PORT}
 FRONTEND_PROVIDER_URL=http://${VPS_IP}:${PROVIDER_PORT}
 FRONTEND_PATIENT_URL=http://${VPS_IP}:${PATIENT_PORT}
@@ -136,7 +141,7 @@ NEXT_PUBLIC_ALLOW_DEMO_SIGNIN=false
 PATIENT_API_BASE_URL=http://${VPS_IP}:${API_PORT}
 PROVIDER_MOBILE_API_BASE_URL=http://${VPS_IP}:${API_PORT}
 
-# --- Email (OTP) - configure when ready ---
+# --- Email (OTP) ---
 RESEND_API_KEY=
 EMAIL_FROM=CarePoint <onboarding@resend.dev>
 SMTP_HOST=
@@ -144,7 +149,7 @@ SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
 
-# --- Optional integrations (leave empty if not used) ---
+# --- Optional integrations ---
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 TELEHEALTH_VENDOR=daily
@@ -186,7 +191,8 @@ CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379
 CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379
 EOF
 
-echo ".env created at deploy/vps/.env"
+chmod 600 "${INSTALL_DIR}/deploy/vps/.env"
+echo "Runtime environment file created with mode 600."
 
 # ---- Step 5: Open firewall ports ---------------------------------------------
 echo "[5/7] Configuring firewall..."
@@ -202,11 +208,11 @@ if command -v ufw &>/dev/null; then
     ufw --force enable >/dev/null 2>&1 || true
     echo "Firewall configured."
 else
-    echo "ufw not found, skipping firewall config. Make sure ports are open."
+    echo "ufw not found, skipping firewall config. Make sure required ports are open."
 fi
 
 # ---- Step 6: Build and start -------------------------------------------------
-echo "[6/7] Building and starting all services (this may take 10-15 minutes on first run)..."
+echo "[6/7] Building and starting all services..."
 cd "${INSTALL_DIR}"
 docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env build
 docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d
@@ -218,11 +224,16 @@ sleep 10
 echo "[7/7] Verifying deployment..."
 echo ""
 
-# Check API health
 if curl -sf "http://127.0.0.1:${API_PORT}/livez" >/dev/null 2>&1; then
     echo "  [OK] API is healthy"
 else
-    echo "  [!!] API not responding yet (may still be starting, check: docker compose -f deploy/vps/docker-compose.yml logs api)"
+    echo "  [!!] API not responding yet. Check API logs before continuing."
+fi
+
+if curl -sf "http://127.0.0.1:${API_PORT}/readyz" >/dev/null 2>&1; then
+    echo "  [OK] API is ready"
+else
+    echo "  [!!] API readiness check is not green. Do not promote this deployment."
 fi
 
 echo ""
@@ -230,25 +241,15 @@ echo "============================================"
 echo "  DEPLOYMENT COMPLETE"
 echo "============================================"
 echo ""
-echo "  Access your services at:"
-echo ""
-echo "    API:             http://${VPS_IP}:${API_PORT}"
-echo "    API Health:      http://${VPS_IP}:${API_PORT}/livez"
-echo "    Admin Portal:    http://${VPS_IP}:${ADMIN_PORT}"
-echo "    Provider Portal: http://${VPS_IP}:${PROVIDER_PORT}"
-echo "    Patient App:     http://${VPS_IP}:${PATIENT_PORT}"
-echo "    Provider Mobile: http://${VPS_IP}:${PROVIDER_MOBILE_PORT}"
+echo "  Verify services at the configured host and ports."
+echo "  Before production promotion, place public services behind HTTPS/TLS"
+echo "  and restrict direct container/application ports at the network edge."
 echo ""
 echo "  Useful commands:"
 echo "    cd ${INSTALL_DIR}"
-echo "    docker compose -f deploy/vps/docker-compose.yml logs -f api    # API logs"
-echo "    docker compose -f deploy/vps/docker-compose.yml ps             # Service status"
-echo "    docker compose -f deploy/vps/docker-compose.yml restart api    # Restart API"
-echo "    docker compose -f deploy/vps/docker-compose.yml down           # Stop everything"
+echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env logs -f api"
+echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env ps"
+echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env restart api"
 echo ""
-echo "  Note: First time build takes 10-15 min. If a service shows"
-echo "  'unhealthy', wait a minute and check again with 'docker compose ps'"
-echo ""
-echo "  JWT secrets saved in: ${INSTALL_DIR}/deploy/vps/.env"
-echo "  KEEP THIS FILE SAFE - it contains all production secrets."
-echo ""
+echo "  Runtime credentials are stored only on the VPS in deploy/vps/.env (mode 600)."
+echo "  Never commit or copy that file into GitHub issues or documentation."
