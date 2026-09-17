@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
+import { DetailStateStrip, EvidenceCardGrid, MetadataGrid, type EvidenceCardItem } from '@/components/admin/detail-primitives';
 import { SafetyAdminActions } from '@/components/admin/safety-admin-actions';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -33,7 +33,7 @@ export default async function SafetyCaseDetailPage({ params }: { params: Promise
 
   if (!item) notFound();
 
-  const evidenceCards = [
+  const evidenceCards: EvidenceCardItem[] = [
     {
       title: 'Incident source and summary',
       meta: item.caseRef,
