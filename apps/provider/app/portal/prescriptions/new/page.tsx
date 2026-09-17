@@ -11,6 +11,13 @@ import { providerApi } from '@/services/api-client';
 import { appendProviderSubjectParams } from '@/lib/subject-links';
 import { getPrescriptionComposerData } from '@/services/mock-api';
 
+type SignedPrescriptionResponse = {
+  item?: {
+    drug?: string;
+    pharmacyName?: string | null;
+  };
+};
+
 export default function PrescriptionComposerPage() {
   const { locale, dir } = useProviderLocale();
   const base = getProviderDetailCopy(locale).prescriptionComposer;
@@ -33,11 +40,11 @@ export default function PrescriptionComposerPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [source, setSource] = useState<'live' | 'fallback'>('fallback');
-  const [drug, setDrug] = useState<string>(fallback.medication ?? '');
+  const [drug, setDrug] = useState<string>(fallback.drug ?? '');
   const [dosage, setDosage] = useState<string>(fallback.dosage ?? '');
   const [frequency, setFrequency] = useState<string>(fallback.frequency ?? '');
   const [duration, setDuration] = useState<string>(fallback.duration ?? '');
-  const [pharmacyName, setPharmacyName] = useState<string>(fallback.pharmacyName ?? '');
+  const [pharmacyName, setPharmacyName] = useState<string>('');
   const resolvedPatientId = appointment?.patientId ?? patientId ?? '';
 
   const load = useCallback(async () => {
@@ -93,9 +100,9 @@ export default function PrescriptionComposerPage() {
         subjectLabel: appointment?.subjectLabel ?? subjectLabel ?? undefined,
         subjectRelationship: appointment?.subjectRelationship ?? subjectRelationship ?? undefined,
       });
-      const signed = await providerApi.signProviderPrescription(String(created?.item?.id), { note: 'Signed from prescription composer' });
+      const signed = await providerApi.signProviderPrescription(String(created?.item?.id), 'Signed from prescription composer') as SignedPrescriptionResponse;
       setMessage(base.submitted);
-      if (signed?.item?.drug) {
+      if (signed.item?.drug) {
         setCompliancePreview(await providerApi.providerPrescriptionCompliancePreview(String(signed.item.drug), signed.item.pharmacyName ?? undefined));
       }
       await load();
@@ -139,7 +146,7 @@ export default function PrescriptionComposerPage() {
           <strong>{source === 'live' ? copy.liveTitle : copy.fallbackTitle}</strong>
           <p className="muted small">{source === 'live' ? copy.liveText : `${copy.fallbackErrorPrefix} ${error ?? 'Unknown error'}.`}</p>
         </div>
-        <span className={`status-chip status-${source === 'live' ? 'success' : 'warning'}`}>{source === 'live' ? 'Live' : base.fallback}</span>
+        <span className={`status-chip status-${source === 'live' ? 'success' : 'warning'}`}>{source === 'live' ? 'Live' : 'Fallback'}</span>
       </div>
 
       {message ? <div className="status-chip status-success">{message}</div> : null}
@@ -148,7 +155,7 @@ export default function PrescriptionComposerPage() {
 
       <WorkspaceStateStrip
         items={[
-          { label: 'Composer source', value: source === 'live' ? 'Provider API' : base.fallback, tone: source === 'live' ? 'success' : 'warning' },
+          { label: 'Composer source', value: source === 'live' ? 'Provider API' : 'Fallback', tone: source === 'live' ? 'success' : 'warning' },
           { label: copy.activeScripts, value: String(items.length), tone: 'info' },
           { label: copy.refillQueue, value: String(refillRequests.length), tone: refillRequests.length ? 'warning' : 'success' },
           { label: copy.pharmacyVisibility, value: String(pharmacyQueue.length), tone: 'info' },
