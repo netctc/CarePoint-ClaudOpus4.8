@@ -54,6 +54,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run check:secrets
       - run: npm run verify:workspace
+      - run: npm run verify:release:deploy
       - run: npm run verify:python-worker
       - run: npm run test:python-worker
       - run: npm run verify:s1:config
