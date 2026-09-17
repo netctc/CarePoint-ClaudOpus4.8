@@ -24,6 +24,18 @@ type ApiDashboardResponse = {
     resource: string;
     resourceId?: string | null;
     details?: Record<string, unknown> | null;
+    facilityContext?: {
+      location?: string | null;
+      facilityId?: string | null;
+      domain?: string | null;
+      external?: boolean | null;
+    } | null;
+    subjectContext?: {
+      subjectProfileId?: string | null;
+      subjectLabel?: string | null;
+      subjectRelationship?: string | null;
+      isFamilySubject?: boolean;
+    } | null;
     createdAt: string;
     actor?: { email?: string | null; name?: string | null; role?: string | null } | null;
   }>;
@@ -425,12 +437,12 @@ function inferOutcome(action: string) {
 }
 
 
-function summarizeRecordSummary(summary: unknown) {
+function summarizeRecordSummary(summary: unknown): string | null {
   if (typeof summary === 'string') return summary;
   if (summary == null) return null;
   if (Array.isArray(summary)) {
-    const parts = summary
-      .map((item) => summarizeRecordSummary(item))
+    const parts: string[] = summary
+      .map((item): string | null => summarizeRecordSummary(item))
       .filter((item): item is string => Boolean(item && String(item).trim()));
     return parts.length ? parts.join(' · ') : null;
   }
@@ -538,7 +550,7 @@ function mapProviderVerificationDetail(detail: ApiProviderDetailResponse) {
     cityCoverage: detail.profile.services.length ? detail.profile.services : ['General coverage'],
     mandatoryDocs: checklistEntries.map(([key, value]) => ({
       name: key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase()),
-      status: value ? 'Received' : 'Missing',
+      status: (value ? 'Received' : 'Missing') as 'Received' | 'Missing',
     })),
     checks: [
       { label: 'Onboarding status', result: detail.onboarding.status === 'APPROVED' ? 'Pass' : detail.onboarding.status === 'REQUEST_CHANGES' ? 'Review' : detail.onboarding.status === 'REJECTED' ? 'Fail' : 'Review' },
@@ -1483,6 +1495,7 @@ type ApiTelehealthItem = {
   providerName?: string | null;
   service?: string | null;
   organizationId?: string | null;
+  createdAt?: string | null;
 };
 
 type ApiTelehealthListResponse = {
@@ -1787,7 +1800,7 @@ export async function loadIntegratedBookingWorkspace(): Promise<LoadResult<{ ite
                 incidentTag: selected.incidentTag || 'No active escalation tag returned',
                 adminOwner: selectedApi.providerName || 'Ops queue',
                 impactSummary: [
-                  selected.downstreamImpact,
+                  'downstreamImpact' in selected ? selected.downstreamImpact : 'No linked payment exception returned by API',
                   summarizeRecordSummary(detailResponse?.records?.[0]?.summary) || 'No related clinical record summary returned in the live detail response.',
                   detailResponse?.documents?.length ? `Booking documents: ${detailResponse.documents.map((item) => `${item.kind.toLowerCase()} · ${item.redactionStatus || 'PENDING'}`).join(' | ')}` : 'No booking documents linked to the selected appointment yet.',
                   detailResponse?.authorizationReview?.required ? `Authorization review: ${detailResponse.authorizationReview.status}${detailResponse.authorizationReview.note ? ` · ${detailResponse.authorizationReview.note}` : ''}` : 'No prior-authorization review is currently required for this booking.',
@@ -1921,7 +1934,6 @@ export async function loadIntegratedSafetyWorkspace(): Promise<LoadResult<{ item
     ]);
     const selectedApi = listResponse.items[0];
     const detailResponse = selectedApi ? await apiRequest<ApiSafetyDetailResponse>(`/api/safety/cases/${selectedApi.id}`) : null;
-    const selectedCase = selectedApi ? mapSafetyItem(selectedApi, detailResponse?.auditTrail) : mockSafetyCases[0];
     return {
       source: 'api',
       data: {
@@ -1938,7 +1950,6 @@ export async function loadIntegratedSafetyWorkspace(): Promise<LoadResult<{ item
             `Storage mode: ${listResponse.storageMode || detailResponse?.storageMode || 'unknown'}`,
             'Use the live controls below to triage, record action plans, and close the selected case.',
           ],
-          selectedCase,
         },
       },
     };
@@ -1952,7 +1963,7 @@ function titleize(value?: string | null) {
   return String(value ?? '')
     .replace(/[_-]+/g, ' ')
     .toLowerCase()
-    .replace(/\w/g, (char) => char.toUpperCase())
+    .replace(/\b\w/g, (char) => char.toUpperCase())
     .trim();
 }
 
@@ -2609,4 +2620,3 @@ export async function loadRefillGovernanceWorkspace() {
     },
   };
 }
-
