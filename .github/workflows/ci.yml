@@ -3,6 +3,11 @@ on:
   pull_request:
   push:
     branches: [main, develop, 'release/**']
+
+concurrency:
+  group: carepoint-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   s1-build-and-runtime:
     name: S1 backend build and runtime smoke
