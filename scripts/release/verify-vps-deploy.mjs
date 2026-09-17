@@ -10,10 +10,16 @@ const healthReport = read('deploy/vps/health-report.sh');
 const adminBoundary = read('apps/admin/src/lib/api/admin-server.ts');
 const appSource = read('services/api/src/app.ts');
 const authRoutes = read('services/api/src/modules/auth/auth.routes.ts');
+const envSource = read('services/api/src/lib/env.ts');
+const authSsoSource = read('services/api/src/lib/auth-sso.ts');
+const integrationScopeSource = read('services/api/src/lib/release-integration-scope.ts');
+const integrationRoutes = read('services/api/src/modules/integrations/integration.routes.ts');
+const paymentsRoutes = read('services/api/src/modules/payments/payments.routes.ts');
 const incidentRunbook = read('docs/release/V1_INCIDENT_RUNBOOK.md');
 const stagingRunbook = read('docs/release/V1_STAGING_RUNBOOK.md');
 const stagingE2eRunbook = read('docs/release/V1_STAGING_E2E_RUNBOOK.md');
 const databaseRecoveryRunbook = read('docs/release/V1_DATABASE_RECOVERY_RUNBOOK.md');
+const integrationScopeRunbook = read('docs/release/V1_INTEGRATION_SCOPE.md');
 const loadHarnessPath = 'scripts/release/pilot-load.mjs';
 const loadHarness = read(loadHarnessPath);
 const performanceRunbook = read('docs/release/V1_PERFORMANCE_RESILIENCE_RUNBOOK.md');
@@ -98,6 +104,25 @@ assert(databaseRecoveryRunbook.includes('checksum of the off-host copy must matc
 assert(databaseRecoveryRunbook.includes('ALLOW_IN_PLACE_RESTORE') && databaseRecoveryRunbook.includes('must remain unset/false'), 'database recovery drill forbids an in-place restore');
 assert(databaseRecoveryRunbook.includes('Synthetic Organization count') && databaseRecoveryRunbook.includes('Synthetic MedicalRecord count'), 'database recovery runbook requires synthetic business/clinical integrity evidence');
 assert(databaseRecoveryRunbook.includes('Repository CI or shell syntax checks cannot substitute'), 'database recovery documentation does not claim repository evidence proves real recoverability');
+
+assert(integrationScopeSource.includes("patientEmailOtp: 'IN'"), 'v1 integration scope keeps email OTP IN');
+for (const key of ['patientSmsOtp', 'telehealth', 'stripePayments', 'enterpriseSso']) {
+  assert(integrationScopeSource.includes(`${key}: 'OUT'`), `v1 integration scope keeps ${key} OUT`);
+}
+assert(integrationScopeSource.includes('!isProduction || isV1IntegrationInScope(key)'), 'production integration runtime is gated by immutable v1 scope');
+assert(envSource.includes("integrationAllowedForRuntime('stripePayments', isProduction)"), 'production Stripe credential exposure is release-scope gated');
+assert(envSource.includes("integrationAllowedForRuntime('enterpriseSso', isProduction)"), 'production SSO enablement is release-scope gated');
+assert(envSource.includes('stripeCredentialConfigured'), 'runtime tracks Stripe configuration separately from enablement');
+assert(envSource.includes('ssoConfigurationPresent'), 'runtime tracks SSO configuration separately from enablement');
+assert(paymentsRoutes.includes('const stripe = env.stripeSecretKey ? new Stripe(env.stripeSecretKey) : null;'), 'payments route can only initialize Stripe through scope-gated env');
+assert(authSsoSource.includes("!isV1IntegrationInScope('enterpriseSso')"), 'SSO handoff reports v1 production scope blocking');
+assert(integrationRoutes.includes("inScope: isV1IntegrationInScope('stripePayments')"), 'integration inventory reports Stripe v1 scope independently of credential presence');
+assert(integrationRoutes.includes("inScope: isV1IntegrationInScope('enterpriseSso')"), 'integration inventory reports SSO v1 scope independently of configuration presence');
+assert(integrationScopeRunbook.includes('presence of a credential or provider configuration never expands the approved pilot scope'), 'integration runbook states credentials cannot widen v1 scope');
+assert(integrationScopeRunbook.includes('| Email OTP | **IN** |'), 'integration runbook documents Email OTP IN');
+assert(integrationScopeRunbook.includes('| Stripe payments | **OUT** |'), 'integration runbook documents Stripe OUT');
+assert(integrationScopeRunbook.includes('| Enterprise SSO | **OUT** |'), 'integration runbook documents SSO OUT');
+assert(integrationScopeRunbook.includes('Repository CI proves the policy wiring but cannot substitute'), 'integration scope documentation does not claim repository evidence proves provider E2E');
 
 let loadHarnessSyntaxValid = true;
 try {
