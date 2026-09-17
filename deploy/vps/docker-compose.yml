@@ -246,7 +246,7 @@ services:
   # ============ Public TLS Edge ============
 
   edge:
-    image: caddy:2.8-alpine@sha256:af32e97399febea808609119bb21544d0265c58a02836576e32a2d082c262c17
+    image: caddy:2.11.4-alpine@sha256:844f60b64e4724a5aa8245e019dace0d3f199f7433ce6c57676cb30a920dbad9
     restart: unless-stopped
     depends_on:
       api:
