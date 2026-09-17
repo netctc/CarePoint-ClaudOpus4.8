@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { useAdminLocale } from '@/components/i18n/admin-locale-provider';
 import { getAdminPortalCopy } from '@/lib/i18n/admin-portal-copy';
-import type { ProviderDirectoryItemContract } from '@/lib/api/contracts/admin';
+import type { ProviderMasterItemContract } from '@/lib/api/contracts/admin';
 
 function toneForStatus(status: string) {
   if (status === 'Active') return 'success';
@@ -13,7 +13,7 @@ function toneForStatus(status: string) {
   return 'neutral';
 }
 
-export function ProviderDirectoryTable({ items }: { items: ProviderDirectoryItemContract[] }) {
+export function ProviderDirectoryTable({ items }: { items: ProviderMasterItemContract[] }) {
   const { locale } = useAdminLocale();
   const copy = getAdminPortalCopy(locale).providerDirectoryTable;
 
@@ -61,8 +61,8 @@ export function ProviderDirectoryTable({ items }: { items: ProviderDirectoryItem
               <td style={{ fontWeight: 800 }}>{item.providerName}</td>
               <td>{item.organizationName}</td>
               <td>{item.specialty}</td>
-              <td>{item.city}</td>
-              <td>{item.monthlyBookings}</td>
+              <td>{item.primaryMarket}</td>
+              <td>{item.linkedOpenItems}</td>
               <td><StatusBadge tone={toneForStatus(item.operatingStatus)}>{item.operatingStatus}</StatusBadge></td>
               <td>{item.payoutReadiness}</td>
               <td>
