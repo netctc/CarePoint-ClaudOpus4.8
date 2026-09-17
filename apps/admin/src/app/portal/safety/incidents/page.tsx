@@ -14,7 +14,7 @@ function tone(severity: string) {
 
 export default async function SafetyIncidentsPage() {
   const [result, accessResult, refillResult, refillEventResult] = await Promise.all([loadIntegratedSafetyWorkspace(), loadClinicalAccessExceptions(), loadRefillRequests(), loadRefillOperationalEvents()]);
-  const selected = result.data.items[0] || result.data.workspace.selectedCase;
+  const selected = result.data.items.find((item) => item.id === result.data.selectedCaseId) ?? result.data.items[0];
 
   return (
     <PortalShell currentPath="/portal/safety/incidents">
