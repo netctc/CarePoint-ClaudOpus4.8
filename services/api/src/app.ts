@@ -10,6 +10,7 @@ import { apiRoutePaths } from '@care-center/contracts';
 import { requestContext } from './middleware/request-context';
 import { errorHandler } from './middleware/error-handler';
 import { releaseOrganizationScopeGuard } from './middleware/release-org-scope';
+import { releaseAccountPasswordPolicy } from './middleware/release-account-password-policy';
 import { notFound, serviceUnavailable } from './lib/http';
 import { healthRouter } from './modules/health/health.routes';
 import { authV1HardeningRouter } from './modules/auth/auth-v1-hardening.routes';
@@ -153,6 +154,10 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   // Fail closed for tenant-scoped administrative user surfaces before either
   // the isolated IAM router or the legacy admin user router can run a query.
   app.use('/api/admin/users', releaseOrganizationScopeGuard);
+  // Release-v1 account creation/reset policy is mounted before both the isolated
+  // IAM router and the legacy admin user router. It prevents any legacy fallback
+  // from creating accounts with a shared/default password and validates CSV rows.
+  app.use('/api/admin/users', releaseAccountPasswordPolicy);
   // Mount the isolated IAM user-management surface before the legacy admin
   // router so enum-safe search and explicit RBAC/org scoping take precedence.
   app.use('/api/admin/users/iam-users', iamUsersRouter);
