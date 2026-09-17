@@ -163,7 +163,7 @@ function DeleteOrganizationButton({ organization, canManage }: { organization: O
 }
 
 export default async function OrganizationsPage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
-  const params = await (searchParams ?? Promise.resolve({}));
+  const params: SearchParams = searchParams ? await searchParams : {};
   const result = await loadOrganizations(params);
   const q = paramValue(params.q);
   const error = paramValue(params.error);
