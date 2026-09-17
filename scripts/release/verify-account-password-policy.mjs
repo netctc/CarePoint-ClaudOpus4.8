@@ -5,6 +5,7 @@ const app = read('services/api/src/app.ts');
 const policy = read('services/api/src/lib/account-password-policy.ts');
 const guard = read('services/api/src/middleware/release-account-password-policy.ts');
 const iamRouter = read('services/api/src/modules/admin-users/iam-users.routes.ts');
+const accountsLayout = read('apps/admin/src/app/portal/accounts/layout.tsx');
 
 const checks = [];
 const assert = (condition, message) => checks.push({ passed: Boolean(condition), message });
@@ -28,6 +29,10 @@ assert(guardMount < iamMount && guardMount < legacyMount, 'release password guar
 
 assert(iamRouter.includes("validateTemporaryPassword(req.body?.password, { required: true })"), 'isolated IAM create route independently requires governed temporary password');
 assert(!iamRouter.includes("|| 'ChangeMe"), 'isolated IAM route contains no shared temporary-password fallback');
+
+assert(accountsLayout.includes('There is no supported platform default.'), 'Admin Accounts visibly states that no shared password default is supported');
+assert(accountsLayout.includes('at least 16 characters'), 'Admin Accounts visibly communicates the release minimum password length');
+assert(accountsLayout.includes('legacy optional/default wording or template value'), 'Admin Accounts warns that legacy inline copy/templates are rejected by the release API');
 
 const failed = checks.filter((check) => !check.passed);
 for (const check of checks) console.log(`${check.passed ? 'PASS' : 'FAIL'} ${check.message}`);
