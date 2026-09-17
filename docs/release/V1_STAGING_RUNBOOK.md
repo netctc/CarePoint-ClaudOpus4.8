@@ -98,6 +98,14 @@ The staging gate is not complete until all of the following are recorded against
 - Runtime secret/config file on the host is permission-restricted and is not committed.
 - No default credentials are used.
 
+## Functional E2E handoff
+
+Infrastructure activation is not the functional acceptance gate. After #13 confirms the deployment is stable, execute `docs/release/V1_STAGING_E2E_RUNBOOK.md` for #15 using the **same exact approved SHA**.
+
+That E2E run must use synthetic accounts/data, freeze the #17 integration IN/OUT matrix for the run, exercise Admin/Patient/Provider critical workflows plus negative paths, prove intended persistence, and record zero unexplained critical-path 5xx before #15 can close.
+
+If the deployed SHA changes after any E2E evidence is collected, repeat the affected E2E paths on the newly approved SHA. Do not carry forward evidence from a different candidate without an explicit scope/retest decision.
+
 ## Evidence to capture
 
 Capture only non-sensitive evidence:
