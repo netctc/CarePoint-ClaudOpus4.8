@@ -5,6 +5,7 @@ const compose = read('deploy/vps/docker-compose.yml');
 const deploy = read('deploy/vps/deploy.sh');
 const caddy = read('deploy/vps/Caddyfile');
 const preflight = read('deploy/vps/preflight.sh');
+const adminBoundary = read('apps/admin/src/lib/api/admin-server.ts');
 
 const checks = [];
 const assert = (condition, message) => {
@@ -36,6 +37,11 @@ for (const hostVar of [
 assert(deploy.includes('ALLOW_LOCALHOST_CORS_WILDCARD=false'), 'deploy disables localhost CORS wildcard');
 assert(deploy.includes('ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false'), 'deploy disables production audit fallback');
 assert(deploy.includes('NEXT_PUBLIC_ALLOW_DEMO_SIGNIN=false'), 'deploy disables demo sign-in');
+assert(deploy.includes('ADMIN_ALLOW_MOCK_DATA=false'), 'deploy disables Admin mock data');
+assert(preflight.includes('require_exact ADMIN_ALLOW_MOCK_DATA false'), 'preflight requires Admin live-data mode');
+assert(compose.includes('ADMIN_ALLOW_MOCK_DATA: ${ADMIN_ALLOW_MOCK_DATA:-false}'), 'Admin container defaults to live-data mode');
+assert(adminBoundary.includes("tagged.source === 'mock'"), 'Admin release boundary rejects mock loader results');
+assert(adminBoundary.includes("process.env.ADMIN_ALLOW_MOCK_DATA === 'true'"), 'Admin mock override is explicit');
 assert(deploy.includes('EXPECTED_RELEASE_SHA'), 'deploy supports immutable SHA pinning');
 assert(preflight.includes('EXPECTED_RELEASE_SHA is required'), 'preflight requires immutable SHA pinning');
 assert(preflight.includes('docker compose') && preflight.includes('config --quiet'), 'preflight validates compose configuration');
