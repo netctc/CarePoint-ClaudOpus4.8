@@ -37,9 +37,9 @@ export function buildSsoAuthorizeUrl(input: {
 }) {
   const configuration = getSsoConfiguration(input.roleHint);
   if (!configuration.available || !configuration.authorizeUrl || !configuration.callbackUrl) {
-    throw badRequest(configuration.inScope
-      ? 'Enterprise SSO is not configured for this environment.'
-      : 'Enterprise SSO is not enabled for the v1 production pilot.');
+    throw badRequest(env.isProduction && !configuration.inScope
+      ? 'Enterprise SSO is not enabled for the v1 production pilot.'
+      : 'Enterprise SSO is not configured for this environment.');
   }
 
   const state = Buffer.from(JSON.stringify({
