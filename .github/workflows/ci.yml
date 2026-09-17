@@ -2,7 +2,7 @@ name: CarePoint CI
 on:
   pull_request:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop]
 
 concurrency:
   group: carepoint-ci-${{ github.workflow }}-${{ github.ref }}
