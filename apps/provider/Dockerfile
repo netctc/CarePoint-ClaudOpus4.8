@@ -19,5 +19,7 @@ COPY . .
 
 RUN npm run build --workspace @care-center/contracts  && npm run build --workspace @care-center/provider  && npm prune --omit=dev
 
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 EXPOSE 3000
-CMD ["npm", "run", "start", "--workspace", "@care-center/provider"]
+CMD ["node", "node_modules/next/dist/bin/next", "start", "apps/provider", "-p", "3000"]
