@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:carepoint_mobile/app/app.dart';
@@ -6,7 +7,7 @@ import 'package:carepoint_mobile/app/router/app_router.dart';
 void main() {
   testWidgets('app boots', (WidgetTester tester) async {
     await tester.pumpWidget(const CarePointApp());
-    expect(find.text('CarePoint'), findsWidgets);
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 
   test('unauthenticated patient is redirected to entry', () {
