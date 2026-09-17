@@ -26,10 +26,12 @@ for (const reference of remoteUses) {
   assert(/^[0-9a-f]{40}$/i.test(target), `${reference} is pinned to a full 40-character commit SHA`);
 }
 
-const checkoutSteps = [...workflow.matchAll(/^\s*-\s+uses:\s+actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?\n\s+with:\s*\n\s+persist-credentials:\s*false\s*$/gmi)];
 const checkoutUses = remoteUses.filter((reference) => reference.startsWith('actions/checkout@'));
+const exactHeadCheckoutSteps = [...workflow.matchAll(
+  /^\s*-\s+uses:\s+actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?\n\s+with:\s*\n\s+ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\|\|\s*github\.sha\s*\}\}\s*\n\s+persist-credentials:\s*false\s*$/gmi,
+)];
 assert(checkoutUses.length > 0, 'CI contains checkout steps to validate');
-assert(checkoutSteps.length === checkoutUses.length, 'every checkout step disables persisted Git credentials');
+assert(exactHeadCheckoutSteps.length === checkoutUses.length, 'every checkout step validates the exact PR head/push SHA and disables persisted Git credentials');
 
 const failed = checks.filter((check) => !check.passed);
 for (const check of checks) {
