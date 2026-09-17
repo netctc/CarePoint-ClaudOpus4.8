@@ -37,7 +37,7 @@ jobs:
             "node:22.23.2-trixie-slim"
             "python:3.12.14-slim-trixie"
             "python:3.12.14-slim-bookworm"
-            "python:3.12.14-alpine3.22"
+            "python:3.12.14-alpine3.24"
             "postgres:16.15-alpine"
             "postgres:16.15-bookworm"
             "caddy:2.11.4-alpine"
@@ -66,3 +66,24 @@ jobs:
           print(f"{image:36} {high:8} {critical:8} {fixable:8} {unfixed:8}")
           PY
           done
+
+          echo
+          echo "Building CarePoint Python worker on Alpine 3.24 candidate"
+          docker build --file services/python-worker/Dockerfile.alpine-candidate --tag carepoint-python-alpine-candidate .
+          echo "Running Python worker tests inside Alpine candidate"
+          docker run --rm carepoint-python-alpine-candidate python -m pytest -q
+          trivy image --quiet --scanners vuln --severity HIGH,CRITICAL --format json --output /tmp/carepoint-python-alpine.json carepoint-python-alpine-candidate
+          python3 - /tmp/carepoint-python-alpine.json <<'PY'
+          import json, sys
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          high = critical = fixable = unfixed = 0
+          for result in data.get("Results") or []:
+              for v in result.get("Vulnerabilities") or []:
+                  sev = str(v.get("Severity") or "").upper()
+                  if sev == "HIGH": high += 1
+                  elif sev == "CRITICAL": critical += 1
+                  else: continue
+                  if str(v.get("FixedVersion") or "").strip(): fixable += 1
+                  else: unfixed += 1
+          print(f"{'carepoint-python-alpine-candidate':36} {high:8} {critical:8} {fixable:8} {unfixed:8}")
+          PY
