@@ -16,11 +16,11 @@ concurrency:
 jobs:
   s1-build-and-runtime:
     name: S1 backend build and runtime smoke
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -29,7 +29,7 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d care_center" --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-        image: redis:7
+        image: redis:7@sha256:71da9275c5f3fcb97d0fa0c8c5b36cc995327265420f17a04bfd544f458059f7
         ports: ['6379:6379']
         options: >-
           --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
@@ -56,13 +56,13 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: 22
+          node-version: 22.23.2
           cache: npm
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.12'
+          python-version: '3.12.14'
           cache: pip
-      - run: python -m pip install --upgrade pip
+      - run: python -m pip install --upgrade pip==26.2.1
       - run: python -m pip install -r services/python-worker/requirements.txt
       - run: npm ci --no-audit --no-fund
       - run: npm run check:secrets
@@ -81,7 +81,7 @@ jobs:
 
   web-build:
     name: Web build (admin + provider)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
       # Build-time placeholder only. Production runtime must fail closed rather
@@ -95,7 +95,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: 22
+          node-version: 22.23.2
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run build:contracts
@@ -110,7 +110,7 @@ jobs:
 
   mobile-analyze:
     name: Flutter analyze + smoke/navigation tests (patient + provider mobile)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -121,10 +121,20 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          channel: stable
-      - run: flutter pub get
+      - name: Install Flutter 3.44.0 from verified release archive
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/flutter_linux_3.44.0-stable.tar.xz"
+          curl -fsSLo "$archive" "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz"
+          echo "e1ec95e6c550458a34de93580cb85dac24da0e9bedb9bb42811f050ac5a0c7d5  $archive" | sha256sum -c -
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+      - name: Resolve committed Flutter lockfile without mutation
+        shell: bash
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
         working-directory: ${{ matrix.app }}
       - run: flutter analyze
         working-directory: ${{ matrix.app }}
