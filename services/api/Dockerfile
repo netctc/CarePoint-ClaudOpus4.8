@@ -22,9 +22,11 @@ COPY . .
 
 RUN npm run build --workspace @care-center/contracts  && npm run prisma:generate --workspace @care-center/api  && npm run build --workspace @care-center/api  && npm prune --omit=dev
 
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 ENV NODE_ENV=production
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "fetch('http://127.0.0.1:'+(process.env.API_PORT||4000)+'/livez').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 # start:prod applies pending Prisma migrations (prisma migrate deploy) before
 # launching the API, so a fresh production database gets its schema created.
-CMD ["npm", "run", "start:prod", "--workspace", "@care-center/api"]
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy --schema services/api/prisma/schema.prisma && exec node services/api/dist/index.js"]
