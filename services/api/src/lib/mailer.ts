@@ -1,10 +1,14 @@
+import { serviceUnavailable } from './http';
+
 // Transactional email (OTP verification codes).
 //
 // Two providers supported:
 //   1. Resend HTTP API (preferred) — set RESEND_API_KEY.
 //   2. SMTP via nodemailer (fallback, lazily loaded) — set SMTP_HOST/SMTP_USER/SMTP_PASS.
 //
-// If neither is configured, sending is a safe no-op (logs a warning).
+// General email calls return an explicit delivery result. OTP delivery is
+// fail-closed in production so authentication can never report a usable
+// challenge when no message was actually accepted by a provider.
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
@@ -31,6 +35,12 @@ function getFromAddress(): string {
   );
 }
 
+function maskedRecipient(value: string) {
+  const [local = '', domain = ''] = value.split('@');
+  const visible = local ? `${local.slice(0, 1)}***` : '***';
+  return domain ? `${visible}@${domain}` : '***';
+}
+
 export function isEmailConfigured(): boolean {
   return getResendApiKey() !== null || getSmtpConfig() !== null;
 }
@@ -49,15 +59,15 @@ async function sendViaResend(opts: { to: string; subject: string; text: string; 
     });
     const bodyText = await res.text().catch(() => '');
     if (!res.ok) {
-      console.error(`[mailer] Resend API error ${res.status} to ${opts.to}: ${bodyText.slice(0, 300)}`);
+      console.error(`[mailer] Resend rejected email for ${maskedRecipient(opts.to)} with status ${res.status}`);
       return { sent: false, reason: 'send_failed' };
     }
     let id: string | undefined;
     try { id = (JSON.parse(bodyText) as { id?: string }).id; } catch { /* ignore */ }
-    console.log(`[mailer] Resend accepted email to ${opts.to} id=${id ?? 'n/a'}`);
+    console.log(`[mailer] Resend accepted email for ${maskedRecipient(opts.to)} id=${id ?? 'n/a'}`);
     return { sent: true, provider: 'resend', id };
-  } catch (error) {
-    console.error(`[mailer] Resend failed for ${opts.to}:`, error instanceof Error ? error.message : error);
+  } catch {
+    console.error(`[mailer] Resend request failed for ${maskedRecipient(opts.to)}`);
     return { sent: false, reason: 'send_failed' };
   }
 }
@@ -72,14 +82,19 @@ async function getSmtpTransporter(): Promise<any | null> {
   if (!config) { smtpTransporter = null; return null; }
   try {
     const nodemailer = (await import('nodemailer' as string)).default;
+    const rejectUnauthorized = process.env.NODE_ENV === 'production'
+      ? true
+      : process.env.SMTP_TLS_REJECT_UNAUTHORIZED?.trim().toLowerCase() !== 'false';
     smtpTransporter = nodemailer.createTransport({
-      host: config.host, port: config.port, secure: config.port === 465,
+      host: config.host,
+      port: config.port,
+      secure: config.port === 465,
       auth: { user: config.user, pass: config.pass },
-      tls: { rejectUnauthorized: false },
+      tls: { rejectUnauthorized },
     });
     return smtpTransporter as any;
-  } catch (error) {
-    console.error('[mailer] nodemailer not available:', error instanceof Error ? error.message : error);
+  } catch {
+    console.error('[mailer] SMTP transport initialization failed');
     smtpTransporter = null;
     return null;
   }
@@ -91,10 +106,10 @@ async function sendViaSmtp(opts: { to: string; subject: string; text: string; ht
   const from = getFromAddress();
   try {
     const info = await tx.sendMail({ from, to: opts.to, subject: opts.subject, text: opts.text, html: opts.html });
-    console.log(`[mailer] SMTP accepted email to ${opts.to} id=${info?.messageId ?? 'n/a'}`);
+    console.log(`[mailer] SMTP accepted email for ${maskedRecipient(opts.to)} id=${info?.messageId ?? 'n/a'}`);
     return { sent: true, provider: 'smtp', id: info?.messageId };
-  } catch (error) {
-    console.error(`[mailer] SMTP failed for ${opts.to}:`, error instanceof Error ? error.message : error);
+  } catch {
+    console.error(`[mailer] SMTP delivery failed for ${maskedRecipient(opts.to)}`);
     return { sent: false, reason: 'send_failed' };
   }
 }
@@ -102,7 +117,7 @@ async function sendViaSmtp(opts: { to: string; subject: string; text: string; ht
 export async function sendEmail(opts: { to: string; subject: string; text: string; html?: string }): Promise<SendResult> {
   if (getResendApiKey()) return sendViaResend(opts);
   if (getSmtpConfig()) return sendViaSmtp(opts);
-  console.warn(`[mailer] No email provider configured; skipping email to ${opts.to}`);
+  console.warn(`[mailer] No email provider configured; skipping email for ${maskedRecipient(opts.to)}`);
   return { sent: false, reason: 'not_configured' };
 }
 
@@ -112,5 +127,13 @@ export async function sendOtpEmail(params: { to: string; code: string; expiresIn
   const subject = `CarePoint verification code: ${params.code}`;
   const text = `Your CarePoint ${purpose} verification code is ${params.code}.\nIt expires in ${minutes} minute(s).\n\nIf you did not request this code, you can safely ignore this email.`;
   const html = `<div style="font-family:Arial,sans-serif;font-size:15px;color:#1a1a1a"><p>Your CarePoint <strong>${purpose}</strong> verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px;margin:16px 0">${params.code}</p><p>It expires in ${minutes} minute(s).</p><p style="color:#666">If you did not request this code, you can safely ignore this email.</p></div>`;
-  return sendEmail({ to: params.to, subject, text, html });
+  const result = await sendEmail({ to: params.to, subject, text, html });
+  if (process.env.NODE_ENV === 'production' && !result.sent) {
+    throw serviceUnavailable(
+      result.reason === 'not_configured'
+        ? 'Email OTP delivery is not configured for this environment.'
+        : 'Email OTP delivery failed. Retry after the email provider recovers.',
+    );
+  }
+  return result;
 }
