@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12-slim AS runtime
+FROM python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -10,7 +10,7 @@ WORKDIR /app/services/python-worker
 RUN addgroup --system carepoint && adduser --system --ingroup carepoint --uid 10001 carepoint
 
 COPY services/python-worker/requirements.txt ./requirements.txt
-RUN python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+RUN python -m pip install --upgrade pip==26.2.1 && python -m pip install -r requirements.txt
 
 COPY services/python-worker ./
 
