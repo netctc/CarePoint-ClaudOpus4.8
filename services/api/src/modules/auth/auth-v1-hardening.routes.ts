@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '../../lib/prisma';
 import { badRequest, forbidden, unauthorized } from '../../lib/http';
 import { writeAuditLog } from '../../lib/audit';
+import { validateBody } from '../../middleware/validate';
 import {
   getAuthChallengeStoreMode,
   issuePrivilegedSignInChallenge,
@@ -39,6 +40,9 @@ const privilegedChallengeStartSchema = z.object({
 const privilegedChallengeResendSchema = z.object({
   challengeId: z.string().trim().min(8),
 });
+
+type PrivilegedChallengeStartInput = z.infer<typeof privilegedChallengeStartSchema>;
+type PrivilegedChallengeResendInput = z.infer<typeof privilegedChallengeResendSchema>;
 
 function toSsoRoleHint(role: string): SsoRoleHint {
   return role === 'PROVIDER' || role === 'NURSE' || role === 'PHARMACIST' || role === 'LAB_TECH'
@@ -91,138 +95,146 @@ authV1HardeningRouter.post('/login', async (req, _res, next) => {
   next(forbidden('Privileged accounts require the managed-device email verification flow.'));
 });
 
-authV1HardeningRouter.post('/challenge/start', async (req, res) => {
-  const input = privilegedChallengeStartSchema.parse(req.body ?? {});
-  const email = input.email.trim().toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email } });
+authV1HardeningRouter.post(
+  '/challenge/start',
+  validateBody(privilegedChallengeStartSchema),
+  async (req, res) => {
+    const input = req.body as PrivilegedChallengeStartInput;
+    const email = input.email.trim().toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email } });
 
-  if (!user) throw unauthorized('Invalid email or password');
-  const passwordValid = await bcrypt.compare(input.password, user.passwordHash);
-  if (!passwordValid) throw unauthorized('Invalid email or password');
-  if (!PRIVILEGED_SIGN_IN_ROLES.has(user.role)) {
-    throw badRequest('This account does not require the privileged sign-in flow.');
-  }
-  if (!input.managedDevice) {
-    throw badRequest('Managed-device confirmation is required for privileged sign-in.');
-  }
+    if (!user) throw unauthorized('Invalid email or password');
+    const passwordValid = await bcrypt.compare(input.password, user.passwordHash);
+    if (!passwordValid) throw unauthorized('Invalid email or password');
+    if (!PRIVILEGED_SIGN_IN_ROLES.has(user.role)) {
+      throw badRequest('This account does not require the privileged sign-in flow.');
+    }
+    if (!input.managedDevice) {
+      throw badRequest('Managed-device confirmation is required for privileged sign-in.');
+    }
 
-  try {
-    enforceApprovedPrivilegedDomain(email);
-  } catch (error) {
-    throw unauthorized(error instanceof Error ? error.message : 'The email domain is not approved for privileged sign-in.');
-  }
+    try {
+      enforceApprovedPrivilegedDomain(email);
+    } catch (error) {
+      throw unauthorized(error instanceof Error ? error.message : 'The email domain is not approved for privileged sign-in.');
+    }
 
-  const risk = buildPrivilegedRiskAssessment({
-    email,
-    role: user.role,
-    managedDevice: input.managedDevice,
-    channel: 'email',
-  });
-  if (risk.requiresAcknowledgement && !input.riskAcknowledged) {
-    throw badRequest('Acknowledge the privileged access notice before continuing.');
-  }
-
-  const issued = await issuePrivilegedSignInChallenge({
-    identifier: email,
-    userId: user.id,
-    role: user.role,
-    organizationId: user.organizationId ?? undefined,
-    channel: 'email',
-    metadata: {
-      managedDevice: true,
-      riskLevel: risk.level,
-      riskReasons: risk.reasons,
-      riskAcknowledged: Boolean(input.riskAcknowledged),
-      requestedChannel: input.channel ?? null,
-      enforcedChannel: 'email',
-    },
-  });
-
-  if (issued.isNew) {
-    await sendOtpEmail({
-      to: issued.challenge.identifier,
-      code: issued.challenge.code,
-      expiresInSeconds: issued.expiresInSeconds,
-      purpose: 'privileged sign-in',
-    });
-  }
-
-  const challengeStoreMode = await getAuthChallengeStoreMode();
-  await writeAuditLog({
-    actorId: user.id,
-    organizationId: user.organizationId ?? undefined,
-    action: issued.isNew ? 'auth.privileged_challenge_started' : 'auth.privileged_challenge_resend_blocked',
-    resource: 'user',
-    resourceId: user.id,
-    details: {
+    const risk = buildPrivilegedRiskAssessment({
+      email,
+      role: user.role,
+      managedDevice: input.managedDevice,
       channel: 'email',
-      resendAfterSeconds: issued.resendAfterSeconds,
-      expiresInSeconds: issued.expiresInSeconds,
-      managedDevice: true,
-      risk,
-      challengeStoreMode,
-    },
-  });
+    });
+    if (risk.requiresAcknowledgement && !input.riskAcknowledged) {
+      throw badRequest('Acknowledge the privileged access notice before continuing.');
+    }
 
-  res.status(202).json({
-    challengeId: issued.challenge.id,
-    channel: 'email',
-    expiresInSeconds: issued.expiresInSeconds,
-    resendAfterSeconds: issued.resendAfterSeconds,
-    challengeStoreMode,
-    risk,
-    sso: getSsoConfiguration(toSsoRoleHint(user.role)),
-    user: {
-      email: user.email,
+    const issued = await issuePrivilegedSignInChallenge({
+      identifier: email,
+      userId: user.id,
       role: user.role,
       organizationId: user.organizationId ?? undefined,
-    },
-    devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
-  });
-});
-
-authV1HardeningRouter.post('/challenge/resend', async (req, res) => {
-  const input = privilegedChallengeResendSchema.parse(req.body ?? {});
-  const issued = await resendPrivilegedSignInChallenge(input.challengeId);
-  if (!issued) {
-    throw badRequest('The privileged sign-in challenge is no longer available. Start again.');
-  }
-
-  if (issued.challenge.channel !== 'email') {
-    throw badRequest('Legacy non-email privileged challenges are no longer valid. Start the sign-in flow again.');
-  }
-
-  if (issued.isNew) {
-    await sendOtpEmail({
-      to: issued.challenge.identifier,
-      code: issued.challenge.code,
-      expiresInSeconds: issued.expiresInSeconds,
-      purpose: 'privileged sign-in',
+      channel: 'email',
+      metadata: {
+        managedDevice: true,
+        riskLevel: risk.level,
+        riskReasons: risk.reasons,
+        riskAcknowledged: Boolean(input.riskAcknowledged),
+        requestedChannel: input.channel ?? null,
+        enforcedChannel: 'email',
+      },
     });
-  }
 
-  const challengeStoreMode = await getAuthChallengeStoreMode();
-  await writeAuditLog({
-    actorId: issued.challenge.userId,
-    organizationId: issued.challenge.organizationId,
-    action: issued.isNew ? 'auth.privileged_challenge_resent' : 'auth.privileged_challenge_resend_blocked',
-    resource: 'user',
-    resourceId: issued.challenge.userId,
-    details: {
+    if (issued.isNew) {
+      await sendOtpEmail({
+        to: issued.challenge.identifier,
+        code: issued.challenge.code,
+        expiresInSeconds: issued.expiresInSeconds,
+        purpose: 'privileged sign-in',
+      });
+    }
+
+    const challengeStoreMode = await getAuthChallengeStoreMode();
+    await writeAuditLog({
+      actorId: user.id,
+      organizationId: user.organizationId ?? undefined,
+      action: issued.isNew ? 'auth.privileged_challenge_started' : 'auth.privileged_challenge_resend_blocked',
+      resource: 'user',
+      resourceId: user.id,
+      details: {
+        channel: 'email',
+        resendAfterSeconds: issued.resendAfterSeconds,
+        expiresInSeconds: issued.expiresInSeconds,
+        managedDevice: true,
+        risk,
+        challengeStoreMode,
+      },
+    });
+
+    res.status(202).json({
       challengeId: issued.challenge.id,
       channel: 'email',
-      resendAfterSeconds: issued.resendAfterSeconds,
       expiresInSeconds: issued.expiresInSeconds,
+      resendAfterSeconds: issued.resendAfterSeconds,
       challengeStoreMode,
-    },
-  });
+      risk,
+      sso: getSsoConfiguration(toSsoRoleHint(user.role)),
+      user: {
+        email: user.email,
+        role: user.role,
+        organizationId: user.organizationId ?? undefined,
+      },
+      devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
+    });
+  },
+);
 
-  res.status(202).json({
-    challengeId: issued.challenge.id,
-    channel: 'email',
-    expiresInSeconds: issued.expiresInSeconds,
-    resendAfterSeconds: issued.resendAfterSeconds,
-    challengeStoreMode,
-    devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
-  });
-});
+authV1HardeningRouter.post(
+  '/challenge/resend',
+  validateBody(privilegedChallengeResendSchema),
+  async (req, res) => {
+    const input = req.body as PrivilegedChallengeResendInput;
+    const issued = await resendPrivilegedSignInChallenge(input.challengeId);
+    if (!issued) {
+      throw badRequest('The privileged sign-in challenge is no longer available. Start again.');
+    }
+
+    if (issued.challenge.channel !== 'email') {
+      throw badRequest('Legacy non-email privileged challenges are no longer valid. Start the sign-in flow again.');
+    }
+
+    if (issued.isNew) {
+      await sendOtpEmail({
+        to: issued.challenge.identifier,
+        code: issued.challenge.code,
+        expiresInSeconds: issued.expiresInSeconds,
+        purpose: 'privileged sign-in',
+      });
+    }
+
+    const challengeStoreMode = await getAuthChallengeStoreMode();
+    await writeAuditLog({
+      actorId: issued.challenge.userId,
+      organizationId: issued.challenge.organizationId,
+      action: issued.isNew ? 'auth.privileged_challenge_resent' : 'auth.privileged_challenge_resend_blocked',
+      resource: 'user',
+      resourceId: issued.challenge.userId,
+      details: {
+        challengeId: issued.challenge.id,
+        channel: 'email',
+        resendAfterSeconds: issued.resendAfterSeconds,
+        expiresInSeconds: issued.expiresInSeconds,
+        challengeStoreMode,
+      },
+    });
+
+    res.status(202).json({
+      challengeId: issued.challenge.id,
+      channel: 'email',
+      expiresInSeconds: issued.expiresInSeconds,
+      resendAfterSeconds: issued.resendAfterSeconds,
+      challengeStoreMode,
+      devCode: process.env.NODE_ENV === 'production' ? undefined : issued.challenge.code,
+    });
+  },
+);
