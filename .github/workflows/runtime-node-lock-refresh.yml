@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm update --package-lock-only --ignore-scripts --no-audit --no-fund next sharp engine.io socket.io-parser ws
+          npm update --package-lock-only --ignore-scripts --no-audit --no-fund next sharp engine.io socket.io-adapter socket.io-parser ws
 
       - name: Verify patched resolved versions
         run: |
@@ -39,6 +39,7 @@ jobs:
             'node_modules/next': '16.3.3',
             'node_modules/sharp': '0.35.4',
             'node_modules/engine.io': '6.6.10',
+            'node_modules/socket.io-adapter': '2.5.8',
             'node_modules/socket.io-parser': '4.2.7',
             'node_modules/ws': '8.21.0',
           };
