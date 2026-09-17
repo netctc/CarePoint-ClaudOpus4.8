@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, develop]
 
+# CI only needs repository read access. Keep GITHUB_TOKEN least-privileged so
+# a compromised build dependency/action cannot mutate repository resources.
+permissions:
+  contents: read
+
 concurrency:
   group: carepoint-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -45,12 +50,12 @@ jobs:
       FRONTEND_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8081
       ALLOW_LOCALHOST_CORS_WILDCARD: 'true'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -81,8 +86,8 @@ jobs:
       NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
           cache: npm
@@ -106,8 +111,8 @@ jobs:
       matrix:
         app: [apps/mobile, apps/provider_mobile]
     steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: stable
       - run: flutter pub get
