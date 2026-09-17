@@ -11,17 +11,12 @@ set -euo pipefail
 # Optional:
 #   CAREPOINT_BRANCH=release/v1-go-live VPS_IP=<public-ip-or-host> ./deploy.sh
 #
-# What it does:
-#   1. Installs Docker + Docker Compose if not present
-#   2. Clones (or pulls) the repository
-#   3. Generates production secrets
-#   4. Creates the runtime environment file on the VPS only
-#   5. Builds and starts all services
-#   6. Runs database migrations through the API production start command
-#   7. Prints access URLs
+# Safety rule:
+#   Runtime credentials are generated only on first install. Existing runtime
+#   credentials are preserved on redeploy. Secret rotation is a separate,
+#   deliberate operation; never rotate the medical encryption key implicitly.
 # =============================================================================
 
-# ---- Configuration -----------------------------------------------------------
 VPS_IP="${VPS_IP:-}"
 REPO_URL="${REPO_URL:-https://github.com/netctc/CarePoint-ClaudOpus4.8.git}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/carepoint}"
@@ -32,18 +27,14 @@ if [ -z "${VPS_IP}" ]; then
     exit 1
 fi
 
-# Ports exposed to the internet
 API_PORT="${API_PORT:-4000}"
 ADMIN_PORT="${ADMIN_PORT:-3001}"
 PROVIDER_PORT="${PROVIDER_PORT:-3002}"
 PATIENT_PORT="${PATIENT_PORT:-8080}"
 PROVIDER_MOBILE_PORT="${PROVIDER_MOBILE_PORT:-8081}"
-
-# Database identity (password is generated at runtime)
 POSTGRES_DB="${POSTGRES_DB:-care_center}"
 POSTGRES_USER="${POSTGRES_USER:-carecenter}"
-
-# =============================================================================
+RUNTIME_ENV_FILE="${INSTALL_DIR}/deploy/vps/.env"
 
 echo "============================================"
 echo "  CarePoint VPS Deployment"
@@ -83,39 +74,32 @@ else
     echo "Repository cloned."
 fi
 
-# ---- Step 3: Generate secrets ------------------------------------------------
-echo "[3/7] Generating production secrets..."
-POSTGRES_PASSWORD=$(openssl rand -hex 32)
-REDIS_PASSWORD=$(openssl rand -hex 32)
-JWT_ACCESS_SECRET=$(openssl rand -hex 32)
-JWT_REFRESH_SECRET=$(openssl rand -hex 32)
-MEDICAL_KEY=$(openssl rand -hex 32)
-PYTHON_SECRET=$(openssl rand -hex 32)
-
-echo "Secrets generated."
-
-# ---- Step 4: Create runtime environment file ---------------------------------
-echo "[4/7] Creating runtime environment file..."
 mkdir -p "${INSTALL_DIR}/deploy/vps"
 
-cat > "${INSTALL_DIR}/deploy/vps/.env" <<EOF
-# === CarePoint Production Environment ===
-# Generated on $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+# ---- Steps 3-4: Initialize runtime configuration once ------------------------
+if [ -f "${RUNTIME_ENV_FILE}" ]; then
+    echo "[3/7] Existing runtime credentials found; preserving them."
+    echo "[4/7] Existing runtime configuration retained."
+    chmod 600 "${RUNTIME_ENV_FILE}"
+else
+    echo "[3/7] First install: generating runtime credentials..."
+    POSTGRES_PASSWORD=$(openssl rand -hex 32)
+    REDIS_PASSWORD=$(openssl rand -hex 32)
+    JWT_ACCESS_SECRET=$(openssl rand -hex 32)
+    JWT_REFRESH_SECRET=$(openssl rand -hex 32)
+    MEDICAL_KEY=$(openssl rand -hex 32)
+    PYTHON_SECRET=$(openssl rand -hex 32)
 
+    echo "[4/7] Creating first-install runtime configuration..."
+    cat > "${RUNTIME_ENV_FILE}" <<EOF
 NODE_ENV=production
-
-# --- Database ---
 POSTGRES_DB=${POSTGRES_DB}
 POSTGRES_USER=${POSTGRES_USER}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
 DIRECT_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-
-# --- Redis ---
 REDIS_PASSWORD=${REDIS_PASSWORD}
 REDIS_URL=redis://default:${REDIS_PASSWORD}@redis:6379
-
-# --- API ---
 API_PORT=${API_PORT}
 HEALTH_CHECK_TIMEOUT_MS=2500
 JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
@@ -127,29 +111,21 @@ AUTH_CHALLENGE_REDIS_ENABLED=true
 AUTH_CHALLENGE_REDIS_PREFIX=carepoint:auth:challenge
 ALLOW_LOCALHOST_CORS_WILDCARD=false
 ALLOW_AUDIT_FALLBACK_IN_PRODUCTION=false
-
-# --- CORS / Frontend URLs ---
 FRONTEND_ADMIN_URL=http://${VPS_IP}:${ADMIN_PORT}
 FRONTEND_PROVIDER_URL=http://${VPS_IP}:${PROVIDER_PORT}
 FRONTEND_PATIENT_URL=http://${VPS_IP}:${PATIENT_PORT}
 FRONTEND_PROVIDER_MOBILE_URL=http://${VPS_IP}:${PROVIDER_MOBILE_PORT}
 FRONTEND_ALLOWED_ORIGINS=http://${VPS_IP}:${ADMIN_PORT},http://${VPS_IP}:${PROVIDER_PORT},http://${VPS_IP}:${PATIENT_PORT},http://${VPS_IP}:${PROVIDER_MOBILE_PORT}
-
-# --- Build-time values ---
 NEXT_PUBLIC_API_BASE_URL=http://${VPS_IP}:${API_PORT}
 NEXT_PUBLIC_ALLOW_DEMO_SIGNIN=false
 PATIENT_API_BASE_URL=http://${VPS_IP}:${API_PORT}
 PROVIDER_MOBILE_API_BASE_URL=http://${VPS_IP}:${API_PORT}
-
-# --- Email (OTP) ---
 RESEND_API_KEY=
 EMAIL_FROM=CarePoint <onboarding@resend.dev>
 SMTP_HOST=
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
-
-# --- Optional integrations ---
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 TELEHEALTH_VENDOR=daily
@@ -163,8 +139,6 @@ SSO_AUTHORIZE_URL=
 SSO_CLIENT_ID=
 SSO_CALLBACK_URL=
 SSO_SCOPE=openid profile email
-
-# --- Python Worker ---
 PYTHON_SERVICES_BASE_URL=http://python-worker-api:8010
 PYTHON_SERVICES_SHARED_SECRET=${PYTHON_SECRET}
 PYTHON_SERVICES_TIMEOUT_MS=2500
@@ -190,9 +164,9 @@ HYBRID_PYTHON_DEFAULT_ROUTE=/api/hybrid-python/jobs
 CELERY_BROKER_URL=redis://default:${REDIS_PASSWORD}@redis:6379
 CELERY_RESULT_BACKEND=redis://default:${REDIS_PASSWORD}@redis:6379
 EOF
-
-chmod 600 "${INSTALL_DIR}/deploy/vps/.env"
-echo "Runtime environment file created with mode 600."
+    chmod 600 "${RUNTIME_ENV_FILE}"
+    echo "First-install runtime credentials created and protected with mode 600."
+fi
 
 # ---- Step 5: Open firewall ports ---------------------------------------------
 echo "[5/7] Configuring firewall..."
@@ -214,16 +188,14 @@ fi
 # ---- Step 6: Build and start -------------------------------------------------
 echo "[6/7] Building and starting all services..."
 cd "${INSTALL_DIR}"
-docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env build
-docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d
+docker compose -f deploy/vps/docker-compose.yml --env-file "${RUNTIME_ENV_FILE}" build
+docker compose -f deploy/vps/docker-compose.yml --env-file "${RUNTIME_ENV_FILE}" up -d
 
 echo "Waiting for services to be healthy..."
 sleep 10
 
 # ---- Step 7: Verify ----------------------------------------------------------
 echo "[7/7] Verifying deployment..."
-echo ""
-
 if curl -sf "http://127.0.0.1:${API_PORT}/livez" >/dev/null 2>&1; then
     echo "  [OK] API is healthy"
 else
@@ -237,19 +209,8 @@ else
 fi
 
 echo ""
-echo "============================================"
-echo "  DEPLOYMENT COMPLETE"
-echo "============================================"
-echo ""
-echo "  Verify services at the configured host and ports."
-echo "  Before production promotion, place public services behind HTTPS/TLS"
-echo "  and restrict direct container/application ports at the network edge."
-echo ""
-echo "  Useful commands:"
-echo "    cd ${INSTALL_DIR}"
-echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env logs -f api"
-echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env ps"
-echo "    docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env restart api"
-echo ""
-echo "  Runtime credentials are stored only on the VPS in deploy/vps/.env (mode 600)."
-echo "  Never commit or copy that file into GitHub issues or documentation."
+echo "Deployment command completed. Before production promotion:"
+echo "- put public services behind HTTPS/TLS;"
+echo "- restrict direct application ports at the network edge;"
+echo "- verify backups, alerts and rollback;"
+echo "- keep runtime credentials off git and out of tickets/docs."
