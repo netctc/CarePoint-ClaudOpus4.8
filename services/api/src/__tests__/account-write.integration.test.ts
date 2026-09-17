@@ -61,12 +61,17 @@ describe.skipIf(!dbReady)('admin account write flows (patient + provider)', () =
     }
   });
 
-  it('creates a patient account (201) and lists it back', async () => {
+  it('creates a patient account (201) with explicit temporary password and lists it back', async () => {
     const email = `itest-patient-${Date.now()}-${Math.random().toString(36).slice(2, 6)}@example.com`;
     const createRes = await request(app)
       .post('/api/admin/users/patients')
       .set('Authorization', `Bearer ${token}`)
-      .send({ email, firstName: 'Pat', lastName: 'Ient' });
+      .send({
+        email,
+        firstName: 'Pat',
+        lastName: 'Ient',
+        password: `P!lot-${Date.now()}-Patient-X9`,
+      });
 
     expect(createRes.status).toBe(201);
     expect(createRes.body.item?.id).toBeTruthy();
@@ -84,16 +89,25 @@ describe.skipIf(!dbReady)('admin account write flows (patient + provider)', () =
     const res = await request(app)
       .post('/api/admin/users/patients')
       .set('Authorization', `Bearer ${token}`)
-      .send({ email: `itest-bad-${Date.now()}@example.com` });
+      .send({
+        email: `itest-bad-${Date.now()}@example.com`,
+        password: `P!lot-${Date.now()}-Missing-Name-X9`,
+      });
     expect(res.status).toBe(400);
   });
 
-  it('creates a provider account (201, default role) and lists it back', async () => {
+  it('creates a provider account (201, default role) with explicit temporary password and lists it back', async () => {
     const email = `itest-provider-${Date.now()}-${Math.random().toString(36).slice(2, 6)}@example.com`;
     const createRes = await request(app)
       .post('/api/admin/users/providers')
       .set('Authorization', `Bearer ${token}`)
-      .send({ email, firstName: 'Prov', lastName: 'Ider', specialty: 'General Medicine' });
+      .send({
+        email,
+        firstName: 'Prov',
+        lastName: 'Ider',
+        specialty: 'General Medicine',
+        password: `P!lot-${Date.now()}-Provider-X9`,
+      });
 
     expect(createRes.status).toBe(201);
     expect(createRes.body.item?.id).toBeTruthy();
