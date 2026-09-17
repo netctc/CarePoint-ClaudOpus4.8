@@ -15,7 +15,8 @@ assert(/\bedge:\s*[\s\S]*?image:\s*caddy:/m.test(compose), 'Caddy edge service i
 assert(/80:80/.test(compose) && /443:443/.test(compose), 'edge publishes HTTP/HTTPS');
 
 for (const service of ['api', 'admin', 'provider', 'patient-web', 'provider-mobile-web']) {
-  const pattern = new RegExp(`\\n  ${service.replace('-', '\\-')}:([\\s\\S]*?)(?=\\n  [A-Za-z0-9_-]+:|\\nvolumes:)`);
+  const escapedService = service.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`\\n  ${escapedService}:([\\s\\S]*?)(?=\\n  [A-Za-z0-9_-]+:|\\nvolumes:)`);
   const block = compose.match(pattern)?.[1] ?? '';
   assert(block.length > 0, `${service} service exists`);
   assert(!/\n\s+ports:\s*\n/.test(block), `${service} does not publish host ports directly`);
@@ -40,7 +41,7 @@ assert(preflight.includes('EXPECTED_RELEASE_SHA is required'), 'preflight requir
 assert(preflight.includes('docker compose') && preflight.includes('config --quiet'), 'preflight validates compose configuration');
 
 const forbiddenFirewallRules = ['API_PORT', 'ADMIN_PORT', 'PROVIDER_PORT', 'PATIENT_PORT', 'PROVIDER_MOBILE_PORT']
-  .filter((name) => new RegExp(`ufw allow \\${${name}}`).test(deploy));
+  .filter((name) => deploy.includes('ufw allow ${' + name + '}'));
 assert(forbiddenFirewallRules.length === 0, 'deploy does not open application ports in UFW');
 
 const failed = checks.filter((check) => !check.passed);
