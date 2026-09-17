@@ -13,7 +13,7 @@ RUN LOCK_SHA="$(sha256sum pubspec.lock | cut -d' ' -f1)" \
  && test "$LOCK_SHA" = "$(sha256sum pubspec.lock | cut -d' ' -f1)" \
  && flutter build web --release --dart-define=API_BASE_URL=${API_BASE_URL}
 
-FROM nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+FROM nginx:1.30.5-alpine3.24-slim@sha256:2853ea34f0e5448adfd4f6ec9c2a7974f28260730adc7a4be4e87600294fe5a2
 COPY apps/mobile/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/mobile/build/web /usr/share/nginx/html
 EXPOSE 80
