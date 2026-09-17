@@ -13,6 +13,7 @@ function writeCookie(res: import('express').Response, name: string, value: strin
   res.cookie(name, value, {
     httpOnly,
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
   });
 }
 
