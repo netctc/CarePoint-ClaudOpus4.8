@@ -5,6 +5,8 @@ INSTALL_DIR="${INSTALL_DIR:-/opt/carepoint}"
 COMPOSE_FILE="${CAREPOINT_COMPOSE_FILE:-${INSTALL_DIR}/deploy/vps/docker-compose.yml}"
 RUNTIME_ENV_FILE="${CAREPOINT_RUNTIME_ENV_FILE:-${INSTALL_DIR}/deploy/vps/.env}"
 OUTPUT_FILE="${OUTPUT_FILE:-}"
+DISK_CRITICAL_PERCENT="${CAREPOINT_DISK_CRITICAL_PERCENT:-90}"
+MEMORY_CRITICAL_PERCENT="${CAREPOINT_MEMORY_CRITICAL_PERCENT:-95}"
 
 fail() {
   echo "HEALTH CHECK FAILED: $*" >&2
@@ -20,8 +22,11 @@ env_value() {
 
 command -v docker >/dev/null 2>&1 || fail "docker is required"
 command -v curl >/dev/null 2>&1 || fail "curl is required"
+command -v df >/dev/null 2>&1 || fail "df is required"
 [ -f "$COMPOSE_FILE" ] || fail "compose file not found: $COMPOSE_FILE"
 [ -f "$RUNTIME_ENV_FILE" ] || fail "runtime configuration not found: $RUNTIME_ENV_FILE"
+[[ "$DISK_CRITICAL_PERCENT" =~ ^[0-9]+$ ]] || fail "CAREPOINT_DISK_CRITICAL_PERCENT must be numeric"
+[[ "$MEMORY_CRITICAL_PERCENT" =~ ^[0-9]+$ ]] || fail "CAREPOINT_MEMORY_CRITICAL_PERCENT must be numeric"
 
 services=(postgres redis api admin provider patient-web provider-mobile-web python-worker-api python-worker-celery edge)
 status=0
@@ -44,7 +49,9 @@ for service in "${services[@]}"; do
 
   state=$(docker inspect --format '{{.State.Status}}' "$cid" 2>/dev/null || printf unknown)
   health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$cid" 2>/dev/null || printf unknown)
-  printf '  %s=state:%s health:%s\n' "$service" "$state" "$health" >> "$report"
+  restart_count=$(docker inspect --format '{{.RestartCount}}' "$cid" 2>/dev/null || printf unknown)
+  oom_killed=$(docker inspect --format '{{.State.OOMKilled}}' "$cid" 2>/dev/null || printf unknown)
+  printf '  %s=state:%s health:%s restarts:%s oom_killed:%s\n' "$service" "$state" "$health" "$restart_count" "$oom_killed" >> "$report"
 
   if [ "$state" != "running" ]; then
     status=1
@@ -52,7 +59,37 @@ for service in "${services[@]}"; do
   if [ "$health" != "n/a" ] && [ "$health" != "healthy" ]; then
     status=1
   fi
+  if [ "$oom_killed" = "true" ]; then
+    status=1
+  fi
 done
+
+cpu_count=$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '1')
+load_1m=$(awk '{print $1}' /proc/loadavg 2>/dev/null || printf 'unknown')
+mem_total_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || true)
+mem_available_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo 2>/dev/null || true)
+memory_used_percent=unknown
+if [[ "$mem_total_kb" =~ ^[0-9]+$ ]] && [[ "$mem_available_kb" =~ ^[0-9]+$ ]] && [ "$mem_total_kb" -gt 0 ]; then
+  memory_used_percent=$(( (100 * (mem_total_kb - mem_available_kb)) / mem_total_kb ))
+fi
+
+disk_used_percent=$(df -P / | awk 'NR==2 {gsub(/%/, "", $5); print $5}')
+[ -n "$disk_used_percent" ] || disk_used_percent=unknown
+
+{
+  echo 'host_resources:'
+  printf '  cpu_count=%s\n' "$cpu_count"
+  printf '  load_1m=%s\n' "$load_1m"
+  printf '  memory_used_percent=%s threshold=%s\n' "$memory_used_percent" "$MEMORY_CRITICAL_PERCENT"
+  printf '  root_disk_used_percent=%s threshold=%s\n' "$disk_used_percent" "$DISK_CRITICAL_PERCENT"
+} >> "$report"
+
+if [[ "$memory_used_percent" =~ ^[0-9]+$ ]] && [ "$memory_used_percent" -ge "$MEMORY_CRITICAL_PERCENT" ]; then
+  status=1
+fi
+if [[ "$disk_used_percent" =~ ^[0-9]+$ ]] && [ "$disk_used_percent" -ge "$DISK_CRITICAL_PERCENT" ]; then
+  status=1
+fi
 
 api_host=$(env_value CAREPOINT_API_HOST)
 admin_host=$(env_value CAREPOINT_ADMIN_HOST)
