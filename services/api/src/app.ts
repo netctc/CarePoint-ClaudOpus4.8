@@ -11,6 +11,7 @@ import { requestContext } from './middleware/request-context';
 import { errorHandler } from './middleware/error-handler';
 import { notFound, serviceUnavailable } from './lib/http';
 import { healthRouter } from './modules/health/health.routes';
+import { authV1HardeningRouter } from './modules/auth/auth-v1-hardening.routes';
 import { authRouter } from './modules/auth/auth.routes';
 import { appointmentsRouter } from './modules/appointments/appointments.routes';
 import { recordsRouter } from './modules/records/records.routes';
@@ -125,6 +126,10 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/health', healthRouter);
   app.use('/api/system', systemRouter);
   app.use(apiRoutePaths.hybridPython, hybridPythonRouter);
+  // Release-v1 privileged authentication hardening is mounted before the
+  // legacy auth router so password-only privileged login/public bootstrap and
+  // non-delivered challenge channels cannot bypass the v1 security posture.
+  app.use('/api/auth', authV1HardeningRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/appointments', appointmentsRouter);
   app.use(apiRoutePaths.records, recordsRouter);
