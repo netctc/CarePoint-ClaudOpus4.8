@@ -96,6 +96,7 @@ require_exact NODE_ENV production
 require_exact ALLOW_LOCALHOST_CORS_WILDCARD false
 require_exact ALLOW_AUDIT_FALLBACK_IN_PRODUCTION false
 require_exact NEXT_PUBLIC_ALLOW_DEMO_SIGNIN false
+require_exact ADMIN_ALLOW_MOCK_DATA false
 
 for key in \
     CAREPOINT_API_HOST \
@@ -123,7 +124,7 @@ IFS=',' read -r -a origin_list <<< "$allowed_origins"
 for origin in "${origin_list[@]}"; do
     [[ "$origin" == https://* ]] || fail "every FRONTEND_ALLOWED_ORIGINS entry must use https://"
 done
-ok "production CORS and public URL policy is strict"
+ok "production CORS, live-data and public URL policy is strict"
 
 for key in \
     POSTGRES_PASSWORD \
