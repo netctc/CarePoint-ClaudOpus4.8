@@ -5,6 +5,7 @@ import { allowRoles } from '../../middleware/rbac';
 import { badRequest, forbidden, notFound } from '../../lib/http';
 import { prisma } from '../../lib/prisma';
 import { writeAuditLog } from '../../lib/audit';
+import { validateTemporaryPassword } from '../../lib/account-password-policy';
 
 const UserRole = {
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -204,7 +205,7 @@ iamUsersRouter.post('/', async (req, res) => {
 
   await assertEmailAvailable(email);
   const organizationId = await resolveOrganizationId(req, req.body?.organizationId);
-  const temporaryPassword = clean(req.body?.password) || 'ChangeMe123!';
+  const temporaryPassword = validateTemporaryPassword(req.body?.password, { required: true })!;
   const passwordHash = await bcrypt.hash(temporaryPassword, 10);
 
   const user = await prisma.user.create({
