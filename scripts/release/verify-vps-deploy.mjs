@@ -20,6 +20,7 @@ const stagingRunbook = read('docs/release/V1_STAGING_RUNBOOK.md');
 const stagingE2eRunbook = read('docs/release/V1_STAGING_E2E_RUNBOOK.md');
 const databaseRecoveryRunbook = read('docs/release/V1_DATABASE_RECOVERY_RUNBOOK.md');
 const integrationScopeRunbook = read('docs/release/V1_INTEGRATION_SCOPE.md');
+const goLiveCertificate = read('docs/pilot/PILOT_V6_FINAL_GO_LIVE_EXECUTION_CERTIFICATE.md');
 const loadHarnessPath = 'scripts/release/pilot-load.mjs';
 const loadHarness = read(loadHarnessPath);
 const performanceRunbook = read('docs/release/V1_PERFORMANCE_RESILIENCE_RUNBOOK.md');
@@ -123,6 +124,18 @@ assert(integrationScopeRunbook.includes('| Email OTP | **IN** |'), 'integration 
 assert(integrationScopeRunbook.includes('| Stripe payments | **OUT** |'), 'integration runbook documents Stripe OUT');
 assert(integrationScopeRunbook.includes('| Enterprise SSO | **OUT** |'), 'integration runbook documents SSO OUT');
 assert(integrationScopeRunbook.includes('Repository CI proves the policy wiring but cannot substitute'), 'integration scope documentation does not claim repository evidence proves provider E2E');
+
+assert(goLiveCertificate.includes('Current status: PENDING / NO-GO BY DEFAULT'), 'go-live certificate is fail-closed while final evidence is incomplete');
+assert(goLiveCertificate.includes('No open P0 is compatible with GO.'), 'go-live certificate forbids GO with open P0 gates');
+assert(goLiveCertificate.includes('A GO decision is invalid unless all of the following are true'), 'go-live certificate requires all mandatory gates before GO');
+assert(goLiveCertificate.includes('#14 — backup timer, off-host copy and isolated restore drill'), 'go-live certificate requires recovery evidence');
+assert(goLiveCertificate.includes('#17 — Email OTP IN validated with the real provider'), 'go-live certificate requires integration evidence');
+assert(goLiveCertificate.includes('#20 — real staging performance, resilience and rollback exercise'), 'go-live certificate requires resilience evidence');
+assert(goLiveCertificate.includes('zero active privileged refresh tokens'), 'go-live certificate requires privileged-session cutover revocation');
+assert(goLiveCertificate.includes('Wait at least one configured access-token TTL'), 'go-live certificate requires access-token TTL wait before privileged pilot access');
+assert(goLiveCertificate.includes('All critical `TBD` fields below are blockers'), 'go-live certificate treats unresolved critical owners/fields as blockers');
+assert(!goLiveCertificate.includes('Phase 4, Controlled Pilot / Go-Live Execution: closed at PILOT-V6.'), 'go-live certificate no longer falsely declares Phase 4 closed');
+assert(goLiveCertificate.includes('Until then, Phase 4 / controlled go-live remains operationally open.'), 'go-live certificate explicitly keeps controlled go-live open until real GO');
 
 let loadHarnessSyntaxValid = true;
 try {
