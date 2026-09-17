@@ -59,6 +59,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run check:secrets
       - run: npm run verify:workspace
+      - name: Validate VPS operations shell syntax
+        run: bash -n deploy/vps/*.sh
       - run: npm run verify:release:deploy
       - run: npm run verify:python-worker
       - run: npm run test:python-worker
