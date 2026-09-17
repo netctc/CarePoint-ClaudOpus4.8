@@ -19,6 +19,7 @@ const pythonDockerfile = read('services/python-worker/Dockerfile');
 const patientDockerfile = read('apps/mobile/Dockerfile');
 const providerMobileDockerfile = read('apps/provider_mobile/Dockerfile');
 const pythonRequirements = read('services/python-worker/requirements.txt');
+const packageLock = JSON.parse(read('package-lock.json'));
 
 const NODE_IMAGE = 'node:22-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5';
 const PYTHON_IMAGE = 'python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea';
@@ -51,6 +52,7 @@ for (const [name, dockerfile] of [
 ]) {
   assert(dockerfile.includes(`FROM ${NODE_IMAGE}`), `${name} Node base image is pinned by digest`);
   assert(dockerfile.includes('npm prune --omit=dev'), `${name} runtime prunes development-only Node dependencies after build`);
+  assert(dockerfile.includes('rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx'), `${name} runtime removes the bundled npm CLI after build`);
 }
 
 assert(pythonDockerfile.includes(`FROM ${PYTHON_IMAGE}`), 'Python worker base image is pinned by digest');
@@ -63,6 +65,18 @@ for (const [name, dockerfile] of [
   assert(dockerfile.includes(`FROM ${FLUTTER_IMAGE} AS builder`), `${name} Flutter builder image is pinned to 3.44.0 by digest`);
   assert(dockerfile.includes(`FROM ${NGINX_IMAGE}`), `${name} Nginx runtime image is pinned by digest`);
   assert(dockerfile.includes('flutter pub get --enforce-lockfile'), `${name} build enforces the committed Flutter lockfile`);
+}
+
+const resolvedNodeSecurityVersions = {
+  'node_modules/next': '16.3.3',
+  'node_modules/sharp': '0.35.4',
+  'node_modules/engine.io': '6.6.10',
+  'node_modules/socket.io-adapter': '2.5.8',
+  'node_modules/socket.io-parser': '4.2.7',
+  'node_modules/ws': '8.21.3',
+};
+for (const [packagePath, version] of Object.entries(resolvedNodeSecurityVersions)) {
+  assert(packageLock.packages?.[packagePath]?.version === version, `${packagePath} is locked to patched version ${version}`);
 }
 
 assert(compose.includes(`image: ${POSTGRES_IMAGE}`), 'Production PostgreSQL image is pinned by digest');
