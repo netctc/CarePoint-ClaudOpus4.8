@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
+import { DetailStateStrip, EvidenceCardGrid, MetadataGrid, type EvidenceCardItem } from '@/components/admin/detail-primitives';
 import { SupportAdminActions } from '@/components/admin/support-admin-actions';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -52,7 +52,7 @@ export default async function SupportTicketDetailPage({
         guardrails: result.data.workspace.selectedTicket.guardrails,
       };
 
-  const evidenceCards = [
+  const evidenceCards: EvidenceCardItem[] = [
     {
       title: 'Intake context',
       meta: `${item.channel} support lane`,
