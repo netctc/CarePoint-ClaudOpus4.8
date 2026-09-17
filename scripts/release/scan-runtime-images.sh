@@ -7,9 +7,12 @@ cd "$ROOT_DIR"
 TRIVY_BIN="${TRIVY_BIN:-trivy}"
 REPORT_DIR="${TRIVY_REPORT_DIR:-${RUNNER_TEMP:-/tmp}/carepoint-trivy}"
 SUMMARY_FILE="${GITHUB_STEP_SUMMARY:-$REPORT_DIR/summary.md}"
-IMAGE_SUFFIX="${GITHUB_SHA:-local}"
+CANDIDATE_SHA="${CANDIDATE_SHA:-${GITHUB_SHA:-local}}"
+IMAGE_SUFFIX="$CANDIDATE_SHA"
+DETAILS_FILE="$REPORT_DIR/high-critical.tsv"
 
 mkdir -p "$REPORT_DIR"
+: > "$DETAILS_FILE"
 
 if ! command -v "$TRIVY_BIN" >/dev/null 2>&1; then
   echo "Trivy executable not found: $TRIVY_BIN" >&2
@@ -53,30 +56,48 @@ scan_image() {
     --output "$report" \
     "$image"
 
-  python3 - "$report" "$label" "$image" "$image_id" <<'PY' >> "$SUMMARY_FILE"
+  python3 - "$report" "$label" "$image" "$image_id" "$SUMMARY_FILE" "$DETAILS_FILE" <<'PY'
 import json
 import sys
 
-report_path, label, image, image_id = sys.argv[1:]
+report_path, label, image, image_id, summary_path, details_path = sys.argv[1:]
 with open(report_path, encoding="utf-8") as handle:
     payload = json.load(handle)
 
 counts = {"HIGH": 0, "CRITICAL": 0}
 fixable = 0
 unfixed = 0
+rows = set()
 for result in payload.get("Results") or []:
     for vuln in result.get("Vulnerabilities") or []:
         severity = str(vuln.get("Severity") or "").upper()
         if severity not in counts:
             continue
         counts[severity] += 1
-        if str(vuln.get("FixedVersion") or "").strip():
+        fixed = str(vuln.get("FixedVersion") or "").strip()
+        if fixed:
             fixable += 1
         else:
             unfixed += 1
+        rows.add((
+            label,
+            severity,
+            str(vuln.get("VulnerabilityID") or "unknown"),
+            str(vuln.get("PkgName") or "unknown"),
+            str(vuln.get("InstalledVersion") or "unknown"),
+            fixed or "unfixed",
+        ))
 
 total = counts["HIGH"] + counts["CRITICAL"]
-print(f"| {label} | `{image}` | `{image_id}` | {counts['HIGH']} | {counts['CRITICAL']} | {fixable} | {unfixed} |")
+with open(summary_path, "a", encoding="utf-8") as summary:
+    summary.write(
+        f"| {label} | `{image}` | `{image_id}` | {counts['HIGH']} | "
+        f"{counts['CRITICAL']} | {fixable} | {unfixed} |\n"
+    )
+with open(details_path, "a", encoding="utf-8") as details:
+    for row in sorted(rows, key=lambda item: (item[0], item[1], item[2], item[3], item[4])):
+        details.write("\t".join(row) + "\n")
+
 if total:
     sys.exit(10)
 PY
@@ -126,7 +147,7 @@ docker pull "$CADDY_IMAGE"
   echo "## CarePoint runtime image vulnerability scan"
   echo
   echo "- Timestamp (UTC): $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "- Candidate SHA: ${GITHUB_SHA:-local}"
+  echo "- Candidate SHA: ${CANDIDATE_SHA}"
   echo "- Scanner: $($TRIVY_BIN --version | head -n 1)"
   echo "- Policy: any HIGH or CRITICAL vulnerability blocks this gate until remediated or explicitly accepted in the Go/No-Go security exception record."
   echo
@@ -151,6 +172,17 @@ for entry in \
     failed=1
   fi
 done
+
+echo
+echo "HIGH/CRITICAL remediation inventory for candidate ${CANDIDATE_SHA}:"
+if [[ -s "$DETAILS_FILE" ]]; then
+  printf '%-22s %-9s %-24s %-32s %-24s %s\n' "SURFACE" "SEVERITY" "CVE" "PACKAGE" "INSTALLED" "FIXED"
+  sort -u "$DETAILS_FILE" | while IFS=$'\t' read -r surface severity cve package installed fixed; do
+    printf '%-22s %-9s %-24s %-32s %-24s %s\n' "$surface" "$severity" "$cve" "$package" "$installed" "$fixed"
+  done
+else
+  echo "No HIGH/CRITICAL vulnerabilities found."
+fi
 
 if [[ "$failed" -ne 0 ]]; then
   echo >&2
