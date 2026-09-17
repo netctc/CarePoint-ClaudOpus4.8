@@ -29,10 +29,10 @@ export type ProviderVerificationDetailContract = {
   providerName: string;
   organizationName: string;
   licenseNumber: string;
-  cityCoverage: string[];
-  mandatoryDocs: { name: string; status: 'Received' | 'Missing' | 'Rejected' }[];
-  checks: { label: string; result: 'Pass' | 'Review' | 'Fail' }[];
-  riskNotes: string[];
+  cityCoverage: readonly string[];
+  mandatoryDocs: readonly { name: string; status: 'Received' | 'Missing' | 'Rejected' }[];
+  checks: readonly { label: string; result: 'Pass' | 'Review' | 'Fail' }[];
+  riskNotes: readonly string[];
 };
 
 export type ProviderMasterItemContract = {
