@@ -69,6 +69,46 @@ require_hostname() {
     getent ahosts "$value" >/dev/null 2>&1 || fail "DNS does not resolve for ${key} (${value})"
 }
 
+validate_privileged_domains() {
+    local raw
+    raw=$(env_value PRIVILEGED_ALLOWED_EMAIL_DOMAINS)
+    [ -n "$raw" ] || fail "PRIVILEGED_ALLOWED_EMAIL_DOMAINS is required for release mode"
+    [[ "$raw" != *"*"* && "$raw" != *@* && "$raw" != *"/"* ]] || fail "PRIVILEGED_ALLOWED_EMAIL_DOMAINS must contain comma-separated domain names only"
+
+    local domains
+    IFS=',' read -r -a domains <<< "$raw"
+    [ "${#domains[@]}" -ge 1 ] || fail "at least one privileged email domain is required"
+    for domain in "${domains[@]}"; do
+        domain="${domain//[[:space:]]/}"
+        [ -n "$domain" ] || fail "PRIVILEGED_ALLOWED_EMAIL_DOMAINS contains an empty entry"
+        [[ "$domain" =~ ^[A-Za-z0-9.-]+\.[A-Za-z0-9-]+$ ]] || fail "PRIVILEGED_ALLOWED_EMAIL_DOMAINS contains an invalid domain entry"
+    done
+}
+
+validate_email_provider() {
+    local resend_key smtp_host smtp_user smtp_pass smtp_port
+    resend_key=$(env_value RESEND_API_KEY)
+    smtp_host=$(env_value SMTP_HOST)
+    smtp_user=$(env_value SMTP_USER)
+    smtp_pass=$(env_value SMTP_PASS)
+    smtp_port=$(env_value SMTP_PORT)
+
+    require_nonempty EMAIL_FROM
+
+    if [ -n "$resend_key" ]; then
+        ok "transactional email provider is configured for OTP delivery (secret value not printed)"
+        return
+    fi
+
+    if [ -n "$smtp_host" ] && [ -n "$smtp_user" ] && [ -n "$smtp_pass" ]; then
+        [[ "${smtp_port:-587}" =~ ^[0-9]+$ ]] || fail "SMTP_PORT must be numeric"
+        ok "transactional SMTP provider is configured for OTP delivery (credentials not printed)"
+        return
+    fi
+
+    fail "production authentication requires RESEND_API_KEY or complete SMTP_HOST/SMTP_USER/SMTP_PASS configuration"
+}
+
 need_command docker
 need_command git
 need_command curl
@@ -142,6 +182,14 @@ require_nonempty DIRECT_URL
 require_nonempty REDIS_URL
 require_nonempty CELERY_BROKER_URL
 require_nonempty CELERY_RESULT_BACKEND
+
+# v1 patient and privileged authentication relies on delivered email OTP. A
+# release host must therefore prove that one real delivery adapter is configured
+# before containers are started. Approved privileged domains are also explicit
+# rather than falling back to the permissive empty-list behavior used in dev.
+validate_email_provider
+validate_privileged_domains
+ok "privileged email-domain allowlist is explicitly configured"
 
 if ! docker compose -f "$COMPOSE_FILE" --env-file "$RUNTIME_ENV_FILE" config --quiet; then
     fail "docker compose configuration validation failed"
