@@ -128,7 +128,7 @@ export async function sendOtpEmail(params: { to: string; code: string; expiresIn
   const text = `Your CarePoint ${purpose} verification code is ${params.code}.\nIt expires in ${minutes} minute(s).\n\nIf you did not request this code, you can safely ignore this email.`;
   const html = `<div style="font-family:Arial,sans-serif;font-size:15px;color:#1a1a1a"><p>Your CarePoint <strong>${purpose}</strong> verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px;margin:16px 0">${params.code}</p><p>It expires in ${minutes} minute(s).</p><p style="color:#666">If you did not request this code, you can safely ignore this email.</p></div>`;
   const result = await sendEmail({ to: params.to, subject, text, html });
-  if (process.env.NODE_ENV === 'production' && !result.sent) {
+  if (process.env.NODE_ENV === 'production' && result.sent === false) {
     throw serviceUnavailable(
       result.reason === 'not_configured'
         ? 'Email OTP delivery is not configured for this environment.'
