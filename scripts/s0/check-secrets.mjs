@@ -95,6 +95,7 @@ function normalizeAssignmentValue(value) {
 function isSafePlaceholderOrDynamic(value) {
   if (!value) return true;
   if (value.startsWith('$(') || value.startsWith('${')) return true;
+  if (/^<[^>]+>$/.test(value)) return true;
 
   const lower = value.toLowerCase();
   return [
@@ -106,12 +107,17 @@ function isSafePlaceholderOrDynamic(value) {
     'dummy-',
     'test-',
     'ci-',
+    'your-',
+    'your_',
   ].some((prefix) => lower.startsWith(prefix));
 }
 
 function findHardcodedAssignments(text, rel) {
   for (const [name, minLength] of secretAssignments) {
-    const pattern = new RegExp(`^\\s*${name}\\s*=\\s*(.+?)\\s*$`, 'gmi');
+    // IMPORTANT: use horizontal whitespace only. `\\s*` can cross a newline,
+    // causing an empty NAME= assignment to consume the following line and be
+    // misreported as a secret value.
+    const pattern = new RegExp(`^[ \\t]*${name}[ \\t]*=[ \\t]*(.*?)[ \\t]*$`, 'gmi');
     for (const match of text.matchAll(pattern)) {
       const value = normalizeAssignmentValue(match[1]);
       if (isSafePlaceholderOrDynamic(value)) continue;
