@@ -7,6 +7,7 @@ import { badRequest } from '../../lib/http';
 import { env } from '../../lib/env';
 import { isEmailConfigured } from '../../lib/mailer';
 import { getSsoConfiguration } from '../../lib/auth-sso';
+import { isV1IntegrationInScope } from '../../lib/release-integration-scope';
 import {
   getGrowthItem,
   getGrowthStorageMode,
@@ -47,6 +48,18 @@ function projectRuntimeState<T extends Record<string, any>>(item: T): T {
   }
 
   if (code === 'STRIPE') {
+    if (env.isProduction) {
+      return {
+        ...item,
+        status: 'DISABLED',
+        lastHealthStatus: 'BLOCKED_V1',
+        lastCheckedAt: null,
+        runtimeNote: env.stripeCredentialConfigured
+          ? 'Stripe credentials are present but Stripe is OUT for the v1 production pilot; payment intent creation remains in manual-review mode.'
+          : 'Stripe is OUT for the v1 production pilot; payment intent creation remains in manual-review mode.',
+      };
+    }
+
     if (!env.stripeSecretKey) {
       return {
         ...item,
@@ -62,7 +75,7 @@ function projectRuntimeState<T extends Record<string, any>>(item: T): T {
       status: 'PENDING_VALIDATION',
       lastHealthStatus: 'UNKNOWN',
       lastCheckedAt: null,
-      runtimeNote: 'Stripe credentials are present, but staging E2E validation is required before the integration may be reported healthy.',
+      runtimeNote: 'Stripe credentials are present for non-production development/test use; this does not change the v1 pilot scope.',
     };
   }
 
@@ -98,40 +111,51 @@ integrationRouter.get('/summary', async (req, res) => {
 integrationRouter.get('/runtime-capabilities', async (_req, res) => {
   const sso = getSsoConfiguration(null);
   const emailConfigured = isEmailConfigured();
+  const smsConfigured = Boolean(env.twilioAccountSid && env.twilioAuthToken);
+  const telehealthConfigured = Boolean(env.dailyApiKey);
   res.json({
     releaseScope: {
       telehealth: {
-        inScope: !env.isProduction,
-        configured: !env.isProduction,
-        note: env.isProduction
-          ? 'OUT for v1 production pilot: placeholder Daily room generation is blocked.'
-          : 'Available only for non-production development/test flows.',
+        inScope: isV1IntegrationInScope('telehealth'),
+        configured: telehealthConfigured,
+        runtimeEnabled: !env.isProduction && telehealthConfigured,
+        note: telehealthConfigured
+          ? 'Daily configuration is present, but telehealth remains OUT for the v1 production pilot.'
+          : 'OUT for v1 production pilot: Daily room provisioning is not enabled.',
       },
       patientEmailOtp: {
-        inScope: true,
+        inScope: isV1IntegrationInScope('patientEmailOtp'),
         configured: emailConfigured,
+        runtimeEnabled: emailConfigured,
         note: emailConfigured
-          ? 'Email OTP provider configuration detected.'
-          : 'Email OTP must be configured before production patient authentication can succeed.',
+          ? 'Email OTP is IN for v1 and provider configuration is detected.'
+          : 'Email OTP is IN for v1 and must be configured before production privileged authentication can succeed.',
       },
       patientSmsOtp: {
-        inScope: false,
-        configured: false,
-        note: 'OUT for v1: no production SMS delivery adapter is enabled.',
+        inScope: isV1IntegrationInScope('patientSmsOtp'),
+        configured: smsConfigured,
+        runtimeEnabled: false,
+        note: smsConfigured
+          ? 'Twilio credentials are present, but SMS OTP remains OUT for v1 and no production SMS delivery adapter is enabled.'
+          : 'OUT for v1: no production SMS delivery adapter is enabled.',
       },
       stripePayments: {
-        inScope: Boolean(env.stripeSecretKey),
-        configured: Boolean(env.stripeSecretKey),
+        inScope: isV1IntegrationInScope('stripePayments'),
+        configured: env.stripeCredentialConfigured,
+        runtimeEnabled: Boolean(env.stripeSecretKey),
         manualFallback: !env.stripeSecretKey,
         validated: false,
-        note: env.stripeSecretKey
-          ? 'Stripe credentials are configured; staging E2E is still required before health may be claimed.'
-          : 'Stripe is OUT; payment intents remain in explicit manual-review mode.',
+        note: env.stripeCredentialConfigured
+          ? 'Stripe credentials are present, but Stripe remains OUT for the v1 production pilot; production uses explicit manual-review mode.'
+          : 'Stripe is OUT for v1; payment intents remain in explicit manual-review mode.',
       },
       enterpriseSso: {
-        inScope: sso.available,
-        configured: sso.available,
-        note: sso.note,
+        inScope: isV1IntegrationInScope('enterpriseSso'),
+        configured: env.ssoConfigurationPresent,
+        runtimeEnabled: sso.available,
+        note: env.ssoConfigurationPresent
+          ? 'Enterprise SSO configuration is present, but SSO remains OUT for the v1 production pilot.'
+          : 'Enterprise SSO is OUT for the v1 production pilot and is not configured.',
       },
     },
   });
