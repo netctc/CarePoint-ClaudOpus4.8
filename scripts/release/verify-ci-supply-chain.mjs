@@ -1,37 +1,53 @@
 import { readFileSync } from 'node:fs';
 
-const workflowPath = '.github/workflows/ci.yml';
-const workflow = readFileSync(workflowPath, 'utf8');
+const workflowPaths = [
+  '.github/workflows/ci.yml',
+  '.github/workflows/runtime-image-security.yml',
+];
 const checks = [];
 
 function assert(condition, message) {
   checks.push({ passed: Boolean(condition), message });
 }
 
-assert(
-  /(^|\n)permissions:\s*\n\s{2}contents:\s*read\s*($|\n)/m.test(workflow),
-  'CI declares least-privileged contents: read permission',
-);
-assert(!/(^|\n)\s{2,}[A-Za-z0-9_-]+:\s*write\s*($|\n)/m.test(workflow), 'CI declares no write-scoped GITHUB_TOKEN permission');
-assert(!/(^|\n)\s*pull_request_target\s*:/m.test(workflow), 'CI does not use pull_request_target for untrusted pull-request code');
+for (const workflowPath of workflowPaths) {
+  const workflow = readFileSync(workflowPath, 'utf8');
+  const label = workflowPath.replace('.github/workflows/', '');
 
-const remoteUses = [...workflow.matchAll(/^\s*-\s+uses:\s+([^\s#]+)(?:\s+#.*)?$/gm)]
-  .map((match) => match[1])
-  .filter((reference) => !reference.startsWith('./'));
+  assert(
+    /(^|\n)permissions:\s*\n\s{2}contents:\s*read\s*($|\n)/m.test(workflow),
+    `${label} declares least-privileged contents: read permission`,
+  );
+  assert(
+    !/(^|\n)\s{2,}[A-Za-z0-9_-]+:\s*write\s*($|\n)/m.test(workflow),
+    `${label} declares no write-scoped GITHUB_TOKEN permission`,
+  );
+  assert(
+    !/(^|\n)\s*pull_request_target\s*:/m.test(workflow),
+    `${label} does not use pull_request_target for untrusted pull-request code`,
+  );
 
-assert(remoteUses.length > 0, 'CI contains remote actions to validate');
-for (const reference of remoteUses) {
-  const atIndex = reference.lastIndexOf('@');
-  const target = atIndex >= 0 ? reference.slice(atIndex + 1) : '';
-  assert(/^[0-9a-f]{40}$/i.test(target), `${reference} is pinned to a full 40-character commit SHA`);
+  const remoteUses = [...workflow.matchAll(/^\s*-\s+uses:\s+([^\s#]+)(?:\s+#.*)?$/gm)]
+    .map((match) => match[1])
+    .filter((reference) => !reference.startsWith('./'));
+
+  assert(remoteUses.length > 0, `${label} contains remote actions to validate`);
+  for (const reference of remoteUses) {
+    const atIndex = reference.lastIndexOf('@');
+    const target = atIndex >= 0 ? reference.slice(atIndex + 1) : '';
+    assert(/^[0-9a-f]{40}$/i.test(target), `${label}: ${reference} is pinned to a full 40-character commit SHA`);
+  }
+
+  const checkoutUses = remoteUses.filter((reference) => reference.startsWith('actions/checkout@'));
+  const exactHeadCheckoutSteps = [...workflow.matchAll(
+    /^\s*-\s+uses:\s+actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?\n\s+with:\s*\n\s+ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\|\|\s*github\.sha\s*\}\}\s*\n\s+persist-credentials:\s*false\s*$/gmi,
+  )];
+  assert(checkoutUses.length > 0, `${label} contains checkout steps to validate`);
+  assert(
+    exactHeadCheckoutSteps.length === checkoutUses.length,
+    `${label}: every checkout validates the exact PR head/push SHA and disables persisted Git credentials`,
+  );
 }
-
-const checkoutUses = remoteUses.filter((reference) => reference.startsWith('actions/checkout@'));
-const exactHeadCheckoutSteps = [...workflow.matchAll(
-  /^\s*-\s+uses:\s+actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?\n\s+with:\s*\n\s+ref:\s*\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\|\|\s*github\.sha\s*\}\}\s*\n\s+persist-credentials:\s*false\s*$/gmi,
-)];
-assert(checkoutUses.length > 0, 'CI contains checkout steps to validate');
-assert(exactHeadCheckoutSteps.length === checkoutUses.length, 'every checkout step validates the exact PR head/push SHA and disables persisted Git credentials');
 
 const failed = checks.filter((check) => !check.passed);
 for (const check of checks) {
