@@ -41,20 +41,33 @@ import '../../features/telehealth/presentation/screens/provider_telehealth_sessi
 
 const Set<String> _publicPaths = <String>{'/welcome', '/sign-in', '/otp'};
 
+const List<String> providerCriticalAppointmentRouteSequence = <String>[
+  '/dashboard',
+  '/calendar',
+  '/queue',
+  '/appointments/test-appointment',
+];
+
+String? providerRedirectForState({
+  required bool isAuthenticated,
+  required String location,
+}) {
+  if (!isAuthenticated && !_publicPaths.contains(location)) {
+    return '/welcome';
+  }
+  if (isAuthenticated && _publicPaths.contains(location)) {
+    return '/dashboard';
+  }
+  return null;
+}
+
 final GoRouter appRouter = GoRouter(
   initialLocation: '/welcome',
   refreshListenable: ProviderSession.instance,
-  redirect: (context, state) {
-    final ProviderSession session = ProviderSession.instance;
-    final String location = state.matchedLocation;
-    if (!session.isAuthenticated && !_publicPaths.contains(location)) {
-      return '/welcome';
-    }
-    if (session.isAuthenticated && _publicPaths.contains(location)) {
-      return '/dashboard';
-    }
-    return null;
-  },
+  redirect: (context, state) => providerRedirectForState(
+    isAuthenticated: ProviderSession.instance.isAuthenticated,
+    location: state.matchedLocation,
+  ),
   routes: <RouteBase>[
     GoRoute(path: '/welcome', builder: (context, state) => const WelcomePage()),
     GoRoute(path: '/sign-in', builder: (context, state) => const SignInPage()),
