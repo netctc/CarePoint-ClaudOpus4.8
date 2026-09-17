@@ -127,6 +127,19 @@ build_image "$PROVIDER_MOBILE_IMAGE" apps/provider_mobile/Dockerfile \
   --build-arg API_BASE_URL=https://api.invalid.example
 build_image "$PYTHON_WORKER_IMAGE" services/python-worker/Dockerfile
 
+validate_node_runtime() {
+  local label="$1"
+  local image="$2"
+  shift 2
+  echo "Validating production Node runtime surface for $label"
+  docker run --rm --entrypoint sh "$image" -c 'test ! -e /usr/local/bin/npm && test ! -e /usr/local/bin/npx && test ! -d /usr/local/lib/node_modules/npm && node --version >/dev/null'
+  docker run --rm --entrypoint node "$image" "$@" >/dev/null
+}
+
+validate_node_runtime "api" "$API_IMAGE" node_modules/prisma/build/index.js --version
+validate_node_runtime "admin" "$ADMIN_IMAGE" node_modules/next/dist/bin/next --version
+validate_node_runtime "provider" "$PROVIDER_IMAGE" node_modules/next/dist/bin/next --version
+
 POSTGRES_IMAGE="$(compose_image postgres)"
 REDIS_IMAGE="$(compose_image redis)"
 CADDY_IMAGE="$(compose_image edge)"
