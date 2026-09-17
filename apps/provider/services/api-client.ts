@@ -69,7 +69,7 @@ async function request<T>(path: string, init?: RequestOptions): Promise<T> {
   return body as T;
 }
 
-function withQuery(path: string, params: Record<string, string | undefined | null>) {
+function withQuery(path: string, params: Record<string, string | number | boolean | undefined | null>) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && String(value).trim()) {
