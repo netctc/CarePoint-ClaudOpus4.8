@@ -102,7 +102,12 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.options('*', cors(corsOptions));
   app.use(helmet());
   app.use(requestContext);
-  app.use(morgan('dev'));
+  // Production access logs deliberately omit URL/path and query strings. This
+  // keeps operational status/latency visibility without risking PHI/PII from
+  // search/filter parameters. Development/test retains the convenient dev log.
+  app.use(env.isProduction
+    ? morgan(':method :status :response-time ms - :res[content-length]')
+    : morgan('dev'));
   app.use(cookieParser() as unknown as express.RequestHandler);
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -201,7 +206,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/iam', iamRouter);
 
   app.use((req, _res, next) => {
-    next(notFound(`Route not found: ${req.method} ${req.originalUrl}`));
+    next(notFound(`Route not found: ${req.method} ${req.path}`));
   });
 
   app.use(errorHandler);
