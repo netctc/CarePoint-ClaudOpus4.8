@@ -1,6 +1,6 @@
 # CarePoint Production Docker Compose
-# All-in-one deployment for VPS (no external dependencies).
-# Usage: docker compose -f deploy/vps/docker-compose.yml --env-file deploy/vps/.env up -d
+# Single-host deployment with only the TLS edge exposed publicly.
+# Runtime values are supplied outside git through the approved secret/config channel.
 
 services:
   # ============ Infrastructure ============
@@ -28,7 +28,7 @@ services:
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD}\" ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -49,8 +49,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "${API_PORT:-4000}:4000"
+    expose:
+      - "4000"
     environment:
       NODE_ENV: production
       API_PORT: "4000"
@@ -121,8 +121,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
@@ -137,8 +137,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "3002:3000"
+    expose:
+      - "3000"
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
@@ -153,8 +153,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "8080:80"
+    expose:
+      - "80"
 
   provider-mobile-web:
     build:
@@ -166,8 +166,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    ports:
-      - "8081:80"
+    expose:
+      - "80"
 
   # ============ Python Worker ============
 
@@ -181,6 +181,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    expose:
+      - "8010"
     environment:
       NODE_ENV: production
       PYTHON_WORKER_API_PORT: ${PYTHON_WORKER_API_PORT:-8010}
@@ -240,8 +242,42 @@ services:
       - python-worker-artifacts:/artifacts
       - python-worker-state:/state
 
+  # ============ Public TLS Edge ============
+
+  edge:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      admin:
+        condition: service_started
+      provider:
+        condition: service_started
+      patient-web:
+        condition: service_started
+      provider-mobile-web:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+      CAREPOINT_API_HOST: ${CAREPOINT_API_HOST}
+      CAREPOINT_ADMIN_HOST: ${CAREPOINT_ADMIN_HOST}
+      CAREPOINT_PROVIDER_HOST: ${CAREPOINT_PROVIDER_HOST}
+      CAREPOINT_PATIENT_HOST: ${CAREPOINT_PATIENT_HOST}
+      CAREPOINT_PROVIDER_MOBILE_HOST: ${CAREPOINT_PROVIDER_MOBILE_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
 volumes:
   postgres-data:
   redis-data:
   python-worker-artifacts:
   python-worker-state:
+  caddy-data:
+  caddy-config:
