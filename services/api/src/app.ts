@@ -20,6 +20,7 @@ import { paymentsRouter } from './modules/payments/payments.routes';
 import { providersRouter } from './modules/providers/providers.routes';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes';
 import { adminUsersRouter } from './modules/admin-users/admin-users.routes';
+import { iamUsersRouter } from './modules/admin-users/iam-users.routes';
 import { auditRouter } from './modules/audit/audit.routes';
 import { iamAuditRouter } from './modules/audit/iam-audit.routes';
 import { rbacRouter } from './modules/access/rbac.routes';
@@ -68,7 +69,6 @@ import { catalogAdminRouter } from './modules/admin/catalog-admin.routes';
 import { coverageAdminRouter } from './modules/admin/coverage-admin.routes';
 import { bookingsAdminRouter } from './modules/admin/bookings-admin.routes';
 import { telehealthAdminRouter } from './modules/admin/telehealth-admin.routes';
-
 
 function isAllowedCorsOrigin(origin?: string) {
   if (!origin) return true;
@@ -130,6 +130,9 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/payments', paymentsRouter);
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
+  // Mount the isolated IAM user-management surface before the legacy admin
+  // router so enum-safe search and explicit RBAC/org scoping take precedence.
+  app.use('/api/admin/users/iam-users', iamUsersRouter);
   app.use('/api/admin/users', adminUsersRouter);
   app.use('/api/admin/audit', iamAuditRouter);
   app.use('/api/admin', adminActionsRouter);
