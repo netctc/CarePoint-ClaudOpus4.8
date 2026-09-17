@@ -133,7 +133,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ c
       <DetailStateStrip
         items={[
           { label: copy.evidenceStatus, value: item.evidenceStatus, detail: 'Captures whether documentation is complete, still under review, or missing from the refund packet.', tone: tone(item.evidenceStatus) },
-          { label: copy.executionPosture, value: item.status, detail: 'Visible queue state for whether the case is pending, complete, or still blocked by finance review.', tone: item.status === 'Complete' ? 'success' : 'warning' },
+          { label: copy.executionPosture, value: selected.queueState, detail: 'Visible queue state for whether the case is pending, complete, or still blocked by finance review.', tone: item.evidenceStatus === 'Complete' ? 'success' : 'warning' },
           { label: copy.apiControl, value: apiItem ? copy.live : copy.mock, detail: 'Shows whether refund actions are wired to the API or operating from the fallback dataset.', tone: apiItem ? 'success' : 'neutral' },
         ]}
       />
