@@ -17,7 +17,7 @@ RUN npm ci --include=dev
 
 COPY . .
 
-RUN npm run build --workspace @care-center/contracts  && npm run build --workspace @care-center/provider
+RUN npm run build --workspace @care-center/contracts  && npm run build --workspace @care-center/provider  && npm prune --omit=dev
 
 EXPOSE 3000
 CMD ["npm", "run", "start", "--workspace", "@care-center/provider"]
