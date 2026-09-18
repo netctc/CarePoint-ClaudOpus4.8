@@ -169,10 +169,20 @@ docker run -d --name "$PG_CONTAINER" \
   "$POSTGRES_IMAGE" >/dev/null
 
 pg_ready=0
-for _ in $(seq 1 30); do
-  if docker exec "$PG_CONTAINER" pg_isready -U scan -d carepoint >/dev/null 2>&1; then
-    pg_ready=1
-    break
+pg_stable_checks=0
+for _ in $(seq 1 60); do
+  if docker exec "$PG_CONTAINER" pg_isready -U scan -d carepoint >/dev/null 2>&1 \
+    && [[ "$(docker exec "$PG_CONTAINER" psql -U scan -d carepoint -Atqc 'SELECT 1' 2>/dev/null || true)" = "1" ]]; then
+    pg_stable_checks=$((pg_stable_checks + 1))
+    if [[ "$pg_stable_checks" -ge 2 ]]; then
+      pg_ready=1
+      break
+    fi
+  else
+    # The official image briefly exposes a temporary init server before
+    # restarting into the final post-init server. Reset the stability counter
+    # across that handoff so a transient ready state cannot satisfy the gate.
+    pg_stable_checks=0
   fi
   sleep 1
 done
@@ -180,7 +190,6 @@ if [[ "$pg_ready" -ne 1 ]]; then
   docker logs "$PG_CONTAINER" >&2
   exit 2
 fi
-test "$(docker exec "$PG_CONTAINER" psql -U scan -d carepoint -Atqc 'SELECT 1')" = "1"
 cleanup_pg
 trap - EXIT
 
