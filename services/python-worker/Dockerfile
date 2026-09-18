@@ -7,10 +7,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app/services/python-worker
 
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      perl-base=5.40.1-6+deb13u1 \
+      libsqlite3-0=3.46.1-7+deb13u2 \
+      gzip=1.13-1+deb13u1 \
+      libpcre2-8-0=10.46-1~deb13u2 \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system carepoint && adduser --system --ingroup carepoint --uid 10001 carepoint
 
 COPY services/python-worker/requirements.txt ./requirements.txt
-RUN python -m pip install --upgrade pip==26.2.1 && python -m pip install -r requirements.txt
+RUN python -m pip install --upgrade pip==26.2.1 setuptools==78.1.1 \
+ && python -m pip install -r requirements.txt
 
 COPY services/python-worker ./
 
