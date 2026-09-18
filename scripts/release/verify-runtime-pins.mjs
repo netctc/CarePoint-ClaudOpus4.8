@@ -98,8 +98,8 @@ assert(caddyDockerfile.includes(`FROM ${CADDY_BUILDER_IMAGE} AS builder`), 'Cadd
 assert(caddyDockerfile.includes(`ARG CADDY_COMMIT=${CADDY_COMMIT}`), 'Caddy source is pinned to the exact v2.11.4 commit');
 for (const dependencyPin of [
   'golang.org/x/crypto@v0.55.0',
-  'golang.org/x/net@v0.56.0',
-  'golang.org/x/text@v0.39.0',
+  'golang.org/x/net@v0.58.0',
+  'golang.org/x/text@v0.41.0',
   'google.golang.org/grpc@v1.83.2',
 ]) {
   assert(caddyDockerfile.includes(dependencyPin), `Caddy build pins patched dependency ${dependencyPin}`);
