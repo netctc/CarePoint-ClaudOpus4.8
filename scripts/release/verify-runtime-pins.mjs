@@ -29,6 +29,7 @@ const NGINX_IMAGE = 'nginx:1.30.5-alpine3.24-slim@sha256:2853ea34f0e5448adfd4f6e
 const POSTGRES_IMAGE = 'postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685';
 const REDIS_IMAGE = 'redis:7-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf';
 const CADDY_BUILDER_IMAGE = 'golang:1.26.6-alpine3.23@sha256:e57c41c1d5864341031181b0db34b9a537bb5773eb6428e4e5bdaea0f9135406';
+const CADDY_VERSION = 'v2.11.4';
 const CADDY_COMMIT = 'e2eee6a7fce366321294c9c2a79f3146891dcbdf';
 const CI_POSTGRES_IMAGE = 'postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94';
 const CI_REDIS_IMAGE = 'redis:7@sha256:71da9275c5f3fcb97d0fa0c8c5b36cc995327265420f17a04bfd544f458059f7';
@@ -60,6 +61,9 @@ for (const [name, dockerfile] of [
 
 assert(pythonDockerfile.includes(`FROM ${PYTHON_IMAGE}`), 'Python worker base image is pinned by digest');
 assert(pythonDockerfile.includes('python -m pip install --upgrade pip==26.2.1 setuptools==78.1.1'), 'Python worker build pins pip and patched setuptools');
+assert(pythonDockerfile.includes("m.version('msgpack') == '1.2.1'"), 'Python worker verifies the effective patched msgpack runtime version');
+assert(pythonDockerfile.includes('python -m pip uninstall -y pip setuptools wheel'), 'Python worker removes build/package-manager tooling from the final runtime');
+assert(pythonDockerfile.includes("u.find_spec('pip') is None"), 'Python worker verifies pip/setuptools/wheel are absent from the final runtime');
 for (const packagePin of [
   'perl-base=5.40.1-6+deb13u1',
   'libsqlite3-0=3.46.1-7+deb13u2',
@@ -95,7 +99,10 @@ assert(compose.includes(`image: ${REDIS_IMAGE}`), 'Production Redis image is pin
 assert(compose.includes('dockerfile: deploy/vps/Caddy.Dockerfile'), 'Production Caddy edge uses the reproducible patched build');
 assert(!compose.includes('image: caddy:'), 'Production Caddy edge does not fall back to the stock Caddy image');
 assert(caddyDockerfile.includes(`FROM ${CADDY_BUILDER_IMAGE} AS builder`), 'Caddy builder image is pinned by digest');
+assert(caddyDockerfile.includes(`ARG CADDY_VERSION=${CADDY_VERSION}`), 'Caddy source build preserves the exact v2.11.4 tag');
 assert(caddyDockerfile.includes(`ARG CADDY_COMMIT=${CADDY_COMMIT}`), 'Caddy source is pinned to the exact v2.11.4 commit');
+assert(caddyDockerfile.includes('git fetch --depth=1 origin tag "${CADDY_VERSION}"'), 'Caddy build fetches the signed upstream release tag instead of an untagged shallow commit');
+assert(caddyDockerfile.includes('git describe --exact-match --tags HEAD'), 'Caddy build verifies the checked-out commit still resolves to the release tag');
 for (const dependencyPin of [
   'golang.org/x/crypto@v0.55.0',
   'golang.org/x/net@v0.58.0',
