@@ -53,10 +53,19 @@ for (const [name, dockerfile] of [
   assert(dockerfile.includes(`FROM ${NODE_IMAGE}`), `${name} Node base image is pinned by digest`);
   assert(dockerfile.includes('npm prune --omit=dev'), `${name} runtime prunes development-only Node dependencies after build`);
   assert(dockerfile.includes('rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx'), `${name} runtime removes the bundled npm CLI after build`);
+  assert(dockerfile.includes('libpcre2-8-0=10.42-1+deb12u1'), `${name} runtime pins the patched Debian pcre2 package`);
 }
 
 assert(pythonDockerfile.includes(`FROM ${PYTHON_IMAGE}`), 'Python worker base image is pinned by digest');
-assert(pythonDockerfile.includes('python -m pip install --upgrade pip==26.2.1'), 'Python worker build pins pip to 26.2.1');
+assert(pythonDockerfile.includes('python -m pip install --upgrade pip==26.2.1 setuptools==78.1.1'), 'Python worker build pins pip and patched setuptools');
+for (const packagePin of [
+  'perl-base=5.40.1-6+deb13u1',
+  'libsqlite3-0=3.46.1-7+deb13u2',
+  'gzip=1.13-1+deb13u1',
+  'libpcre2-8-0=10.46-1~deb13u2',
+]) {
+  assert(pythonDockerfile.includes(packagePin), `Python worker runtime pins patched package ${packagePin}`);
+}
 
 for (const [name, dockerfile] of [
   ['Patient Web', patientDockerfile],
@@ -88,6 +97,7 @@ const requirementLines = pythonRequirements
   .map((line) => line.trim())
   .filter((line) => line && !line.startsWith('#'));
 assert(requirementLines.length > 0, 'Python worker declares direct requirements');
+assert(requirementLines.includes('msgpack==1.2.1'), 'Python worker pins patched msgpack 1.2.1');
 assert(
   requirementLines.every((line) => /^[A-Za-z0-9_.-]+(?:\[[A-Za-z0-9_.-]+(?:,[A-Za-z0-9_.-]+)*\])?==[^\s]+$/.test(line)),
   'Python worker direct requirements use exact versions instead of open ranges',
