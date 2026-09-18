@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
-FROM node:22-bookworm-slim
+FROM node:22-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
 WORKDIR /app
+
+RUN apt-get update  && apt-get install -y --no-install-recommends libpcre2-8-0=10.42-1+deb12u1  && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production     NEXT_TELEMETRY_DISABLED=1     PORT=3001     HOSTNAME=0.0.0.0
 
@@ -19,7 +21,9 @@ RUN npm ci --include=dev
 
 COPY . .
 
-RUN npm run build --workspace @care-center/contracts  && npm run build --workspace @care-center/admin
+RUN npm run build --workspace @care-center/contracts  && npm run build --workspace @care-center/admin  && npm prune --omit=dev
+
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 EXPOSE 3001
-CMD ["npm", "run", "start", "--workspace", "@care-center/admin"]
+CMD ["node", "node_modules/next/dist/bin/next", "start", "apps/admin", "-p", "3001"]

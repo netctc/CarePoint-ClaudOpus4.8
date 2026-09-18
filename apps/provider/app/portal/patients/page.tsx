@@ -20,7 +20,7 @@ type PatientRow = {
   latestContext: string;
   signal: string;
   status: string;
-  variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  variant: 'success' | 'warning' | 'danger' | 'primary' | 'neutral';
   nextAction: string;
 };
 
@@ -29,7 +29,7 @@ function normalizeVariant(value: unknown): PatientRow['variant'] {
   if (input.includes('danger') || input.includes('critical') || input.includes('failed')) return 'danger';
   if (input.includes('warning') || input.includes('caution') || input.includes('pending')) return 'warning';
   if (input.includes('success') || input.includes('normal') || input.includes('within')) return 'success';
-  if (input.includes('info')) return 'info';
+  if (input.includes('info')) return 'primary';
   return 'neutral';
 }
 

@@ -107,9 +107,9 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedFacility, setSelectedFacility] = useState(copy.allFacilities);
-  const [slotService, setSlotService] = useState(copy.consultation);
-  const [slotLocation, setSlotLocation] = useState(copy.virtualCare);
+  const [selectedFacility, setSelectedFacility] = useState<string>(copy.allFacilities);
+  const [slotService, setSlotService] = useState<string>(copy.consultation);
+  const [slotLocation, setSlotLocation] = useState<string>(copy.virtualCare);
   const [slotStartsAt, setSlotStartsAt] = useState('2026-04-06T09:00');
   const [slotEndsAt, setSlotEndsAt] = useState('2026-04-06T09:30');
   const [slotCapacity, setSlotCapacity] = useState('1');

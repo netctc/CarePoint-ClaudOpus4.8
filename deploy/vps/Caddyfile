@@ -1,0 +1,40 @@
+{
+    email {$ACME_EMAIL}
+    admin off
+}
+
+(security_headers) {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+        -Server
+    }
+}
+
+{$CAREPOINT_API_HOST} {
+    import security_headers
+    reverse_proxy api:4000
+}
+
+{$CAREPOINT_ADMIN_HOST} {
+    import security_headers
+    reverse_proxy admin:3001
+}
+
+{$CAREPOINT_PROVIDER_HOST} {
+    import security_headers
+    reverse_proxy provider:3000
+}
+
+{$CAREPOINT_PATIENT_HOST} {
+    import security_headers
+    reverse_proxy patient-web:80
+}
+
+{$CAREPOINT_PROVIDER_MOBILE_HOST} {
+    import security_headers
+    reverse_proxy provider-mobile-web:80
+}

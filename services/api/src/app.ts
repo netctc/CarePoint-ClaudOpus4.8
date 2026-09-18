@@ -9,8 +9,11 @@ import { env } from './lib/env';
 import { apiRoutePaths } from '@care-center/contracts';
 import { requestContext } from './middleware/request-context';
 import { errorHandler } from './middleware/error-handler';
-import { notFound } from './lib/http';
+import { releaseOrganizationScopeGuard } from './middleware/release-org-scope';
+import { releaseAccountPasswordPolicy } from './middleware/release-account-password-policy';
+import { notFound, serviceUnavailable } from './lib/http';
 import { healthRouter } from './modules/health/health.routes';
+import { authV1HardeningRouter } from './modules/auth/auth-v1-hardening.routes';
 import { authRouter } from './modules/auth/auth.routes';
 import { appointmentsRouter } from './modules/appointments/appointments.routes';
 import { recordsRouter } from './modules/records/records.routes';
@@ -20,6 +23,7 @@ import { paymentsRouter } from './modules/payments/payments.routes';
 import { providersRouter } from './modules/providers/providers.routes';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes';
 import { adminUsersRouter } from './modules/admin-users/admin-users.routes';
+import { iamUsersRouter } from './modules/admin-users/iam-users.routes';
 import { auditRouter } from './modules/audit/audit.routes';
 import { iamAuditRouter } from './modules/audit/iam-audit.routes';
 import { rbacRouter } from './modules/access/rbac.routes';
@@ -69,12 +73,15 @@ import { coverageAdminRouter } from './modules/admin/coverage-admin.routes';
 import { bookingsAdminRouter } from './modules/admin/bookings-admin.routes';
 import { telehealthAdminRouter } from './modules/admin/telehealth-admin.routes';
 
-
 function isAllowedCorsOrigin(origin?: string) {
   if (!origin) return true;
   if (env.frontendAllowedOrigins.includes(origin)) return true;
   if (!env.allowLocalhostCorsWildcard) return false;
   return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+}
+
+function telehealthReleaseGate(_req: express.Request, _res: express.Response, next: express.NextFunction) {
+  next(serviceUnavailable('Telehealth is not enabled for the CarePoint v1 production pilot.'));
 }
 
 export function createApp(getIo?: () => SocketIOServer | undefined) {
@@ -96,7 +103,12 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.options('*', cors(corsOptions));
   app.use(helmet());
   app.use(requestContext);
-  app.use(morgan('dev'));
+  // Production access logs deliberately omit URL/path and query strings. This
+  // keeps operational status/latency visibility without risking PHI/PII from
+  // search/filter parameters. Development/test retains the convenient dev log.
+  app.use(env.isProduction
+    ? morgan(':method :status :response-time ms - :res[content-length]')
+    : morgan('dev'));
   app.use(cookieParser() as unknown as express.RequestHandler);
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -121,15 +133,34 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/health', healthRouter);
   app.use('/api/system', systemRouter);
   app.use(apiRoutePaths.hybridPython, hybridPythonRouter);
+  // Release-v1 privileged authentication hardening is mounted before the
+  // legacy auth router so password-only privileged login/public bootstrap and
+  // non-delivered challenge channels cannot bypass the v1 security posture.
+  app.use('/api/auth', authV1HardeningRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/appointments', appointmentsRouter);
   app.use(apiRoutePaths.records, recordsRouter);
   app.use(apiRoutePaths.records, releaseRouter);
   app.use(apiRoutePaths.messaging, messagingRouter);
-  app.use('/api/telehealth', telehealthRouter);
+  // The current telehealth implementation only generates placeholder Daily
+  // room URLs; production must not present those as working sessions. Keep the
+  // full router available in non-production test/dev, and fail explicitly in
+  // staging/production until a real vendor room-provisioning adapter is added.
+  app.use('/api/telehealth', env.isProduction ? telehealthReleaseGate : telehealthRouter);
   app.use('/api/payments', paymentsRouter);
+  app.use('/api/providers', releaseOrganizationScopeGuard);
   app.use('/api/providers', providersRouter);
   app.use('/api/dashboard', dashboardRouter);
+  // Fail closed for tenant-scoped administrative user surfaces before either
+  // the isolated IAM router or the legacy admin user router can run a query.
+  app.use('/api/admin/users', releaseOrganizationScopeGuard);
+  // Release-v1 account creation/reset policy is mounted before both the isolated
+  // IAM router and the legacy admin user router. It prevents any legacy fallback
+  // from creating accounts with a shared/default password and validates CSV rows.
+  app.use('/api/admin/users', releaseAccountPasswordPolicy);
+  // Mount the isolated IAM user-management surface before the legacy admin
+  // router so enum-safe search and explicit RBAC/org scoping take precedence.
+  app.use('/api/admin/users/iam-users', iamUsersRouter);
   app.use('/api/admin/users', adminUsersRouter);
   app.use('/api/admin/audit', iamAuditRouter);
   app.use('/api/admin', adminActionsRouter);
@@ -137,7 +168,9 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/admin', catalogAdminRouter);
   app.use('/api/admin', coverageAdminRouter);
   app.use('/api/admin', bookingsAdminRouter);
-  app.use('/api/admin', telehealthAdminRouter);
+  if (!env.isProduction) {
+    app.use('/api/admin', telehealthAdminRouter);
+  }
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/audit', auditRouter);
   app.use('/api/access/rbac', rbacRouter);
@@ -147,6 +180,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use(apiRoutePaths.coverage, coverageRouter);
   app.use('/api/pricing', pricingRouter);
   app.use('/api/policies', policyRouter);
+  app.use('/api/bookings', releaseOrganizationScopeGuard);
   app.use('/api/bookings', bookingsRouter);
   app.use('/api/support', supportRouter);
   app.use('/api/safety', safetyRouter);
@@ -177,7 +211,7 @@ export function createApp(getIo?: () => SocketIOServer | undefined) {
   app.use('/api/iam', iamRouter);
 
   app.use((req, _res, next) => {
-    next(notFound(`Route not found: ${req.method} ${req.originalUrl}`));
+    next(notFound(`Route not found: ${req.method} ${req.path}`));
   });
 
   app.use(errorHandler);

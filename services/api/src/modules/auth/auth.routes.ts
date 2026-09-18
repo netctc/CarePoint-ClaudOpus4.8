@@ -13,6 +13,7 @@ function writeCookie(res: import('express').Response, name: string, value: strin
   res.cookie(name, value, {
     httpOnly,
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
   });
 }
 
@@ -105,9 +106,11 @@ const ssoStartSchema = z.object({
   returnTo: z.string().trim().max(500).optional(),
 });
 
+// v1 supports patient OTP delivery by email only. SMS remains OUT until a real
+// SMS delivery adapter is implemented and validated in staging.
 const otpRequestSchema = z.object({
   identifier: z.string().trim().min(3),
-  channel: z.enum(['email', 'sms']).default('email'),
+  channel: z.literal('email').default('email'),
 });
 const otpVerifySchema = z.object({
   identifier: z.string().trim().min(3),
@@ -146,7 +149,7 @@ authRouter.post('/challenge/resend', validateBody(privilegedChallengeResendSchem
 });
 
 authRouter.post('/otp/request', async (req: any, res: any) => {
-  const payload = otpRequestSchema.parse(req.body) as { identifier: string; channel?: 'email' | 'sms' };
+  const payload = otpRequestSchema.parse(req.body) as { identifier: string; channel?: 'email' };
   const result = await requestPatientOtp(payload);
   res.status(202).json(result);
 });
@@ -159,7 +162,7 @@ authRouter.post('/otp/verify', async (req: any, res: any) => {
 });
 
 authRouter.post('/otp/resend', async (req: any, res: any) => {
-  const payload = otpRequestSchema.parse(req.body) as { identifier: string; channel?: 'email' | 'sms' };
+  const payload = otpRequestSchema.parse(req.body) as { identifier: string; channel?: 'email' };
   const result = await requestPatientOtp(payload);
   res.status(202).json(result);
 });
@@ -168,7 +171,7 @@ const otpRegisterSchema = z.object({
   email: z.string().trim().email(),
   firstName: z.string().trim().min(1),
   lastName: z.string().trim().min(1),
-  channel: z.enum(['email', 'sms']).default('email'),
+  channel: z.literal('email').default('email'),
 });
 
 authRouter.post('/otp/register', async (req: any, res: any) => {

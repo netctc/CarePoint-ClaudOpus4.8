@@ -2,24 +2,34 @@ name: CarePoint CI
 on:
   pull_request:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop]
+
+# CI only needs repository read access. Keep GITHUB_TOKEN least-privileged so
+# a compromised build dependency/action cannot mutate repository resources.
+permissions:
+  contents: read
+
+concurrency:
+  group: carepoint-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   s1-build-and-runtime:
     name: S1 backend build and runtime smoke
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16@sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: care_center
         ports: ['5432:5432']
         options: >-
-          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          --health-cmd "pg_isready -U postgres -d care_center" --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-        image: redis:7
+        image: redis:7@sha256:71da9275c5f3fcb97d0fa0c8c5b36cc995327265420f17a04bfd544f458059f7
         ports: ['6379:6379']
         options: >-
           --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
@@ -40,62 +50,93 @@ jobs:
       FRONTEND_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:8081
       ALLOW_LOCALHOST_CORS_WILDCARD: 'true'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          node-version: 22
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.23.2
           cache: npm
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: '3.12'
+          python-version: '3.12.14'
           cache: pip
-      - run: python -m pip install --upgrade pip
+      - run: python -m pip install --upgrade pip==26.2.1
       - run: python -m pip install -r services/python-worker/requirements.txt
       - run: npm ci --no-audit --no-fund
       - run: npm run check:secrets
       - run: npm run verify:workspace
+      - name: Validate VPS operations shell syntax
+        run: bash -n deploy/vps/*.sh
+      - run: npm run verify:release:deploy
       - run: npm run verify:python-worker
       - run: npm run test:python-worker
       - run: npm run verify:s1:config
       - run: npm run prisma:generate
       - run: npm run build:backend
       - run: npm run smoke:api:ci
-      - run: npm run prisma:db:push --workspace @care-center/api
+      - run: npm run prisma:migrate:deploy --workspace @care-center/api
       - run: npm run test:api
 
   web-build:
     name: Web build (admin + provider)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
-      # Build-time only. The web apps degrade to mock data at runtime when the
-      # API is unreachable, so a placeholder base URL is sufficient to compile.
+      # Build-time placeholder only. Production runtime must fail closed rather
+      # than present synthetic data when the API is unavailable.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          node-version: 22
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22.23.2
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run build:contracts
+      - name: Strict TypeScript check (admin + provider)
+        shell: bash
+        run: |
+          status=0
+          npm exec --workspace @care-center/admin -- tsc --noEmit -p tsconfig.json || status=$?
+          npm exec --workspace @care-center/provider -- tsc --noEmit -p tsconfig.json || status=$?
+          exit "$status"
       - run: npm run build:web
 
   mobile-analyze:
-    name: Flutter analyze (patient + provider mobile)
-    runs-on: ubuntu-latest
+    name: Flutter analyze + smoke/navigation tests (patient + provider mobile)
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
         app: [apps/mobile, apps/provider_mobile]
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          channel: stable
-      - run: flutter pub get
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Install Flutter 3.44.0 from verified release archive
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/flutter_linux_3.44.0-stable.tar.xz"
+          curl -fsSLo "$archive" "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz"
+          echo "e1ec95e6c550458a34de93580cb85dac24da0e9bedb9bb42811f050ac5a0c7d5  $archive" | sha256sum -c -
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+      - name: Resolve committed Flutter lockfile without mutation
+        shell: bash
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
         working-directory: ${{ matrix.app }}
       - run: flutter analyze
+        working-directory: ${{ matrix.app }}
+      - run: flutter test --no-pub
         working-directory: ${{ matrix.app }}

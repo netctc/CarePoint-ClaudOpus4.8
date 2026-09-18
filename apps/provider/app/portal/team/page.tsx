@@ -22,7 +22,7 @@ export default function TeamRolesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [patientId, setPatientId] = useState('');
   const [reasonCode, setReasonCode] = useState(REASON_CODES[0]);
-  const [note, setNote] = useState(copy.coverageNoteDefault);
+  const [note, setNote] = useState<string>(copy.coverageNoteDefault);
 
   const load = useCallback(async () => {
     try {

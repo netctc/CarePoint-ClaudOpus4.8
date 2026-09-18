@@ -46,7 +46,8 @@ export default async function ProviderOnboardingReviewPage({ params }: { params:
     const docsReceived = detail.mandatoryDocs.filter((doc) => doc.status === 'Received').length;
     const checksPassed = detail.checks.filter((check) => check.result === 'Pass').length;
     const hasBlockingItem = docsReceived !== detail.mandatoryDocs.length || checksPassed !== detail.checks.length;
-    const requestedFields = apiDetail?.onboarding.persistedState?.requestedFields ?? [];
+    const rawRequestedFields = apiDetail?.onboarding.persistedState?.requestedFields;
+    const requestedFields = Array.isArray(rawRequestedFields) ? rawRequestedFields : [];
 
     const currentStatus: string = apiDetail?.onboarding.persistedState?.status || 'DRAFT';
     const stepIndex = getStepIndex(currentStatus);

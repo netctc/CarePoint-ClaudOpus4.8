@@ -50,6 +50,46 @@ const Set<String> _publicPaths = <String>{
   '/otp',
 };
 
+const List<String> patientCriticalBookingRouteSequence = <String>[
+  '/home',
+  '/providers/search',
+  '/providers/profile',
+  '/booking/slot',
+];
+
+String? patientRedirectForState({
+  required bool isAuthenticated,
+  required bool profileSetupComplete,
+  required String location,
+}) {
+  if (location == '/') {
+    if (!isAuthenticated) {
+      return '/entry';
+    }
+    if (!profileSetupComplete) {
+      return '/profile-setup';
+    }
+    return '/home';
+  }
+
+  if (!isAuthenticated && !_publicPaths.contains(location)) {
+    return '/entry';
+  }
+
+  if (isAuthenticated && (location == '/entry' || location == '/language' || location == '/sign-in' || location == '/otp' || location == '/consent')) {
+    if (!profileSetupComplete) {
+      return '/profile-setup';
+    }
+    return '/home';
+  }
+
+  if (isAuthenticated && !profileSetupComplete && location != '/profile-setup') {
+    return '/profile-setup';
+  }
+
+  return null;
+}
+
 String? _stringExtraOrNull(Object? extra) => extra is String && extra.isNotEmpty ? extra : null;
 
 final GoRouter appRouter = GoRouter(
@@ -57,35 +97,11 @@ final GoRouter appRouter = GoRouter(
   refreshListenable: AppSession.instance,
   redirect: (context, state) {
     final AppSession session = AppSession.instance;
-    final bool isAuthenticated = session.isAuthenticated;
-    final String location = state.matchedLocation;
-
-    if (location == '/') {
-      if (!isAuthenticated) {
-        return '/entry';
-      }
-      if (!session.profileSetupComplete) {
-        return '/profile-setup';
-      }
-      return '/home';
-    }
-
-    if (!isAuthenticated && !_publicPaths.contains(location)) {
-      return '/entry';
-    }
-
-    if (isAuthenticated && (location == '/entry' || location == '/language' || location == '/sign-in' || location == '/otp' || location == '/consent')) {
-      if (!session.profileSetupComplete) {
-        return '/profile-setup';
-      }
-      return '/home';
-    }
-
-    if (isAuthenticated && !session.profileSetupComplete && location != '/profile-setup') {
-      return '/profile-setup';
-    }
-
-    return null;
+    return patientRedirectForState(
+      isAuthenticated: session.isAuthenticated,
+      profileSetupComplete: session.profileSetupComplete,
+      location: state.matchedLocation,
+    );
   },
   routes: <GoRoute>[
     GoRoute(path: '/', builder: (context, state) => const UnifiedEntryPage()),

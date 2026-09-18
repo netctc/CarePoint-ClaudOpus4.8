@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { DataSourceBanner } from '@/components/admin/data-source-banner';
-import { DetailStateStrip, EvidenceCardGrid, MetadataGrid } from '@/components/admin/detail-primitives';
+import { DetailStateStrip, EvidenceCardGrid, MetadataGrid, type EvidenceCardItem } from '@/components/admin/detail-primitives';
 import { RefundAdminActions } from '@/components/admin/refund-admin-actions';
 import { PortalShell } from '@/components/layout/portal-shell';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -53,7 +53,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ c
       };
   const apiItem = result.data.apiItems?.find((entry) => entry.id === item.id);
 
-  const evidenceCards = [
+  const evidenceCards: EvidenceCardItem[] = [
     {
       title: 'Payment ledger snapshot',
       meta: selected.bookingRef,
@@ -133,7 +133,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ c
       <DetailStateStrip
         items={[
           { label: copy.evidenceStatus, value: item.evidenceStatus, detail: 'Captures whether documentation is complete, still under review, or missing from the refund packet.', tone: tone(item.evidenceStatus) },
-          { label: copy.executionPosture, value: item.status, detail: 'Visible queue state for whether the case is pending, complete, or still blocked by finance review.', tone: item.status === 'Complete' ? 'success' : 'warning' },
+          { label: copy.executionPosture, value: selected.queueState, detail: 'Visible queue state for whether the case is pending, complete, or still blocked by finance review.', tone: item.evidenceStatus === 'Complete' ? 'success' : 'warning' },
           { label: copy.apiControl, value: apiItem ? copy.live : copy.mock, detail: 'Shows whether refund actions are wired to the API or operating from the fallback dataset.', tone: apiItem ? 'success' : 'neutral' },
         ]}
       />

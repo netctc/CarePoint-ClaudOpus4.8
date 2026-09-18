@@ -29,17 +29,17 @@ export type ProviderVerificationDetailContract = {
   providerName: string;
   organizationName: string;
   licenseNumber: string;
-  cityCoverage: string[];
-  mandatoryDocs: { name: string; status: 'Received' | 'Missing' | 'Rejected' }[];
-  checks: { label: string; result: 'Pass' | 'Review' | 'Fail' }[];
-  riskNotes: string[];
+  cityCoverage: readonly string[];
+  mandatoryDocs: readonly { name: string; status: 'Received' | 'Missing' | 'Rejected' }[];
+  checks: readonly { label: string; result: 'Pass' | 'Review' | 'Fail' }[];
+  riskNotes: readonly string[];
 };
 
 export type ProviderMasterItemContract = {
   id: string;
   providerName: string;
   organizationName: string;
-  providerType: 'Individual' | 'Institutional' | 'Organization-based';
+  providerType: 'Individual' | 'Institutional' | 'Organization' | 'Organization-based';
   accessScopeLabel?: string;
   primaryFacility?: string;
   specialty: string;
@@ -56,7 +56,7 @@ export type ProviderProfileContract = {
   id: string;
   providerName: string;
   organizationName: string;
-  providerType: 'Individual' | 'Institutional' | 'Organization-based';
+  providerType: 'Individual' | 'Institutional' | 'Organization' | 'Organization-based';
   accessScopeLabel?: string;
   primaryFacility?: string;
   specialty: string;
@@ -198,15 +198,15 @@ export type SafetyCaseContract = {
   severity: 'Minor' | 'Major' | 'Critical';
   summary: string;
   status: 'Open' | 'Escalated' | 'Pending approval' | 'Closed';
-  timeline: { at: string; event: string }[];
-  actions: string[];
+  timeline: readonly { at: string; event: string }[];
+  actions: readonly string[];
   dualApprovalRequired: boolean;
   category: 'Clinical' | 'Operational' | 'Medication';
   investigator: string;
   linkedSource: string;
   nextReviewAt: string;
-  approvals: { reviewer: string; decision: 'Pending' | 'Approved' | 'Changes requested'; at?: string }[];
-  closureGuardrails: string[];
+  approvals: readonly { reviewer: string; decision: 'Pending' | 'Approved' | 'Changes requested'; at?: string }[];
+  closureGuardrails: readonly string[];
 };
 
 export type PolicyTemplateContract = {
@@ -215,9 +215,8 @@ export type PolicyTemplateContract = {
   policyArea: string;
   country: string;
   version: string;
-  status: 'Draft' | 'Published' | 'Archived';
+  status: 'Active' | 'Draft' | 'Published' | 'Archived';
 };
-
 
 export type AccessGrantContract = {
   id: string;
@@ -234,6 +233,7 @@ export type AuditLogContract = {
   actor: string;
   action: string;
   target: string;
+  subject?: string | null;
   purpose: string;
   outcome: 'Success' | 'Denied' | 'Escalated';
 };

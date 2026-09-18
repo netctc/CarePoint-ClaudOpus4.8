@@ -918,8 +918,10 @@ function statusBadgeClass(status: AccountStatus) {
 
 function exportHref(type: AccountType, filters: AccountFilters) {
   const params = new URLSearchParams({ type });
-  if (filters.q?.trim()) params.set('q', filters.q.trim());
-  if (filters.status?.trim()) params.set('status', filters.status.trim());
+  const q = paramValue(filters.q).trim();
+  const status = paramValue(filters.status).trim();
+  if (q) params.set('q', q);
+  if (status) params.set('status', status);
   return '/portal/accounts/export?' + params.toString();
 }
 
@@ -1142,8 +1144,10 @@ function DataQualityPanel({ report }: { report?: DataQualityReportResponse }) {
 
 
 function ImportAccountsPanel() {
-  const patientTemplate = 'organizationId,firstName,lastName,email,dateOfBirth,insuranceNumber,status,password\n,Amina,Haddad,amina.patient@example.com,1990-05-12,INS-1001,ACTIVE,ChangeMe123!';
-  const providerTemplate = 'organizationId,firstName,lastName,email,role,specialty,licenseNumber,services,status,password\n,Karim,Nasser,karim.provider@example.com,PROVIDER,Cardiology,LIC-1001,"Consultation|Telehealth",ACTIVE,ChangeMe123!';
+  const patientTemplate = 'organizationId,firstName,lastName,email,dateOfBirth,insuranceNumber,status,password\
+,Amina,Haddad,amina.patient@example.com,1990-05-12,INS-1001,ACTIVE,ChangeMe123!';
+  const providerTemplate = 'organizationId,firstName,lastName,email,role,specialty,licenseNumber,services,status,password\
+,Karim,Nasser,karim.provider@example.com,PROVIDER,Cardiology,LIC-1001,"Consultation|Telehealth",ACTIVE,ChangeMe123!';
 
   return (
     <section className="card">
@@ -1221,7 +1225,7 @@ function OnboardingStatusSelect({ defaultValue = 'DRAFT' }: { defaultValue?: Pro
     <select name="onboardingStatus" className="input" defaultValue={defaultValue}>
       <option value="DRAFT">DRAFT</option>
       <option value="READY_FOR_REVIEW">READY_FOR_REVIEW</option>
-      <option value="REQUEST_CHANGES">REQUEST_CHANGES</option>
+      <option value="REQUEST_CHANGES">REQUEST CHANGES</option>
       <option value="APPROVED">APPROVED</option>
       <option value="REJECTED">REJECTED</option>
     </select>
@@ -1825,8 +1829,8 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
           <span className="tag">API-backed filters</span>
         </div>
         <form className="form-grid" method="get">
-          <AccountInput name="q" defaultValue={filters.q ?? ''} placeholder="Search name, email, license, insurance, organization" />
-          <select name="status" className="input" defaultValue={filters.status ?? ''}>
+          <AccountInput name="q" defaultValue={paramValue(filters.q)} placeholder="Search name, email, license, insurance, organization" />
+          <select name="status" className="input" defaultValue={paramValue(filters.status)}>
             <option value="">All statuses</option>
             <option value="ACTIVE">ACTIVE</option>
             <option value="SUSPENDED">SUSPENDED</option>

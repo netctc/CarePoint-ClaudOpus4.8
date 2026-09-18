@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import dotenv from 'dotenv';
+import { integrationAllowedForRuntime } from './release-integration-scope';
 
 function loadEnvFiles() {
   const serviceDir = path.resolve(__dirname, '../..');
@@ -126,6 +127,15 @@ const allowedCorsOrigins = unique([
   ...parseList(process.env.FRONTEND_ALLOWED_ORIGINS).map((origin) => validateHttpUrl('FRONTEND_ALLOWED_ORIGINS', origin)),
 ]);
 
+const stripeCredentialConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
+const rawSsoEnabled = asBoolean('SSO_ENABLED', false);
+const ssoConfigurationPresent = Boolean(
+  rawSsoEnabled &&
+  process.env.SSO_AUTHORIZE_URL &&
+  process.env.SSO_CLIENT_ID &&
+  process.env.SSO_CALLBACK_URL
+);
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   isProduction,
@@ -144,7 +154,8 @@ export const env = {
   frontendProviderMobileUrl,
   frontendAllowedOrigins: allowedCorsOrigins,
   allowLocalhostCorsWildcard: asBoolean('ALLOW_LOCALHOST_CORS_WILDCARD', !isProduction),
-  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',
+  stripeCredentialConfigured,
+  stripeSecretKey: integrationAllowedForRuntime('stripePayments', isProduction) ? process.env.STRIPE_SECRET_KEY ?? '' : '',
   telehealthVendor: process.env.TELEHEALTH_VENDOR ?? 'daily',
   dailyApiKey: process.env.DAILY_API_KEY ?? '',
   twilioAccountSid: process.env.TWILIO_ACCOUNT_SID ?? '',
@@ -153,7 +164,8 @@ export const env = {
   authChallengeRedisEnabled: asBoolean('AUTH_CHALLENGE_REDIS_ENABLED', false),
   authChallengeRedisPrefix: process.env.AUTH_CHALLENGE_REDIS_PREFIX ?? 'carepoint:auth:challenge',
   privilegedAllowedEmailDomains: process.env.PRIVILEGED_ALLOWED_EMAIL_DOMAINS ?? '',
-  ssoEnabled: asBoolean('SSO_ENABLED', false),
+  ssoConfigurationPresent,
+  ssoEnabled: integrationAllowedForRuntime('enterpriseSso', isProduction) && rawSsoEnabled,
   ssoProviderName: process.env.SSO_PROVIDER_NAME ?? 'Enterprise SSO',
   ssoAuthorizeUrl: process.env.SSO_AUTHORIZE_URL ?? '',
   ssoClientId: process.env.SSO_CLIENT_ID ?? '',

@@ -65,16 +65,16 @@ describe('provider IAM routes - authentication and authorization', () => {
     expect(res.status).toBe(403);
   });
 
-  it('COMPANY_ADMIN without organizationId returns 401', async () => {
+  it('COMPANY_ADMIN without organizationId returns 403', async () => {
     const token = signAccessToken({
       sub: 'test-company-admin',
       role: 'COMPANY_ADMIN',
-      // No organizationId
+      // Authenticated but missing the tenant scope required by this surface.
     });
     const res = await request(app)
       .get('/api/admin/users/providers/iam')
       .set('Authorization', `Bearer ${token}`);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 });
 

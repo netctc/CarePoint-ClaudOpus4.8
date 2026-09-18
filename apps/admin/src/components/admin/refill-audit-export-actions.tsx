@@ -30,6 +30,46 @@ type PacketSummary = {
   governanceNotes?: string[];
 };
 
+type ScopeListResponse = { items?: ScopeItem[] };
+type CreateScopeResponse = { item?: ScopeItem };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function scopeListResponse(value: unknown): ScopeListResponse {
+  if (!isRecord(value) || !Array.isArray(value.items)) return { items: [] };
+  return { items: value.items.filter((item): item is ScopeItem => isRecord(item) && typeof item.id === 'string' && typeof item.title === 'string' && typeof item.limit === 'number') };
+}
+
+function packetSummaryResponse(value: unknown): PacketSummary {
+  if (!isRecord(value)) return {};
+  const result: PacketSummary = {};
+  if (isRecord(value.summary)) {
+    const summary: NonNullable<PacketSummary['summary']> = {};
+    const numberKeys: Array<keyof NonNullable<PacketSummary['summary']>> = [
+      'operationalEventCount', 'escalationCount', 'controlledMedicationEvents',
+      'deliveryExecutionCount', 'failedDeliveryCount', 'exportReadyCount',
+    ];
+    for (const key of numberKeys) {
+      const candidate = value.summary[key];
+      if (typeof candidate === 'number') summary[key] = candidate;
+    }
+    result.summary = summary;
+  }
+  if (Array.isArray(value.governanceNotes)) {
+    result.governanceNotes = value.governanceNotes.filter((note): note is string => typeof note === 'string');
+  }
+  return result;
+}
+
+function createScopeResponse(value: unknown): CreateScopeResponse {
+  if (!isRecord(value) || !isRecord(value.item)) return {};
+  const item = value.item;
+  if (typeof item.id !== 'string' || typeof item.title !== 'string' || typeof item.limit !== 'number') return {};
+  return { item: item as ScopeItem };
+}
+
 const emptyForm = {
   title: '',
   note: '',
@@ -54,11 +94,13 @@ export function RefillAuditExportActions() {
 
   async function loadScopes() {
     try {
-      const [scopeResponse, summaryResponse] = await Promise.all([
+      const [rawScopeResponse, rawSummaryResponse] = await Promise.all([
         adminApi.refillAuditScopes(),
         adminApi.refillAuditPacketSummary(selectedScopeId || undefined),
       ]);
-      const items = Array.isArray(scopeResponse.items) ? scopeResponse.items : [];
+      const scopeResponse = scopeListResponse(rawScopeResponse);
+      const summaryResponse = packetSummaryResponse(rawSummaryResponse);
+      const items = scopeResponse.items ?? [];
       setScopes(items);
       setSummary(summaryResponse);
       if (!selectedScopeId && items.length) {
@@ -79,8 +121,8 @@ export function RefillAuditExportActions() {
     let active = true;
     (async () => {
       try {
-        const response = await adminApi.refillAuditPacketSummary(selectedScopeId || undefined);
-        if (active) setSummary(response);
+        const rawResponse = await adminApi.refillAuditPacketSummary(selectedScopeId || undefined);
+        if (active) setSummary(packetSummaryResponse(rawResponse));
       } catch {
         // keep current summary
       }
@@ -121,7 +163,7 @@ export function RefillAuditExportActions() {
     setState('saving');
     setMessage(null);
     try {
-      const response = await adminApi.createRefillAuditScope({
+      const rawResponse = await adminApi.createRefillAuditScope({
         title: form.title.trim(),
         note: form.note.trim() || undefined,
         limit: Number(form.limit) || 100,
@@ -132,6 +174,7 @@ export function RefillAuditExportActions() {
         includeExecutions: form.includeExecutions,
         includeOperationalEvents: form.includeOperationalEvents,
       });
+      const response = createScopeResponse(rawResponse);
       setState('success');
       setMessage(`Saved scope ${response.item?.title ?? form.title}.`);
       setForm(emptyForm);

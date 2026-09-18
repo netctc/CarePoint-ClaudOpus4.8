@@ -12,6 +12,8 @@ import { appendProviderSubjectParams } from '@/lib/subject-links';
 import { providerApi } from '@/services/api-client';
 import { getPatientChartSummary } from '@/services/mock-api';
 
+type PatientReportResponse = { items?: any[] };
+
 function formatDateTime(value: string | null | undefined, locale: string) {
   if (!value) return '—';
   const date = new Date(value);
@@ -53,7 +55,7 @@ export default function PatientChartSummaryPage() {
         providerApi.appointments() as Promise<any>,
         providerApi.me() as Promise<any>,
         providerApi.chartAccessContext(patientId, requestedSubjectProfileId ?? undefined) as Promise<any>,
-        providerApi.providerPatientReports(patientId, requestedSubjectProfileId ?? undefined).catch(() => ({ items: [] })),
+        providerApi.providerPatientReports(patientId, requestedSubjectProfileId ?? undefined).catch(() => ({ items: [] })) as Promise<PatientReportResponse>,
       ]);
       setRecords(recordResult.items ?? []);
       setAppointments((appointmentResult.items ?? []).filter((item: any) => item.patientId === patientId && ((requestedSubjectProfileId ? item.subjectProfileId === requestedSubjectProfileId : !item.subjectProfileId) || !requestedSubjectProfileId)));

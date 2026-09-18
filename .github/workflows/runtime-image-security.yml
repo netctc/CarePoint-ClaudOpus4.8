@@ -1,0 +1,48 @@
+name: Runtime Image Security
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-image-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan-runtime-images:
+    name: Build and scan release runtime images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      TRIVY_VERSION: '0.74.0'
+      TRIVY_SHA256: '2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a'
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Validate image scan script syntax
+        run: bash -n scripts/release/scan-runtime-images.sh
+
+      - name: Install verified Trivy binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          url="https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
+          curl --fail --silent --show-error --location --output "/tmp/${archive}" "$url"
+          echo "${TRIVY_SHA256}  /tmp/${archive}" | sha256sum --check --strict
+          tar -xzf "/tmp/${archive}" -C /tmp trivy
+          sudo install -m 0755 /tmp/trivy /usr/local/bin/trivy
+          trivy --version
+
+      - name: Build and scan exact release runtime images
+        env:
+          TRIVY_NO_PROGRESS: 'true'
+        run: bash scripts/release/scan-runtime-images.sh
