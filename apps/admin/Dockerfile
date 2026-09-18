@@ -2,6 +2,8 @@
 FROM node:22-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be574bcbe1b7b843d3ebafdd95eaf7767a7e5
 WORKDIR /app
 
+RUN apt-get update  && apt-get install -y --no-install-recommends libpcre2-8-0=10.42-1+deb12u1  && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production     NEXT_TELEMETRY_DISABLED=1     PORT=3001     HOSTNAME=0.0.0.0
 
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
