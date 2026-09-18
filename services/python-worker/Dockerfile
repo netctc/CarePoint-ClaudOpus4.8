@@ -19,7 +19,10 @@ RUN addgroup --system carepoint && adduser --system --ingroup carepoint --uid 10
 
 COPY services/python-worker/requirements.txt ./requirements.txt
 RUN python -m pip install --upgrade pip==26.2.1 setuptools==78.1.1 \
- && python -m pip install -r requirements.txt
+ && python -m pip install -r requirements.txt \
+ && python -c "import importlib.metadata as m; assert m.version('msgpack') == '1.2.1'" \
+ && python -m pip uninstall -y pip setuptools wheel \
+ && python -c "import importlib.util as u; assert u.find_spec('pip') is None and u.find_spec('setuptools') is None and u.find_spec('wheel') is None"
 
 COPY services/python-worker ./
 
