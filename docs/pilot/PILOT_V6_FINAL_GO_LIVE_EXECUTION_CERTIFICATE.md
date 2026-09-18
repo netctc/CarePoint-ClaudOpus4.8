@@ -25,6 +25,7 @@ A GO decision is invalid unless all of the following are true at the decision ti
 - #18 — Patient/Provider Mobile regression gate: CLOSED, or an explicit approved web-only deferral exists. The current v1 release branch has #18 closed.
 - #19 — external monitoring/alert delivery, centralized logging, named incident ownership and alert exercise: CLOSED.
 - #20 — real staging performance, resilience and rollback exercise: CLOSED.
+- #26 — runtime image security scan/remediation complete; any residual HIGH/CRITICAL finding is unfixable at decision time and has explicit accountable Go/No-Go acceptance: CLOSED.
 
 No open P0 is compatible with GO.
 
@@ -41,6 +42,20 @@ Before the decision, record all of the following and ensure they refer to the sa
 - rollback target SHA/image/tag.
 
 A branch name alone is not an immutable release identity.
+
+## Runtime security exception requirement
+
+A residual runtime-image vulnerability is **not** accepted merely because the scanner reports it as `unfixed`. Before #26 can close through an exception rather than remediation, every accepted finding or tightly scoped finding group must record:
+
+- CVE/finding identifier and affected runtime surface/package;
+- scanner evidence tied to the exact release SHA/image digest;
+- why the finding is not currently remediable and its relevant exploitability/exposure in the CarePoint deployment;
+- compensating mitigation and rollback/containment action;
+- accountable security/release owner;
+- target remediation date and mandatory review date;
+- explicit Go/No-Go approval reference.
+
+A `TBD`, blanket “accept all unfixed findings”, missing owner/date, or an exception not tied to the exact release SHA is invalid. Until these requirements are complete, #26 remains open and the decision remains NO-GO by default.
 
 ## Privileged cutover requirement
 
@@ -77,13 +92,14 @@ All critical `TBD` fields below are blockers while this certificate is pending. 
 | Expansion criteria | TBD — required before GO |
 | Rollback criteria | TBD — required before GO |
 | Open P1 waivers | TBD — list issue + owner + mitigation, or NONE |
-| Accepted residual risks | TBD — list risk + owner + review date, or NONE |
+| Accepted residual risks | TBD — for each accepted item/group list CVE/finding + surface/package + exploitability rationale + mitigation + owner + target/review date + approval reference, or NONE |
 | #14 recovery evidence | PENDING |
 | #15 E2E evidence | PENDING |
 | #16 authorization/audit evidence | PENDING |
 | #17 integration evidence | PENDING |
 | #19 observability evidence | PENDING |
 | #20 resilience/rollback evidence | PENDING |
+| #26 runtime security evidence / exception approval | PENDING |
 | Privileged-session revocation | PENDING |
 | Access-token TTL wait completed | PENDING |
 | Signature/approval reference | TBD — required before GO |
@@ -101,6 +117,7 @@ Before changing `Decision` to `GO`, the decision owner must confirm:
 - [ ] Backup/restore evidence meets the approved RPO/RTO objectives.
 - [ ] Critical E2E, tenant isolation, integrations and alert delivery all passed on the deployed release.
 - [ ] The real rollback exercise passed and the rollback target is still available.
+- [ ] #26 is closed: all fixable HIGH/CRITICAL runtime findings are remediated, and every accepted residual unfixable finding has the required scoped exception evidence and explicit approval.
 - [ ] Privileged refresh sessions were revoked and the access-token TTL wait completed.
 - [ ] Initial cohort size, expansion criteria and rollback criteria are explicit.
 - [ ] Hypercare coverage and the Day-0/Day-1 review cadence are active.
