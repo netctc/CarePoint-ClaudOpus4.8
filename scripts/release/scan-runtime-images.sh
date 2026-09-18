@@ -109,6 +109,7 @@ PROVIDER_IMAGE="carepoint-scan-provider:${IMAGE_SUFFIX}"
 PATIENT_IMAGE="carepoint-scan-patient:${IMAGE_SUFFIX}"
 PROVIDER_MOBILE_IMAGE="carepoint-scan-provider-mobile:${IMAGE_SUFFIX}"
 PYTHON_WORKER_IMAGE="carepoint-scan-python-worker:${IMAGE_SUFFIX}"
+CADDY_IMAGE="carepoint-scan-caddy:${IMAGE_SUFFIX}"
 
 # Build exactly from the release repository SHA. Build arguments are non-secret
 # placeholders because vulnerability scanning does not require live credentials.
@@ -126,6 +127,7 @@ build_image "$PATIENT_IMAGE" apps/mobile/Dockerfile \
 build_image "$PROVIDER_MOBILE_IMAGE" apps/provider_mobile/Dockerfile \
   --build-arg API_BASE_URL=https://api.invalid.example
 build_image "$PYTHON_WORKER_IMAGE" services/python-worker/Dockerfile
+build_image "$CADDY_IMAGE" deploy/vps/Caddy.Dockerfile
 
 validate_node_runtime() {
   local label="$1"
@@ -140,11 +142,13 @@ validate_node_runtime "api" "$API_IMAGE" services/api/node_modules/prisma/build/
 validate_node_runtime "admin" "$ADMIN_IMAGE" node_modules/next/dist/bin/next --version
 validate_node_runtime "provider" "$PROVIDER_IMAGE" node_modules/next/dist/bin/next --version
 
+echo "Validating patched Caddy runtime"
+docker run --rm "$CADDY_IMAGE" version
+
 POSTGRES_IMAGE="$(compose_image postgres)"
 REDIS_IMAGE="$(compose_image redis)"
-CADDY_IMAGE="$(compose_image edge)"
 
-for required in POSTGRES_IMAGE REDIS_IMAGE CADDY_IMAGE; do
+for required in POSTGRES_IMAGE REDIS_IMAGE; do
   value="${!required:-}"
   if [[ -z "$value" || "$value" != *@sha256:* ]]; then
     echo "Could not resolve digest-pinned compose image for $required" >&2
@@ -154,7 +158,6 @@ done
 
 docker pull "$POSTGRES_IMAGE"
 docker pull "$REDIS_IMAGE"
-docker pull "$CADDY_IMAGE"
 
 {
   echo "## CarePoint runtime image vulnerability scan"
