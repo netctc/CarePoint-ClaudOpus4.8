@@ -110,6 +110,7 @@ PROVIDER_IMAGE="carepoint-scan-provider:${IMAGE_SUFFIX}"
 PATIENT_IMAGE="carepoint-scan-patient:${IMAGE_SUFFIX}"
 PROVIDER_MOBILE_IMAGE="carepoint-scan-provider-mobile:${IMAGE_SUFFIX}"
 PYTHON_WORKER_IMAGE="carepoint-scan-python-worker:${IMAGE_SUFFIX}"
+POSTGRES_IMAGE="carepoint-scan-postgres:${IMAGE_SUFFIX}"
 CADDY_IMAGE="carepoint-scan-caddy:${IMAGE_SUFFIX}"
 
 # Build exactly from the release repository SHA. Build arguments are non-secret
@@ -128,6 +129,7 @@ build_image "$PATIENT_IMAGE" apps/mobile/Dockerfile \
 build_image "$PROVIDER_MOBILE_IMAGE" apps/provider_mobile/Dockerfile \
   --build-arg API_BASE_URL=https://api.invalid.example
 build_image "$PYTHON_WORKER_IMAGE" services/python-worker/Dockerfile
+build_image "$POSTGRES_IMAGE" deploy/vps/Postgres.Dockerfile
 build_image "$CADDY_IMAGE" deploy/vps/Caddy.Dockerfile
 
 validate_node_runtime() {
@@ -151,18 +153,42 @@ docker run --rm "$PYTHON_WORKER_IMAGE" celery --version >/dev/null
 echo "Validating patched Caddy runtime"
 docker run --rm "$CADDY_IMAGE" version
 
-POSTGRES_IMAGE="$(compose_image postgres)"
-REDIS_IMAGE="$(compose_image redis)"
+echo "Validating hardened PostgreSQL runtime"
+docker run --rm --entrypoint sh "$POSTGRES_IMAGE" -c 'test "$(readlink /usr/local/bin/gosu)" = "/sbin/su-exec" && su-exec nobody true'
 
-for required in POSTGRES_IMAGE REDIS_IMAGE; do
-  value="${!required:-}"
-  if [[ -z "$value" || "$value" != *@sha256:* ]]; then
-    echo "Could not resolve digest-pinned compose image for $required" >&2
-    exit 2
+PG_CONTAINER="carepoint-scan-postgres-${CANDIDATE_SHA:0:12}"
+cleanup_pg() {
+  docker rm -f "$PG_CONTAINER" >/dev/null 2>&1 || true
+}
+trap cleanup_pg EXIT
+
+docker run -d --name "$PG_CONTAINER" \
+  -e POSTGRES_PASSWORD=scan-password-do-not-use \
+  -e POSTGRES_USER=scan \
+  -e POSTGRES_DB=carepoint \
+  "$POSTGRES_IMAGE" >/dev/null
+
+pg_ready=0
+for _ in $(seq 1 30); do
+  if docker exec "$PG_CONTAINER" pg_isready -U scan -d carepoint >/dev/null 2>&1; then
+    pg_ready=1
+    break
   fi
+  sleep 1
 done
+if [[ "$pg_ready" -ne 1 ]]; then
+  docker logs "$PG_CONTAINER" >&2
+  exit 2
+fi
+test "$(docker exec "$PG_CONTAINER" psql -U scan -d carepoint -Atqc 'SELECT 1')" = "1"
+cleanup_pg
+trap - EXIT
 
-docker pull "$POSTGRES_IMAGE"
+REDIS_IMAGE="$(compose_image redis)"
+if [[ -z "$REDIS_IMAGE" || "$REDIS_IMAGE" != *@sha256:* ]]; then
+  echo "Could not resolve digest-pinned compose image for REDIS_IMAGE" >&2
+  exit 2
+fi
 docker pull "$REDIS_IMAGE"
 
 {
