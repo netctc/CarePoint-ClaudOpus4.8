@@ -6,7 +6,10 @@ services:
   # ============ Infrastructure ============
 
   postgres:
-    image: postgres:16-alpine@sha256:866efe7070b471f3a5397edac0e5edd65c23ff056587c6e47c07d008caaedd28
+    build:
+      context: ../..
+      dockerfile: deploy/vps/Postgres.Dockerfile
+    image: carepoint-postgres:16.15-alpine3.24-su-exec0.3-r0
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
