@@ -8,7 +8,7 @@ ARG REDIS_URL=redis://redis:6379
 
 ENV DATABASE_URL=${DATABASE_URL}     DIRECT_URL=${DIRECT_URL}     REDIS_URL=${REDIS_URL}
 
-RUN apt-get update  && apt-get install -y --no-install-recommends openssl ca-certificates  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update  && apt-get install -y --no-install-recommends       openssl       ca-certificates       libpcre2-8-0=10.42-1+deb12u1  && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY apps/admin/package*.json apps/admin/
