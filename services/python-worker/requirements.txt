@@ -7,4 +7,5 @@ httpx==0.28.1
 opentelemetry-api==1.44.0
 opentelemetry-sdk==1.44.0
 opentelemetry-instrumentation-fastapi==0.65b0
+msgpack==1.2.1
 pytest==8.4.2
