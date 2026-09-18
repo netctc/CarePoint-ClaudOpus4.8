@@ -199,19 +199,7 @@ echo
 echo "HIGH/CRITICAL remediation inventory for candidate ${CANDIDATE_SHA}:"
 if [[ -s "$DETAILS_FILE" ]]; then
   printf '%-22s %-9s %-24s %-32s %-24s %-24s %s\n' "SURFACE" "SEVERITY" "CVE" "PACKAGE" "INSTALLED" "FIXED" "TARGET"
-  sort -u "$DETAILS_FILE" | while IFS=
-else
-  echo "No HIGH/CRITICAL vulnerabilities found."
-fi
-
-if [[ "$failed" -ne 0 ]]; then
-  echo >&2
-  echo "Release image security gate failed: HIGH/CRITICAL findings require remediation or an explicit approved exception." >&2
-  exit 1
-fi
-
-echo "Release image security gate passed: no HIGH/CRITICAL findings across required runtime surfaces."
-\t' read -r surface severity cve package installed fixed target; do
+  sort -u "$DETAILS_FILE" | while IFS=$'\t' read -r surface severity cve package installed fixed target; do
     printf '%-22s %-9s %-24s %-32s %-24s %-24s %s\n' "$surface" "$severity" "$cve" "$package" "$installed" "$fixed" "$target"
   done
 else
