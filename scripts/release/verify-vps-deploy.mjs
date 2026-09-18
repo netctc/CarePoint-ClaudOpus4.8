@@ -30,7 +30,7 @@ const assert = (condition, message) => {
   checks.push({ passed: Boolean(condition), message });
 };
 
-assert(/\bedge:\s*[\s\S]*?image:\s*caddy:/m.test(compose), 'Caddy edge service is defined');
+assert(/\bedge:\s*[\s\S]*?dockerfile:\s*deploy\/vps\/Caddy\.Dockerfile/m.test(compose), 'Patched Caddy edge build is defined');
 assert(/80:80/.test(compose) && /443:443/.test(compose), 'edge publishes HTTP/HTTPS');
 
 for (const service of ['api', 'admin', 'provider', 'patient-web', 'provider-mobile-web']) {
