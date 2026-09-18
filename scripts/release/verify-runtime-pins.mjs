@@ -19,6 +19,7 @@ const pythonDockerfile = read('services/python-worker/Dockerfile');
 const patientDockerfile = read('apps/mobile/Dockerfile');
 const providerMobileDockerfile = read('apps/provider_mobile/Dockerfile');
 const caddyDockerfile = read('deploy/vps/Caddy.Dockerfile');
+const postgresDockerfile = read('deploy/vps/Postgres.Dockerfile');
 const pythonRequirements = read('services/python-worker/requirements.txt');
 const packageLock = JSON.parse(read('package-lock.json'));
 
@@ -26,7 +27,8 @@ const NODE_IMAGE = 'node:22-bookworm-slim@sha256:83f487e0a63425e5b4d146fb5e5be57
 const PYTHON_IMAGE = 'python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea';
 const FLUTTER_IMAGE = 'ghcr.io/cirruslabs/flutter:3.44.0@sha256:46691e311715845de03a3ba4753a475476936805b29431b1f00f1816981033f8';
 const NGINX_IMAGE = 'nginx:1.30.5-alpine3.24-slim@sha256:2853ea34f0e5448adfd4f6ec9c2a7974f28260730adc7a4be4e87600294fe5a2';
-const POSTGRES_IMAGE = 'postgres:16-alpine@sha256:866efe7070b471f3a5397edac0e5edd65c23ff056587c6e47c07d008caaedd28';
+const POSTGRES_BASE_IMAGE = 'postgres:16-alpine@sha256:866efe7070b471f3a5397edac0e5edd65c23ff056587c6e47c07d008caaedd28';
+const POSTGRES_RUNTIME_IMAGE = 'carepoint-postgres:16.15-alpine3.24-su-exec0.3-r0';
 const REDIS_IMAGE = 'redis:7-alpine@sha256:520775a41a63e77e06c73e35d2fd9cc15921a609516818796b4ecbb813078bc7';
 const CADDY_BUILDER_IMAGE = 'golang:1.26.6-alpine3.23@sha256:e57c41c1d5864341031181b0db34b9a537bb5773eb6428e4e5bdaea0f9135406';
 const CADDY_VERSION = 'v2.11.4';
@@ -94,7 +96,14 @@ for (const [packagePath, version] of Object.entries(resolvedNodeSecurityVersions
   assert(packageLock.packages?.[packagePath]?.version === version, `${packagePath} is locked to patched version ${version}`);
 }
 
-assert(compose.includes(`image: ${POSTGRES_IMAGE}`), 'Production PostgreSQL image is pinned by digest');
+assert(compose.includes('dockerfile: deploy/vps/Postgres.Dockerfile'), 'Production PostgreSQL uses the hardened reproducible build');
+assert(compose.includes(`image: ${POSTGRES_RUNTIME_IMAGE}`), 'Production PostgreSQL uses the governed local runtime tag');
+assert(!compose.includes('image: postgres:'), 'Production PostgreSQL does not fall back to the stock image directly');
+assert(postgresDockerfile.includes(`FROM ${POSTGRES_BASE_IMAGE}`), 'PostgreSQL hardened runtime base is pinned by digest');
+assert(postgresDockerfile.includes('su-exec=0.3-r0'), 'PostgreSQL privilege-drop helper is pinned to su-exec 0.3-r0');
+assert(postgresDockerfile.includes('rm -f /usr/local/bin/gosu'), 'PostgreSQL hardened runtime removes the Go-based gosu binary');
+assert(postgresDockerfile.includes('ln -s /sbin/su-exec /usr/local/bin/gosu'), 'PostgreSQL entrypoint compatibility is provided by su-exec');
+assert(postgresDockerfile.includes('su-exec nobody true'), 'PostgreSQL build verifies the replacement privilege-drop helper');
 assert(compose.includes(`image: ${REDIS_IMAGE}`), 'Production Redis image is pinned by digest');
 assert(compose.includes('dockerfile: deploy/vps/Caddy.Dockerfile'), 'Production Caddy edge uses the reproducible patched build');
 assert(!compose.includes('image: caddy:'), 'Production Caddy edge does not fall back to the stock Caddy image');
