@@ -246,7 +246,9 @@ services:
   # ============ Public TLS Edge ============
 
   edge:
-    image: caddy:2.11.4-alpine@sha256:844f60b64e4724a5aa8245e019dace0d3f199f7433ce6c57676cb30a920dbad9
+    build:
+      context: ../..
+      dockerfile: deploy/vps/Caddy.Dockerfile
     restart: unless-stopped
     depends_on:
       api:
