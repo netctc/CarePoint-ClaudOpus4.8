@@ -86,6 +86,7 @@ for result in payload.get("Results") or []:
             str(vuln.get("PkgName") or "unknown"),
             str(vuln.get("InstalledVersion") or "unknown"),
             fixed or "unfixed",
+            str(result.get("Target") or "unknown"),
         ))
 
 total = counts["HIGH"] + counts["CRITICAL"]
@@ -142,6 +143,11 @@ validate_node_runtime "api" "$API_IMAGE" services/api/node_modules/prisma/build/
 validate_node_runtime "admin" "$ADMIN_IMAGE" node_modules/next/dist/bin/next --version
 validate_node_runtime "provider" "$PROVIDER_IMAGE" node_modules/next/dist/bin/next --version
 
+echo "Validating minimal Python runtime"
+docker run --rm "$PYTHON_WORKER_IMAGE" python -c "import importlib.metadata as m, importlib.util as u; assert m.version('msgpack') == '1.2.1'; assert u.find_spec('pip') is None; assert u.find_spec('setuptools') is None; assert u.find_spec('wheel') is None"
+docker run --rm "$PYTHON_WORKER_IMAGE" uvicorn --version >/dev/null
+docker run --rm "$PYTHON_WORKER_IMAGE" celery --version >/dev/null
+
 echo "Validating patched Caddy runtime"
 docker run --rm "$CADDY_IMAGE" version
 
@@ -192,9 +198,21 @@ done
 echo
 echo "HIGH/CRITICAL remediation inventory for candidate ${CANDIDATE_SHA}:"
 if [[ -s "$DETAILS_FILE" ]]; then
-  printf '%-22s %-9s %-24s %-32s %-24s %s\n' "SURFACE" "SEVERITY" "CVE" "PACKAGE" "INSTALLED" "FIXED"
-  sort -u "$DETAILS_FILE" | while IFS=$'\t' read -r surface severity cve package installed fixed; do
-    printf '%-22s %-9s %-24s %-32s %-24s %s\n' "$surface" "$severity" "$cve" "$package" "$installed" "$fixed"
+  printf '%-22s %-9s %-24s %-32s %-24s %-24s %s\n' "SURFACE" "SEVERITY" "CVE" "PACKAGE" "INSTALLED" "FIXED" "TARGET"
+  sort -u "$DETAILS_FILE" | while IFS=
+else
+  echo "No HIGH/CRITICAL vulnerabilities found."
+fi
+
+if [[ "$failed" -ne 0 ]]; then
+  echo >&2
+  echo "Release image security gate failed: HIGH/CRITICAL findings require remediation or an explicit approved exception." >&2
+  exit 1
+fi
+
+echo "Release image security gate passed: no HIGH/CRITICAL findings across required runtime surfaces."
+\t' read -r surface severity cve package installed fixed target; do
+    printf '%-22s %-9s %-24s %-32s %-24s %-24s %s\n' "$surface" "$severity" "$cve" "$package" "$installed" "$fixed" "$target"
   done
 else
   echo "No HIGH/CRITICAL vulnerabilities found."
