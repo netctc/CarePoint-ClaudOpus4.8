@@ -136,7 +136,7 @@ validate_node_runtime() {
   docker run --rm --entrypoint node "$image" "$@" >/dev/null
 }
 
-validate_node_runtime "api" "$API_IMAGE" node_modules/prisma/build/index.js --version
+validate_node_runtime "api" "$API_IMAGE" services/api/node_modules/prisma/build/index.js --version
 validate_node_runtime "admin" "$ADMIN_IMAGE" node_modules/next/dist/bin/next --version
 validate_node_runtime "provider" "$PROVIDER_IMAGE" node_modules/next/dist/bin/next --version
 
